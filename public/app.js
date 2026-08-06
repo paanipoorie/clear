@@ -14,6 +14,9 @@ const state = {
   selectedIssueForOps: null
 };
 
+const MOCK_MUNICIPALITY_DISTRICT = 'LUDHIANA';
+const MOCK_MUNICIPALITY_STATE = 'Punjab';
+
 // Map and attachments editor state
 let mapInstance = null;
 let mapMarker = null;
@@ -139,8 +142,8 @@ function switchPortal(portalName) {
       
       citizenViewport.style.display = 'none';
       
-      document.getElementById('roleHeaderBadge').textContent = 'MUNICIPAL OPS';
-      document.getElementById('userRoleLabel').textContent = 'Operations Officer';
+      document.getElementById('roleHeaderBadge').textContent = `MUNICIPAL OPS • ${MOCK_MUNICIPALITY_DISTRICT}`;
+      document.getElementById('userRoleLabel').textContent = `Operations Officer (${MOCK_MUNICIPALITY_DISTRICT})`;
       
       // Select Triage tab by default
       switchOpsTab('triage');
@@ -1576,10 +1579,8 @@ async function fetchOpsData() {
     if (!issuesRes.ok) return;
     let issues = await issuesRes.json();
 
-    // Support location filter on Kanban columns
-    if (state.currentSubLocation) {
-      issues = issues.filter(issue => issue.subLocation.toUpperCase() === state.currentSubLocation.toUpperCase());
-    }
+    // Filter issues by the municipality's assigned district
+    issues = issues.filter(issue => issue.subLocation.toUpperCase() === MOCK_MUNICIPALITY_DISTRICT);
 
     // Support search query filter on Kanban columns
     if (state.searchQuery) {
@@ -1621,10 +1622,8 @@ function renderOpsDashboardSummaries(issues) {
 function renderOpsNoticesFeed(notices) {
   const feed = document.getElementById('opsNoticesFeed');
   
-  // Filter notices list by current active sublocation if set
-  if (state.currentSubLocation) {
-    notices = notices.filter(n => n.subLocation.toUpperCase() === state.currentSubLocation.toUpperCase());
-  }
+  // Filter notices list by the municipality's assigned district
+  notices = notices.filter(n => n.subLocation.toUpperCase() === MOCK_MUNICIPALITY_DISTRICT);
 
   if (notices.length === 0) {
     feed.innerHTML = '<p class="empty-notices-msg">No notices published yet.</p>';
@@ -1808,36 +1807,52 @@ function renderOpsDetailPanel(issue) {
   
   const statusEl = document.getElementById('opsDetailStatus');
   statusEl.textContent = issue.status;
-  statusEl.className = 'badge status-badge-detail';
+  statusEl.className = 'status-badge-detail';
   if (issue.status === 'Resolved') {
-    statusEl.style.backgroundColor = '#d1fae5';
-    statusEl.style.color = '#065f46';
+    statusEl.classList.add('status-resolved');
   } else if (issue.status === 'In Progress') {
-    statusEl.style.backgroundColor = '#fef3c7';
-    statusEl.style.color = '#92400e';
+    statusEl.classList.add('status-in-progress');
+  } else if (issue.status === 'Acknowledged') {
+    statusEl.classList.add('status-acknowledged');
+  } else if (issue.status === 'Review Queue') {
+    statusEl.classList.add('status-review-queue');
   } else {
-    statusEl.style.backgroundColor = '#eff6ff';
-    statusEl.style.color = '#2563eb';
+    statusEl.classList.add('status-rejected');
   }
 
   const priority = calculatePriorityLabel(issue);
   const prioEl = document.getElementById('opsDetailPriority');
-  prioEl.textContent = priority + ' Priority';
-  prioEl.className = 'priority-val badge';
+  prioEl.textContent = priority;
+  prioEl.className = 'prio-badge';
   if (priority === 'High') {
-    prioEl.style.backgroundColor = '#fef2f2';
-    prioEl.style.color = '#dc2626';
+    prioEl.classList.add('prio-high');
   } else if (priority === 'Medium') {
-    prioEl.style.backgroundColor = '#fffbeb';
-    prioEl.style.color = '#d97706';
+    prioEl.classList.add('prio-medium');
   } else {
-    prioEl.style.backgroundColor = '#f1f5f9';
-    prioEl.style.color = '#64748b';
+    prioEl.classList.add('prio-low');
   }
 
   document.getElementById('opsDetailDesc').textContent = issue.description || 'No description supplied.';
   document.getElementById('opsDetailVerifications').textContent = issue.verifications || 0;
   document.getElementById('opsDetailUpvotes').textContent = issue.upvotes || 0;
+
+  // Render comments inside inspection panel
+  const commentsList = document.getElementById('opsDetailCommentsList');
+  if (commentsList) {
+    if (issue.comments && issue.comments.length > 0) {
+      commentsList.innerHTML = issue.comments.map(c => `
+        <div class="panel-comment-item">
+          <div class="panel-comment-meta">
+            <span class="panel-comment-user">${escapeHTML(c.user)}</span>
+            <span class="panel-comment-time">${escapeHTML(c.timestamp)}</span>
+          </div>
+          <p class="panel-comment-text">${escapeHTML(c.text)}</p>
+        </div>
+      `).join('');
+    } else {
+      commentsList.innerHTML = `<p class="empty-comments-msg">No comments posted yet.</p>`;
+    }
+  }
 
   const linksContainer = document.getElementById('opsDetailLinksContainer');
   const linksUl = document.getElementById('opsDetailLinks');
@@ -1853,8 +1868,8 @@ function renderOpsDetailPanel(issue) {
     gallery.innerHTML = issue.images.map(img => `<img src="${img}" class="ops-detail-photo" alt="Details photo" onclick="window.open('${img}')">`).join('');
   } else {
     gallery.innerHTML = `
-      <div style="background-color:#f1f5f9; padding:15px; border-radius:6px; text-align:center; width:100%; border:1px dashed var(--color-border);">
-        <p style="font-size:11px; color:var(--color-muted-text); margin:0;">No citizen photos attached.</p>
+      <div class="empty-photos-frame">
+        <p>No citizen photos attached.</p>
       </div>
     `;
   }
@@ -1909,7 +1924,7 @@ function renderOpsDetailPanel(issue) {
       lng = coords.lng;
     }
 
-    document.getElementById('opsDetailCoords').textContent = hasCoords ? `📍 GPS: ${lat.toFixed(4)}, ${lng.toFixed(4)}` : `📍 Approximate Center: ${issue.subLocation}`;
+    document.getElementById('opsDetailCoords').textContent = hasCoords ? `GPS: ${lat.toFixed(4)}, ${lng.toFixed(4)}` : `Approximate Center: ${issue.subLocation}`;
 
     opsDetailMapInstance = L.map('opsDetailMap').setView([lat, lng], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -1928,7 +1943,7 @@ function renderTriageActionRibbon(issue) {
   ribbon.innerHTML = '';
 
   const label = document.createElement('span');
-  label.style.fontWeight = '600';
+  label.style.fontWeight = '500';
   label.style.fontSize = '12px';
   label.style.color = 'var(--color-secondary-text)';
   label.style.marginRight = 'auto';
@@ -1939,17 +1954,13 @@ function renderTriageActionRibbon(issue) {
     ribbon.appendChild(label);
 
     const ackBtn = document.createElement('button');
-    ackBtn.className = 'btn btn-primary btn-sm';
-    ackBtn.style.backgroundColor = '#2563eb';
-    ackBtn.style.borderColor = '#2563eb';
+    ackBtn.className = 'btn btn-ops-triage btn-ops-triage-primary';
     ackBtn.textContent = 'Acknowledge';
     ackBtn.addEventListener('click', () => updateIssueStatus(issue.id, 'Acknowledged'));
     ribbon.appendChild(ackBtn);
 
     const rejBtn = document.createElement('button');
-    rejBtn.className = 'btn btn-secondary btn-sm';
-    rejBtn.style.color = '#dc2626';
-    rejBtn.style.borderColor = '#fecaca';
+    rejBtn.className = 'btn btn-ops-triage btn-ops-triage-danger';
     rejBtn.textContent = 'Reject';
     rejBtn.addEventListener('click', () => {
       const reason = prompt('Specify rejection reason:');
@@ -1962,9 +1973,7 @@ function renderTriageActionRibbon(issue) {
     ribbon.appendChild(label);
 
     const startBtn = document.createElement('button');
-    startBtn.className = 'btn btn-primary btn-sm';
-    startBtn.style.backgroundColor = '#f5a623';
-    startBtn.style.borderColor = '#f5a623';
+    startBtn.className = 'btn btn-ops-triage btn-ops-triage-warning';
     startBtn.textContent = 'Start Work';
     startBtn.addEventListener('click', () => updateIssueStatus(issue.id, 'In Progress'));
     ribbon.appendChild(startBtn);
@@ -1973,19 +1982,17 @@ function renderTriageActionRibbon(issue) {
     ribbon.appendChild(label);
 
     const resolveBtn = document.createElement('button');
-    resolveBtn.className = 'btn btn-primary btn-sm';
-    resolveBtn.style.backgroundColor = '#059669';
-    resolveBtn.style.borderColor = '#059669';
+    resolveBtn.className = 'btn btn-ops-triage btn-ops-triage-success';
     resolveBtn.textContent = 'Resolve Report';
     resolveBtn.addEventListener('click', () => {
       document.getElementById('resolutionModal').classList.add('open');
     });
     ribbon.appendChild(resolveBtn);
   } else if (issue.status === 'Resolved') {
-    label.textContent = '✅ Issue successfully resolved.';
+    label.textContent = 'Issue successfully resolved.';
     ribbon.appendChild(label);
   } else if (issue.status === 'Rejected') {
-    label.textContent = '❌ Rejection decision completed.';
+    label.textContent = 'Rejection decision completed.';
     ribbon.appendChild(label);
   }
 }

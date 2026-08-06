@@ -1685,18 +1685,7 @@ textarea:focus-visible {
   margin-top: 4px;
 }
 
-.ops-dashboard-summary .summary-card[data-status="Review Queue"] {
-  border-left: 4px solid var(--color-muted-text);
-}
-.ops-dashboard-summary .summary-card[data-status="Acknowledged"] {
-  border-left: 4px solid #3b82f6;
-}
-.ops-dashboard-summary .summary-card[data-status="In Progress"] {
-  border-left: 4px solid #f5a623;
-}
-.ops-dashboard-summary .summary-card[data-status="Resolved"] {
-  border-left: 4px solid var(--color-accent);
-}
+/* Removed heavy left borders for a cleaner look */
 
 /* ========================================== */
 /* KANBAN BOARD SYSTEM                        */
@@ -1709,8 +1698,9 @@ textarea:focus-visible {
 }
 
 .kanban-col {
-  background-color: #f1f5f9;
-  border-radius: var(--radius-md);
+  background-color: #fafafa;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
   padding: 14px;
   min-height: 480px;
   display: flex;
@@ -1828,44 +1818,54 @@ textarea:focus-visible {
 }
 
 .btn-ops-action {
-  font-size: 10px;
-  padding: 4px 6px;
+  font-size: 11px;
+  padding: 4px 8px;
   text-align: center;
   border-radius: 4px;
-  font-weight: 600;
+  font-weight: 500;
   border: 1px solid var(--color-border);
   cursor: pointer;
   background-color: var(--color-card-bg);
+  color: var(--color-secondary-text);
   transition: all var(--transition-fast);
 }
 
+.btn-ops-action:hover {
+  background-color: var(--color-bg);
+  color: var(--color-primary-text);
+  border-color: var(--color-border-hover);
+}
+
 .btn-ops-ack {
-  color: #2563eb;
-  border-color: #bfdbfe;
-  background-color: #eff6ff;
+  color: var(--color-primary-text);
 }
 
 .btn-ops-ack:hover {
-  background-color: #dbeafe;
+  background-color: #eff6ff;
+  color: #1e40af;
+  border-color: #bfdbfe;
 }
 
 .btn-ops-rej {
-  color: #dc2626;
-  border-color: #fecaca;
-  background-color: #fef2f2;
+  color: #b91c1c;
 }
 
 .btn-ops-rej:hover {
-  background-color: #fee2e2;
+  background-color: #fef2f2;
+  color: #991b1b;
+  border-color: #fecaca;
 }
 
 .btn-ops-dup {
-  color: var(--color-muted-text);
+  color: var(--color-secondary-text);
   grid-column: span 2;
   text-align: center;
 }
+
 .btn-ops-dup:hover {
-  background-color: #f8fafc;
+  background-color: #f1f5f9;
+  color: #334155;
+  border-color: #cbd5e1;
 }
 
 /* ========================================== */
@@ -2389,5 +2389,285 @@ textarea:focus-visible {
 }
 .notification-dot.active {
   display: block;
+}
+
+/* ======================================================== */
+/* MUNICIPALITY dashboard INSPECTION PANEL REFINEMENTS      */
+/* ======================================================== */
+
+.panel-header-title {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--color-secondary-text);
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+.panel-group {
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.panel-group:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.panel-group-title {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--color-primary-text);
+  margin-bottom: 16px;
+  letter-spacing: 0.05em;
+}
+
+.panel-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.grid-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.grid-item.full-width {
+  grid-column: span 2;
+}
+
+.grid-item label,
+.panel-field label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--color-muted-text);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.val-text {
+  font-size: 13px;
+  color: var(--color-primary-text);
+  font-weight: 500;
+}
+
+.title-val {
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--color-primary-text);
+  line-height: 1.3;
+}
+
+.panel-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.panel-comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 220px;
+  overflow-y: auto;
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 12px;
+}
+
+.panel-comment-item {
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 8px;
+}
+
+.panel-comment-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.panel-comment-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+
+.panel-comment-user {
+  font-weight: 600;
+  color: var(--color-secondary-text);
+}
+
+.panel-comment-time {
+  color: var(--color-muted-text);
+}
+
+.panel-comment-text {
+  font-size: 12px;
+  color: var(--color-primary-text);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.empty-comments-msg {
+  font-size: 12px;
+  color: var(--color-muted-text);
+  text-align: center;
+  margin: 0;
+  padding: 10px 0;
+}
+
+.empty-photos-frame {
+  background-color: var(--color-bg);
+  padding: 20px;
+  border-radius: 6px;
+  text-align: center;
+  width: 100%;
+  border: 1px dashed var(--color-border);
+}
+
+.empty-photos-frame p {
+  font-size: 12px;
+  color: var(--color-muted-text);
+  margin: 0;
+}
+
+/* ======================================================== */
+/* STATUS & PRIORITY BADGES REFINEMENTS                     */
+/* ======================================================== */
+
+/* Muted Status Badges */
+.status-badge-detail {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: none;
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--color-border);
+  line-height: 1.2;
+}
+
+.status-review-queue {
+  background-color: #f1f5f9;
+  color: #475569;
+  border-color: #cbd5e1;
+}
+
+.status-acknowledged {
+  background-color: #eff6ff;
+  color: #1e40af;
+  border-color: #bfdbfe;
+}
+
+.status-in-progress {
+  background-color: #fffbeb;
+  color: #b45309;
+  border-color: #fde68a;
+}
+
+.status-resolved {
+  background-color: #f0fdf4;
+  color: #15803d;
+  border-color: #bbf7d0;
+}
+
+.status-rejected {
+  background-color: #fef2f2;
+  color: #b91c1c;
+  border-color: #fecaca;
+}
+
+/* Subtle Priority Badges */
+.prio-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: none;
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--color-border);
+  line-height: 1.2;
+}
+
+.prio-low {
+  background-color: #f8fafc;
+  color: #64748b;
+  border-color: #e2e8f0;
+}
+
+.prio-medium {
+  background-color: #fffbeb;
+  color: #d97706;
+  border-color: #fde68a;
+}
+
+.prio-high {
+  background-color: #fef2f2;
+  color: #dc2626;
+  border-color: #fecaca;
+}
+
+/* Ops Triage Action Ribbon buttons */
+.btn-ops-triage {
+  height: 32px !important;
+  width: auto !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  padding: 0 12px !important;
+  border-radius: 4px !important;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-card-bg);
+  color: var(--color-primary-text);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+
+.btn-ops-triage-primary {
+  background-color: #171717 !important;
+  color: #ffffff !important;
+  border-color: #171717 !important;
+}
+.btn-ops-triage-primary:hover {
+  background-color: #333333 !important;
+  border-color: #333333 !important;
+}
+
+.btn-ops-triage-danger {
+  color: #b91c1c !important;
+}
+.btn-ops-triage-danger:hover {
+  background-color: #fef2f2 !important;
+  border-color: #fecaca !important;
+}
+
+.btn-ops-triage-warning {
+  background-color: #fffbeb !important;
+  color: #d97706 !important;
+  border-color: #fde68a !important;
+}
+.btn-ops-triage-warning:hover {
+  background-color: #fef3c7 !important;
+}
+
+.btn-ops-triage-success {
+  background-color: #f0fdf4 !important;
+  color: #15803d !important;
+  border-color: #bbf7d0 !important;
+}
+.btn-ops-triage-success:hover {
+  background-color: #dcfce7 !important;
 }
 
