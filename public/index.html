@@ -148,6 +148,13 @@
             </svg>
             Triage Board
           </button>
+          <button class="sidebar-link" id="opsResolvedTabBtn">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+            Resolved Issues
+          </button>
           <button class="sidebar-link" id="opsNoticesTabBtn">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M11 5L6 9H2v6h4l5 4V5z"></path>
@@ -284,11 +291,6 @@
               <div class="summary-count" id="countInProgress">0</div>
               <div class="summary-desc">Active field crew dispatch</div>
             </div>
-            <div class="summary-card" data-status="Resolved">
-              <div class="summary-title">Resolved Today</div>
-              <div class="summary-count" id="countResolvedToday">0</div>
-              <div class="summary-desc">Completed resolutions</div>
-            </div>
           </section>
 
           <!-- Kanban Board -->
@@ -318,15 +320,6 @@
                 <span class="count-badge" id="countColInProgress">0</span>
               </div>
               <div class="kanban-col-cards" id="cardsInProgress"></div>
-            </div>
-
-            <!-- Resolved -->
-            <div class="kanban-col" id="colResolved">
-              <div class="kanban-col-header">
-                <h3>Resolved</h3>
-                <span class="count-badge" id="countColResolved">0</span>
-              </div>
-              <div class="kanban-col-cards" id="cardsResolved"></div>
             </div>
           </div>
         </div>
@@ -376,6 +369,18 @@
               <h3>Active Published Bulletins</h3>
               <div class="published-feed" id="opsNoticesFeed">
                 <p class="empty-notices-msg">No notices published yet.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. MUNICIPALITY RESOLVED ISSUES VIEW -->
+        <div id="municipalResolvedViewport" style="display: none;">
+          <div class="ops-resolved-workspace">
+            <div class="resolved-list-panel">
+              <h3>Resolved Reports</h3>
+              <div class="resolved-feed" id="opsResolvedFeed">
+                <p class="empty-resolved-msg">No resolved reports yet.</p>
               </div>
             </div>
           </div>
@@ -554,10 +559,6 @@
               <label>Status</label>
               <div><span class="status-badge-detail" id="opsDetailStatus">Review Queue</span></div>
             </div>
-            <div class="grid-item">
-              <label>Priority</label>
-              <div><span class="prio-badge" id="opsDetailPriority">High</span></div>
-            </div>
           </div>
         </div>
 
@@ -600,10 +601,6 @@
               <div class="metric-val" id="opsDetailUpvotes">42</div>
             </div>
           </div>
-          <div class="panel-field" style="margin-top: 12px;">
-            <label>Comments</label>
-            <div class="panel-comments-list" id="opsDetailCommentsList"></div>
-          </div>
         </div>
 
         <!-- Municipality Group -->
@@ -614,12 +611,6 @@
           <div class="panel-field">
             <label>Status Actions</label>
             <div class="action-triage-ribbon" id="triageActionRibbon"></div>
-          </div>
-
-          <div class="panel-field">
-            <label>Internal Notes</label>
-            <textarea id="opsInternalNotesInput" rows="3" placeholder="Add private notes for staff, team schedules, work order details..."></textarea>
-            <button class="btn btn-secondary btn-sm" id="btnSaveInternalNotes" style="margin-top: 8px;">Save Internal Notes</button>
           </div>
 
           <!-- Resolution Display / Photos -->

@@ -1645,7 +1645,7 @@ textarea:focus-visible {
 /* Summary stats metrics row (Light operations layout) */
 .ops-dashboard-summary {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 16px;
 }
 
@@ -1692,7 +1692,7 @@ textarea:focus-visible {
 /* ========================================== */
 .kanban-board-wrapper {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 16px;
   align-items: start;
 }
@@ -2669,5 +2669,127 @@ textarea:focus-visible {
 }
 .btn-ops-triage-success:hover {
   background-color: #dcfce7 !important;
+}
+
+/* ========================================== */
+/* OPERATIONS RESOLVED ISSUES SYSTEM         */
+/* ========================================== */
+.ops-resolved-workspace {
+  background-color: var(--color-card-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  box-shadow: var(--color-shadow);
+}
+
+.resolved-list-panel h3 {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 8px;
+  color: var(--color-primary-text);
+}
+
+.resolved-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.ops-resolved-card-item {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  background-color: #f8fafc;
+  transition: all var(--transition-fast);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ops-resolved-card-item:hover {
+  border-color: var(--color-border-hover);
+  box-shadow: var(--color-shadow);
+}
+
+.ops-resolved-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ops-resolved-card-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-primary-text);
+  margin: 0;
+}
+
+.ops-resolved-card-meta {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 11px;
+  color: var(--color-muted-text);
+}
+
+.ops-resolved-card-desc {
+  font-size: 12px;
+  color: var(--color-secondary-text);
+  line-height: 1.4;
+  margin: 0;
+}
+
+.ops-resolved-card-resolution {
+  background-color: #ffffff;
+  border-left: 3px solid #10b981;
+  padding: 8px 12px;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: 12px;
+  color: var(--color-primary-text);
+  border-top: 1px solid var(--color-border);
+  border-right: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.ops-resolved-card-resolution strong {
+  color: #065f46;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.ops-resolved-card-photos {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+
+.ops-resolved-card-photos img {
+  height: 60px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  cursor: pointer;
+  border: 1px solid var(--color-border);
+  transition: opacity var(--transition-fast);
+}
+
+.ops-resolved-card-photos img:hover {
+  opacity: 0.8;
+}
+
+.empty-resolved-msg {
+  font-size: 12px;
+  color: var(--color-muted-text);
+  text-align: center;
+  padding: 30px 0;
 }
 

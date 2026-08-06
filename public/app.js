@@ -79,10 +79,12 @@ const toastContainer = document.getElementById('toastContainer');
 // Role Viewports
 const citizenViewport = document.getElementById('citizenViewport');
 const municipalTriageViewport = document.getElementById('municipalTriageViewport');
+const municipalResolvedViewport = document.getElementById('municipalResolvedViewport');
 const municipalNoticesViewport = document.getElementById('municipalNoticesViewport');
 
 // Active ops tab selector helper
 const opsTriageTabBtn = document.getElementById('opsTriageTabBtn');
+const opsResolvedTabBtn = document.getElementById('opsResolvedTabBtn');
 const opsNoticesTabBtn = document.getElementById('opsNoticesTabBtn');
 
 // Init application
@@ -122,6 +124,7 @@ function switchPortal(portalName) {
       
       citizenViewport.style.display = 'block';
       municipalTriageViewport.style.display = 'none';
+      municipalResolvedViewport.style.display = 'none';
       municipalNoticesViewport.style.display = 'none';
       
       document.getElementById('roleHeaderBadge').textContent = 'CIVIC PORTAL';
@@ -158,10 +161,17 @@ function switchOpsTab(tabName) {
   if (tabName === 'triage') {
     updateSidebarActiveBtn(opsTriageTabBtn);
     municipalTriageViewport.style.display = 'block';
+    municipalResolvedViewport.style.display = 'none';
+    municipalNoticesViewport.style.display = 'none';
+  } else if (tabName === 'resolved') {
+    updateSidebarActiveBtn(opsResolvedTabBtn);
+    municipalTriageViewport.style.display = 'none';
+    municipalResolvedViewport.style.display = 'block';
     municipalNoticesViewport.style.display = 'none';
   } else if (tabName === 'notices') {
     updateSidebarActiveBtn(opsNoticesTabBtn);
     municipalTriageViewport.style.display = 'none';
+    municipalResolvedViewport.style.display = 'none';
     municipalNoticesViewport.style.display = 'block';
   }
   
@@ -169,7 +179,7 @@ function switchOpsTab(tabName) {
 }
 
 function updateSidebarActiveBtn(activeBtn) {
-  const allBtns = [exploreBtn, followingBtn, noticesBtn, opsTriageTabBtn, opsNoticesTabBtn];
+  const allBtns = [exploreBtn, followingBtn, noticesBtn, opsTriageTabBtn, opsResolvedTabBtn, opsNoticesTabBtn];
   allBtns.forEach(btn => {
     if (btn) {
       if (btn === activeBtn) btn.classList.add('active');
@@ -792,6 +802,7 @@ function setupEventListeners() {
 
   // Ops Tab Buttons Click Handling (Sidebar)
   opsTriageTabBtn.addEventListener('click', () => switchOpsTab('triage'));
+  opsResolvedTabBtn.addEventListener('click', () => switchOpsTab('resolved'));
   opsNoticesTabBtn.addEventListener('click', () => switchOpsTab('notices'));
 
   // Mobile menu sidebar toggle
@@ -1339,27 +1350,7 @@ function setupEventListeners() {
     cleanupOpsDetailMap();
   });
 
-  // Ops internal notes save handler
-  document.getElementById('btnSaveInternalNotes').addEventListener('click', async () => {
-    const notesVal = document.getElementById('opsInternalNotesInput').value.trim();
-    if (!state.selectedIssueForOps) return;
 
-    try {
-      const res = await fetch(`/api/issues/${state.selectedIssueForOps.id}/notes`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ internalNotes: notesVal })
-      });
-      if (res.ok) {
-        showToast('Internal municipality notes updated');
-        state.selectedIssueForOps.internalNotes = notesVal;
-        fetchOpsData(); // Refresh board
-      }
-    } catch (err) {
-      console.error(err);
-      showToast('Connection error. Failed to save notes.');
-    }
-  });
 
   // Ops Notices form submit handler
   document.getElementById('noticePublishForm').addEventListener('submit', async (e) => {
@@ -1571,6 +1562,17 @@ function showToast(message) {
 // MUNICIPALITY OPERATIONS DASHBOARD LOGIC
 // ==========================================
 
+// Calculate priority score for sorting the Review Queue
+function calculatePriorityScore(issue) {
+  const verifications = issue.verifications || 0;
+  const upvotes = issue.upvotes || 0;
+  const createdAt = new Date(issue.createdAt);
+  const hoursWaiting = Math.max(0, (Date.now() - createdAt.getTime()) / (1000 * 60 * 60));
+
+  // Score = verifications (2.5) + upvotes (1.0) + hours waiting (0.15)
+  return (verifications * 2.5) + (upvotes * 1.0) + (hoursWaiting * 0.15);
+}
+
 async function fetchOpsData() {
   if (state.activePortal !== 'municipality') return;
 
@@ -1596,6 +1598,8 @@ async function fetchOpsData() {
 
     if (state.activeOpsTab === 'triage') {
       renderKanbanBoard(issues);
+    } else if (state.activeOpsTab === 'resolved') {
+      renderResolvedIssuesFeed(issues);
     } else if (state.activeOpsTab === 'notices') {
       const notices = await fetchNotices();
       renderOpsNoticesFeed(notices);
@@ -1605,17 +1609,15 @@ async function fetchOpsData() {
   }
 }
 
-// Display four dashboard summary metrics cards
+// Display three dashboard summary metrics cards (excluding Resolved Today)
 function renderOpsDashboardSummaries(issues) {
   const pending = issues.filter(i => i.status === 'Review Queue').length;
   const acknowledged = issues.filter(i => i.status === 'Acknowledged').length;
   const inProgress = issues.filter(i => i.status === 'In Progress').length;
-  const resolved = issues.filter(i => i.status === 'Resolved').length;
 
   document.getElementById('countPending').textContent = pending;
   document.getElementById('countAcknowledged').textContent = acknowledged;
   document.getElementById('countInProgress').textContent = inProgress;
-  document.getElementById('countResolvedToday').textContent = resolved;
 }
 
 // Render notices in Ops Notices Management Tab
@@ -1655,13 +1657,83 @@ function renderOpsNoticesFeed(notices) {
   });
 }
 
-// Render Kanban Column Boards
+// Render Resolved reports in Resolved Issues tab
+function renderResolvedIssuesFeed(issues) {
+  const feed = document.getElementById('opsResolvedFeed');
+  
+  // Filter for resolved issues
+  let resolvedIssues = issues.filter(i => i.status === 'Resolved');
+  
+  // Sort by resolution time (most recent first)
+  resolvedIssues.sort((a, b) => {
+    const timeA = a.timeline ? new Date(a.timeline[a.timeline.length - 1].timestamp).getTime() : new Date(a.createdAt).getTime();
+    const timeB = b.timeline ? new Date(b.timeline[b.timeline.length - 1].timestamp).getTime() : new Date(b.createdAt).getTime();
+    return timeB - timeA;
+  });
+
+  if (resolvedIssues.length === 0) {
+    feed.innerHTML = '<p class="empty-resolved-msg">No resolved reports yet.</p>';
+    return;
+  }
+
+  feed.innerHTML = '';
+  resolvedIssues.forEach(issue => {
+    const card = document.createElement('div');
+    card.className = 'ops-resolved-card-item';
+    
+    // Check if custom resolution images exist
+    let resolutionPhotosHTML = '';
+    if (issue.resolutionImages && issue.resolutionImages.length > 0) {
+      resolutionPhotosHTML = `
+        <div class="ops-resolved-card-photos">
+          ${issue.resolutionImages.map(img => `<img src="${img}" alt="Resolution proof" onclick="window.open('${img}')">`).join('')}
+        </div>
+      `;
+    }
+    
+    // Check if citizen images exist
+    let citizenPhotosHTML = '';
+    if (issue.images && issue.images.length > 0) {
+      citizenPhotosHTML = `
+        <div class="ops-resolved-card-photos" style="margin-bottom: 8px;">
+          <span style="font-size: 11px; color: var(--color-muted-text); display: block; width: 100%;">Citizen Proof:</span>
+          ${issue.images.map(img => `<img src="${img}" alt="Citizen report photo" onclick="window.open('${img}')" style="height: 60px;">`).join('')}
+        </div>
+      `;
+    }
+
+    const resolvedDate = issue.timeline 
+      ? new Date(issue.timeline.filter(t => t.status === 'Resolved')[0]?.timestamp || issue.createdAt).toLocaleDateString()
+      : new Date(issue.createdAt).toLocaleDateString();
+
+    card.innerHTML = `
+      <div class="ops-resolved-card-header">
+        <h4 class="ops-resolved-card-title">${escapeHTML(issue.title)}</h4>
+        <div class="ops-resolved-card-meta">
+          <span>District: <strong>${escapeHTML(issue.subLocation)}</strong></span>
+          <span>&bull;</span>
+          <span>Resolved Date: <strong>${resolvedDate}</strong></span>
+        </div>
+      </div>
+      <p class="ops-resolved-card-desc">${escapeHTML(issue.description || 'No description supplied.')}</p>
+      ${citizenPhotosHTML}
+      <div class="ops-resolved-card-resolution">
+        <strong>Resolution Action:</strong>
+        <p>${escapeHTML(issue.resolutionNote || 'No resolution note provided.')}</p>
+        ${resolutionPhotosHTML}
+      </div>
+    `;
+    
+    feed.appendChild(card);
+  });
+}
+
+// Render Kanban Column Boards (excluding Resolved column)
 function renderKanbanBoard(issues) {
   const cols = {
     'Review Queue': document.getElementById('cardsReviewQueue'),
     'Acknowledged': document.getElementById('cardsAcknowledged'),
-    'In Progress': document.getElementById('cardsInProgress'),
-    'Resolved': document.getElementById('cardsResolved')
+    'In Progress': document.getElementById('cardsInProgress')
   };
 
   // Reset columns
@@ -1673,12 +1745,25 @@ function renderKanbanBoard(issues) {
   const counts = {
     'Review Queue': 0,
     'Acknowledged': 0,
-    'In Progress': 0,
-    'Resolved': 0
+    'In Progress': 0
   };
 
-  issues.forEach(issue => {
-    if (issue.status === 'Rejected') return;
+  // Sort Review Queue issues by score descending
+  const reviewQueueIssues = issues
+    .filter(i => i.status === 'Review Queue')
+    .sort((a, b) => calculatePriorityScore(b) - calculatePriorityScore(a));
+  
+  const acknowledgedIssues = issues.filter(i => i.status === 'Acknowledged');
+  const inProgressIssues = issues.filter(i => i.status === 'In Progress');
+
+  const renderList = [
+    ...reviewQueueIssues,
+    ...acknowledgedIssues,
+    ...inProgressIssues
+  ];
+
+  renderList.forEach(issue => {
+    if (issue.status === 'Rejected' || issue.status === 'Resolved') return;
 
     counts[issue.status] += 1;
     const colContainer = cols[issue.status];
@@ -1687,11 +1772,6 @@ function renderKanbanBoard(issues) {
     const card = document.createElement('div');
     card.className = 'ops-issue-card';
     card.id = `ops-card-${issue.id}`;
-    
-    const priority = calculatePriorityLabel(issue);
-    let prioClass = 'prio-low';
-    if (priority === 'Medium') prioClass = 'prio-medium';
-    else if (priority === 'High') prioClass = 'prio-high';
 
     // Build Review Queue button triage ribbon
     let actionsHTML = '';
@@ -1709,7 +1789,6 @@ function renderKanbanBoard(issues) {
       <h4 class="ops-card-title">${escapeHTML(issue.title)}</h4>
       <div class="ops-card-meta">
         <span class="ops-card-district">${escapeHTML(issue.subLocation)}</span>
-        <span class="prio-badge ${prioClass}">${priority}</span>
       </div>
       ${actionsHTML}
     `;
@@ -1744,7 +1823,6 @@ function renderKanbanBoard(issues) {
   document.getElementById('countColPending').textContent = counts['Review Queue'];
   document.getElementById('countColAcknowledged').textContent = counts['Acknowledged'];
   document.getElementById('countColInProgress').textContent = counts['In Progress'];
-  document.getElementById('countColResolved').textContent = counts['Resolved'];
 }
 
 // REST call to update status
@@ -1820,39 +1898,9 @@ function renderOpsDetailPanel(issue) {
     statusEl.classList.add('status-rejected');
   }
 
-  const priority = calculatePriorityLabel(issue);
-  const prioEl = document.getElementById('opsDetailPriority');
-  prioEl.textContent = priority;
-  prioEl.className = 'prio-badge';
-  if (priority === 'High') {
-    prioEl.classList.add('prio-high');
-  } else if (priority === 'Medium') {
-    prioEl.classList.add('prio-medium');
-  } else {
-    prioEl.classList.add('prio-low');
-  }
-
   document.getElementById('opsDetailDesc').textContent = issue.description || 'No description supplied.';
   document.getElementById('opsDetailVerifications').textContent = issue.verifications || 0;
   document.getElementById('opsDetailUpvotes').textContent = issue.upvotes || 0;
-
-  // Render comments inside inspection panel
-  const commentsList = document.getElementById('opsDetailCommentsList');
-  if (commentsList) {
-    if (issue.comments && issue.comments.length > 0) {
-      commentsList.innerHTML = issue.comments.map(c => `
-        <div class="panel-comment-item">
-          <div class="panel-comment-meta">
-            <span class="panel-comment-user">${escapeHTML(c.user)}</span>
-            <span class="panel-comment-time">${escapeHTML(c.timestamp)}</span>
-          </div>
-          <p class="panel-comment-text">${escapeHTML(c.text)}</p>
-        </div>
-      `).join('');
-    } else {
-      commentsList.innerHTML = `<p class="empty-comments-msg">No comments posted yet.</p>`;
-    }
-  }
 
   const linksContainer = document.getElementById('opsDetailLinksContainer');
   const linksUl = document.getElementById('opsDetailLinks');
@@ -1872,22 +1920,6 @@ function renderOpsDetailPanel(issue) {
         <p>No citizen photos attached.</p>
       </div>
     `;
-  }
-
-  document.getElementById('opsInternalNotesInput').value = issue.internalNotes || '';
-
-  const timelineUl = document.getElementById('opsDetailTimeline');
-  timelineUl.innerHTML = '';
-  if (issue.timeline && issue.timeline.length > 0) {
-    issue.timeline.forEach(event => {
-      const node = document.createElement('div');
-      node.className = `timeline-node ${event.status === 'Resolved' ? 'resolved' : 'active'}`;
-      node.innerHTML = `
-        <div class="node-status">${escapeHTML(event.status)}</div>
-        <div class="node-time">${new Date(event.timestamp).toLocaleString()}</div>
-      `;
-      timelineUl.appendChild(node);
-    });
   }
 
   const resContainer = document.getElementById('opsDetailResolutionContainer');
