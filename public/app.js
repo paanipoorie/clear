@@ -2,6 +2,8 @@
 const state = {
   currentSubLocation: '',
   showMyIssues: false,
+  showFollowedOnly: false,
+  showNoticesOnly: false,
   searchQuery: '',
   currentUser: {
     username: 'user',
@@ -48,6 +50,8 @@ const feedContainer = document.getElementById('feed');
 const feedTitle = document.getElementById('feedTitle');
 const searchInput = document.getElementById('searchInput');
 const exploreBtn = document.getElementById('exploreBtn');
+const followingBtn = document.getElementById('followingBtn');
+const noticesBtn = document.getElementById('noticesBtn');
 const createIssueBtn = document.getElementById('createIssueBtn');
 const createModal = document.getElementById('createModal');
 const closeModalBtn = document.getElementById('closeModalBtn');
@@ -90,6 +94,23 @@ async function fetchUser() {
 }
 
 async function fetchIssues() {
+  if (state.showNoticesOnly) {
+    // Render notices placeholder
+    feedContainer.innerHTML = `
+      <div class="empty-state">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-accent); margin-bottom: 16px; width: 48px; height: 48px;">
+          <path d="M11 5L6 9H2v6h4l5 4V5z"></path>
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+        </svg>
+        <h3>Official Municipal Notices</h3>
+        <p>This tab will display official notices and alerts posted by municipalities and local authorities.</p>
+        <span class="badge" style="margin-top: 12px; font-size: 11px; background-color: var(--color-accent-soft); color: var(--color-accent); padding: 4px 10px; border-radius: 12px; font-weight: 600;">Coming Soon</span>
+      </div>
+    `;
+    feedTitle.textContent = "Official Notices";
+    return;
+  }
+
   // Show spinner
   feedContainer.innerHTML = `
     <div class="loading-state">
@@ -102,6 +123,7 @@ async function fetchIssues() {
   const params = new URLSearchParams();
   if (state.currentSubLocation) params.append('subLocation', state.currentSubLocation);
   if (state.showMyIssues) params.append('myIssues', 'true');
+  if (state.showFollowedOnly) params.append('followedOnly', 'true');
   if (state.searchQuery) params.append('search', state.searchQuery);
 
   try {
@@ -131,6 +153,8 @@ function renderIssues(issues) {
   // Update header text based on filters
   if (state.showMyIssues) {
     feedTitle.textContent = "My Registered Issues";
+  } else if (state.showFollowedOnly) {
+    feedTitle.textContent = "Reports You Follow";
   } else if (state.currentSubLocation) {
     feedTitle.textContent = `Reports in ${state.currentSubLocation}`;
   } else {
@@ -517,15 +541,30 @@ function setupEventListeners() {
     locationBoxBtn.setAttribute('aria-expanded', isOpen);
   });
 
+  function updateNavActiveState(activeId) {
+    const navButtons = [exploreBtn, followingBtn, noticesBtn];
+    navButtons.forEach(btn => {
+      if (btn) {
+        if (btn.id === activeId) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      }
+    });
+  }
+
   // Explore / Reset filters btn
   exploreBtn.addEventListener('click', () => {
     state.currentSubLocation = '';
     state.showMyIssues = false;
+    state.showFollowedOnly = false;
+    state.showNoticesOnly = false;
     state.searchQuery = '';
     searchInput.value = '';
     
     // Reset sidebar visual active states
-    exploreBtn.classList.add('active');
+    updateNavActiveState('exploreBtn');
     sublocationButtons.forEach(b => {
       if (b.dataset.sub === '') b.classList.add('active');
       else b.classList.remove('active');
@@ -540,17 +579,61 @@ function setupEventListeners() {
     sidebar.classList.remove('open'); // Close mobile menu if open
   });
 
+  // Following filter click
+  followingBtn.addEventListener('click', () => {
+    state.currentSubLocation = '';
+    state.showMyIssues = false;
+    state.showFollowedOnly = true;
+    state.showNoticesOnly = false;
+    state.searchQuery = '';
+    searchInput.value = '';
+
+    updateNavActiveState('followingBtn');
+    sublocationButtons.forEach(b => b.classList.remove('active'));
+
+    // Close location dropdown
+    sublocationList.classList.remove('open');
+    locationBoxBtn.classList.remove('open');
+    locationBoxBtn.setAttribute('aria-expanded', 'false');
+
+    fetchIssues();
+    sidebar.classList.remove('open');
+  });
+
+  // Notices click
+  noticesBtn.addEventListener('click', () => {
+    state.currentSubLocation = '';
+    state.showMyIssues = false;
+    state.showFollowedOnly = false;
+    state.showNoticesOnly = true;
+    state.searchQuery = '';
+    searchInput.value = '';
+
+    updateNavActiveState('noticesBtn');
+    sublocationButtons.forEach(b => b.classList.remove('active'));
+
+    // Close location dropdown
+    sublocationList.classList.remove('open');
+    locationBoxBtn.classList.remove('open');
+    locationBoxBtn.setAttribute('aria-expanded', 'false');
+
+    fetchIssues();
+    sidebar.classList.remove('open');
+  });
+
   // Location filter click
   sublocationButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       sublocationButtons.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       
-      // Explore goes inactive if we select a specific location
-      exploreBtn.classList.remove('active');
+      // Explore goes active if we select a specific location
+      state.showFollowedOnly = false;
+      state.showNoticesOnly = false;
+      state.showMyIssues = false;
+      updateNavActiveState('exploreBtn');
       
       state.currentSubLocation = btn.dataset.sub;
-      state.showMyIssues = false; // Selecting sublocation resets "my issues"
       
       // Close dropdown to keep sidebar compact
       sublocationList.classList.remove('open');
@@ -572,8 +655,10 @@ function setupEventListeners() {
   myIssuesBtn.addEventListener('click', () => {
     state.showMyIssues = true;
     state.currentSubLocation = '';
+    state.showFollowedOnly = false;
+    state.showNoticesOnly = false;
     sublocationButtons.forEach(b => b.classList.remove('active'));
-    exploreBtn.classList.remove('active');
+    updateNavActiveState('');
     profileDropdown.classList.remove('open');
     
     // Close location dropdown

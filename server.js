@@ -64,9 +64,9 @@ let currentUser = {
 
 // API Routes
 
-// Get all issues with filters (subLocation, myIssues, search)
+// Get all issues with filters (subLocation, myIssues, search, followedOnly)
 app.get('/api/issues', (req, res) => {
-  const { subLocation, myIssues, search } = req.query;
+  const { subLocation, myIssues, search, followedOnly } = req.query;
   let filteredIssues = [...issues];
 
   if (subLocation) {
@@ -81,6 +81,10 @@ app.get('/api/issues', (req, res) => {
     // Let's assume issues with id: 1 and 3 are created by 'user' (the current user) or followed by the user.
     // Let's make it issues created/followed by user for representation.
     filteredIssues = filteredIssues.filter(issue => issue.id === 1 || issue.followed);
+  }
+
+  if (followedOnly === 'true') {
+    filteredIssues = filteredIssues.filter(issue => issue.followed);
   }
 
   if (search) {
