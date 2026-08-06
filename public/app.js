@@ -205,13 +205,12 @@ async function fetchUser() {
 
 // Calculate Urgency Priority automatically based on signals
 function calculatePriorityLabel(issue) {
-  const verifications = issue.verifications || 0;
   const upvotes = issue.upvotes || 0;
   const createdAt = new Date(issue.createdAt);
   const hoursWaiting = Math.max(0, (Date.now() - createdAt.getTime()) / (1000 * 60 * 60));
 
-  // Score = verifications (2.5) + upvotes (1.0) + hours waiting (0.15)
-  const score = (verifications * 2.5) + (upvotes * 1.0) + (hoursWaiting * 0.15);
+  // Score = upvotes (1.5) + hours waiting (0.15)
+  const score = (upvotes * 1.5) + (hoursWaiting * 0.15);
   
   if (score < 8) return 'Low';
   if (score < 20) return 'Medium';
@@ -240,7 +239,7 @@ async function fetchIssues() {
         <p>Loading notices...</p>
       </div>
     `;
-    feedTitle.textContent = "Official Notices";
+    if (feedTitle) feedTitle.textContent = "Official Notices";
     
     const noticesList = await fetchNotices();
     renderPublicNotices(noticesList);
@@ -347,14 +346,16 @@ function renderPublicNotices(notices) {
 
 // Render Issues Feed for Citizen Portal
 function renderIssues(issues) {
-  if (state.showMyIssues) {
-    feedTitle.textContent = "My Registered Issues";
-  } else if (state.showFollowedOnly) {
-    feedTitle.textContent = "Reports You Follow";
-  } else if (state.currentSubLocation) {
-    feedTitle.textContent = `Reports in ${state.currentSubLocation}`;
-  } else {
-    feedTitle.textContent = "Active Local Reports";
+  if (feedTitle) {
+    if (state.showMyIssues) {
+      feedTitle.textContent = "My Registered Issues";
+    } else if (state.showFollowedOnly) {
+      feedTitle.textContent = "Reports You Follow";
+    } else if (state.currentSubLocation) {
+      feedTitle.textContent = `Reports in ${state.currentSubLocation}`;
+    } else {
+      feedTitle.textContent = "Active Local Reports";
+    }
   }
   
   if (issues.length === 0) {
@@ -375,300 +376,124 @@ function renderIssues(issues) {
   issues.forEach(issue => {
     // Filter out rejected issues from citizen portal view
     if (issue.status === 'Rejected') return;
-
-    const card = document.createElement('article');
-    card.className = 'post-card';
-    card.id = `issue-${issue.id}`;
-    
-    // Choose graphic template based on whether custom images exist
-    let graphicHTML = '';
-    if (issue.images && issue.images.length > 0) {
-      graphicHTML = `
-        <div class="custom-uploaded-images">
-          ${issue.images.map(img => `<img src="${img}" class="feed-uploaded-image" alt="Uploaded report photo">`).join('')}
-        </div>
-      `;
-    } else if (issue.imageType === 'dumping') {
-      graphicHTML = `
-        <div class="post-card-graphic post-graphic-dumping">
-          <div class="post-graphic-svg-wrapper">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-              <line x1="10" y1="11" x2="10" y2="17"></line>
-              <line x1="14" y1="11" x2="14" y2="17"></line>
-            </svg>
-          </div>
-        </div>
-      `;
-    } else if (issue.imageType === 'burning') {
-      graphicHTML = `
-        <div class="post-card-graphic post-graphic-burning">
-          <div class="post-graphic-svg-wrapper">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path>
-            </svg>
-          </div>
-        </div>
-      `;
-    } else if (issue.imageType === 'water') {
-      graphicHTML = `
-        <div class="post-card-graphic post-graphic-water">
-          <div class="post-graphic-svg-wrapper">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-              <path d="M12 2L8 6m4-4l4 4"></path>
-            </svg>
-          </div>
-        </div>
-      `;
-    } else {
-      graphicHTML = `
-        <div class="post-card-graphic post-graphic-default">
-          <div class="post-graphic-svg-wrapper">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"></polygon>
-              <line x1="12" y1="22" x2="12" y2="12"></line>
-              <line x1="12" y1="12" x2="22" y2="8.5"></line>
-              <line x1="12" y1="12" x2="2" y2="8.5"></line>
-              <circle cx="12" cy="12" r="3"></circle>
-            </svg>
-          </div>
-        </div>
-      `;
-    }
-
-    // Auto priority score badges
-    const priority = calculatePriorityLabel(issue);
-    let prioClass = 'prio-low';
-    if (priority === 'Medium') prioClass = 'prio-medium';
-    else if (priority === 'High') prioClass = 'prio-high';
-
-    // Status format badge
-    let statusHTML = `<span class="badge" style="background-color: var(--color-bg); font-weight:600; text-transform:uppercase; border:1px solid var(--color-border); padding: 2px 8px; border-radius:12px; margin-left:8px;">${issue.status}</span>`;
-    if (issue.status === 'Resolved') {
-      statusHTML = `<span class="badge" style="background-color: #d1fae5; color: #065f46; font-weight:600; text-transform:uppercase; padding: 2px 8px; border-radius:12px; margin-left:8px;">Resolved</span>`;
-    } else if (issue.status === 'In Progress') {
-      statusHTML = `<span class="badge" style="background-color: #fef3c7; color: #92400e; font-weight:600; text-transform:uppercase; padding: 2px 8px; border-radius:12px; margin-left:8px;">In Progress</span>`;
-    }
-
-    // Public timeline trace - shown only after Resolved
-    let timelineHTML = '';
-    if (issue.status === 'Resolved') {
-      timelineHTML = `
-        <div class="card-timeline-section">
-          <div class="timeline-title">Public Resolution Timeline</div>
-          <div class="timeline-steps-flow">
-            <div class="step-flow done">Reported</div>
-            <div class="step-line active"></div>
-            <div class="step-flow done">Acknowledged</div>
-            <div class="step-line active"></div>
-            <div class="step-flow done">In Progress</div>
-            <div class="step-line active"></div>
-            <div class="step-flow done">Resolved</div>
-          </div>
-          <div class="resolution-summary-box">
-            <strong>Resolution Summary Note:</strong>
-            <p>${escapeHTML(issue.resolutionNote)}</p>
-            ${issue.resolutionImages && issue.resolutionImages.length > 0 ? `
-              <div class="res-gallery-preview" style="margin-top:10px;">
-                <img src="${issue.resolutionImages[0]}" class="res-image-thumb" alt="Resolution photographic proof" style="max-height:150px; width:100%; object-fit:cover; border-radius:6px; cursor:pointer;" onclick="window.open('${issue.resolutionImages[0]}')">
-              </div>
-            ` : ''}
-          </div>
-        </div>
-      `;
-    }
-
-    card.innerHTML = `
-      <div class="post-card-header">
-        <div class="post-card-title-group">
-          <h3 class="post-card-title">${escapeHTML(issue.title)}</h3>
-          <div class="post-card-meta">
-            <span class="post-card-location">${escapeHTML(issue.location)}, ${escapeHTML(issue.subLocation)}</span>
-            <span>&bull;</span>
-            <span class="prio-badge ${prioClass}">${priority} Priority</span>
-            ${statusHTML}
-            ${issue.reported ? '<span class="reported-badge">Reported</span>' : ''}
-          </div>
-        </div>
-        <div class="post-card-options">
-          <button class="btn-options-trigger" aria-label="Post actions">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon icon-sm">
-              <circle cx="12" cy="12" r="1"></circle>
-              <circle cx="5" cy="12" r="1"></circle>
-              <circle cx="19" cy="12" r="1"></circle>
-            </svg>
-          </button>
-          <div class="post-options-dropdown">
-            <button class="dropdown-item follow-option-btn">
-              ${issue.followed ? 'Unfollow Post' : 'Follow Post'}
-            </button>
-            <button class="dropdown-item danger report-option-btn" ${issue.reported ? 'disabled' : ''}>
-              ${issue.reported ? 'Reported' : 'Report'}
-            </button>
-          </div>
-        </div>
-      </div>
-      
-      ${graphicHTML}
-      
-      ${issue.description ? `<p class="post-card-desc">${escapeHTML(issue.description)}</p>` : ''}
-      
-      ${issue.links && issue.links.length > 0 ? `
-        <div class="post-card-links">
-          <div class="post-card-links-title">Attached Links</div>
-          <ul class="post-card-links-list">
-            ${issue.links.map(link => `<li><a href="${link}" target="_blank" rel="noopener noreferrer">${escapeHTML(link)}</a></li>`).join('')}
-          </ul>
-        </div>
-      ` : ''}
-
-      ${timelineHTML}
-      
-      <div class="post-card-actions">
-        <!-- Vote Buttons -->
-        <button class="action-pill upvote-btn" aria-label="Upvote">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="icon icon-sm">
-            <line x1="12" y1="19" x2="12" y2="5"></line>
-            <polyline points="5 12 12 5 19 12"></polyline>
-          </svg>
-          <span class="upvote-count">${issue.upvotes}</span>
-        </button>
-        
-        <button class="action-pill downvote-btn" aria-label="Downvote">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="icon icon-sm">
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <polyline points="19 12 12 19 5 12"></polyline>
-          </svg>
-          <span class="downvote-count">${issue.downvotes}</span>
-        </button>
-        
-        <div class="action-pill-divider"></div>
-
-        <!-- Verification action -->
-        <button class="action-pill verify-btn ${issue.verifiedByCurrentUser ? 'verified-active' : ''}" aria-label="Verify issue report">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="icon icon-sm">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-          </svg>
-          <span>Verify (${issue.verifications || 0})</span>
-        </button>
-        
-        <!-- Comments button -->
-        <button class="action-pill comment-trigger-btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon icon-sm">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-          </svg>
-          <span>Comments (${issue.comments.length})</span>
-        </button>
-        
-        <!-- Share button -->
-        <button class="action-pill share-btn" aria-label="Share post">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon icon-sm">
-            <line x1="22" y1="2" x2="11" y2="13"></line>
-            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-          </svg>
-        </button>
-        
-        <!-- Track Location Button -->
-        <button type="button" class="action-pill track-location-btn" style="margin-left: auto; color: var(--color-accent); font-weight: 600;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon icon-sm" style="margin-right: 2px;">
-            <path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"></path>
-            <circle cx="12" cy="10" r="3"></circle>
-          </svg>
-          <span>Track</span>
-        </button>
-      </div>
-
-      <!-- Collapsible Comments Drawer -->
-      <section class="comments-section">
-        <div class="comments-list">
-          ${issue.comments.length === 0 ? '<p style="font-size:12px;color:var(--color-muted-text);padding:4px 8px;">No comments yet. Start the resolution discussion!</p>' : ''}
-          ${issue.comments.map(c => `
-            <div class="comment-item">
-              <div class="comment-meta">
-                <span>${escapeHTML(c.user)}</span>
-                <span>${escapeHTML(c.timestamp)}</span>
-              </div>
-              <p class="comment-text">${escapeHTML(c.text)}</p>
-            </div>
-          `).join('')}
-        </div>
-        <form class="comment-form">
-          <input type="text" class="comment-input" placeholder="Discuss action or request details..." required maxlength="200">
-          <button type="submit" class="btn-comment-submit">Post</button>
-        </form>
-      </section>
-    `;
-    
-    bindCardEvents(card, issue);
-    feedContainer.appendChild(card);
+    feedContainer.appendChild(createPostCardElement(issue));
   });
+}
+
+// Reusable Post Card component creator
+function createPostCardElement(issue) {
+  const card = document.createElement('article');
+  card.className = 'post-card';
+  card.id = `issue-${issue.id}`;
+
+  // Image (optional)
+  let imageHTML = '';
+  const mainImages = (issue.status === 'Resolved' && issue.resolutionImages && issue.resolutionImages.length > 0)
+    ? issue.resolutionImages
+    : issue.images;
+
+  if (mainImages && mainImages.length > 0) {
+    imageHTML = `
+      <div class="post-card-image-wrapper">
+        <img src="${mainImages[0]}" class="post-card-image" alt="Report photo">
+      </div>
+    `;
+  }
+
+  // Status badge inline class mapping
+  let statusClass = 'status-review-queue';
+  if (issue.status === 'Resolved') statusClass = 'status-resolved';
+  else if (issue.status === 'In Progress') statusClass = 'status-in-progress';
+  else if (issue.status === 'Acknowledged') statusClass = 'status-acknowledged';
+  else if (issue.status === 'Rejected') statusClass = 'status-rejected';
+
+  // Order:
+  // Title
+  // District • Status
+  // Image (optional)
+  // Description preview
+  // Action bar
+  card.innerHTML = `
+    <h3 class="post-card-title">${escapeHTML(issue.title)}</h3>
+    <div class="post-card-meta">
+      <span class="post-card-district">${escapeHTML(issue.subLocation)}</span>
+      <span class="meta-dot">&bull;</span>
+      <span class="status-badge-inline ${statusClass}">${escapeHTML(issue.status)}</span>
+    </div>
+    ${imageHTML}
+    ${issue.description ? `<p class="post-card-desc-preview">${escapeHTML(issue.description)}</p>` : ''}
+    <div class="post-card-actions">
+      <!-- Vote Buttons -->
+      <button class="action-pill upvote-btn" aria-label="Upvote">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="icon icon-sm">
+          <polyline points="18 15 12 9 6 15"></polyline>
+        </svg>
+        <span class="upvote-count">${issue.upvotes}</span>
+      </button>
+      
+      <button class="action-pill downvote-btn" aria-label="Downvote">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="icon icon-sm">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+        <span class="downvote-count">${issue.downvotes}</span>
+      </button>
+      
+      <!-- Comments button -->
+      <button class="action-pill comment-trigger-btn" aria-label="Comments">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon icon-sm">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        </svg>
+        <span class="comment-count">${issue.comments ? issue.comments.length : 0}</span>
+      </button>
+      
+      <!-- Follow button (📍) -->
+      <button class="action-pill follow-btn ${issue.followed ? 'followed-active' : ''}" aria-label="Follow report">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="icon icon-sm">
+          <path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"></path>
+          <circle cx="12" cy="10" r="3"></circle>
+        </svg>
+      </button>
+      
+      <!-- Share button -->
+      <button class="action-pill share-btn" aria-label="Share post">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon icon-sm">
+          <line x1="22" y1="2" x2="11" y2="13"></line>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        </svg>
+      </button>
+    </div>
+  `;
+
+  bindCardEvents(card, issue);
+  return card;
 }
 
 // Bind interactive event handlers to citizen post cards
 function bindCardEvents(card, issue) {
-  // Option dropdown menu toggling
-  const trigger = card.querySelector('.btn-options-trigger');
-  const dropdown = card.querySelector('.post-options-dropdown');
-  
-  trigger.addEventListener('click', (e) => {
-    e.stopPropagation();
-    document.querySelectorAll('.post-options-dropdown.open').forEach(d => {
-      if (d !== dropdown) d.classList.remove('open');
-    });
-    dropdown.classList.toggle('open');
+  // Clicking anywhere on the post card opens the detail page/drawer
+  card.style.cursor = 'pointer';
+  card.addEventListener('click', (e) => {
+    // If user clicked any action button inside the card, ignore
+    if (e.target.closest('.post-card-actions')) return;
+    openOpsDetailPanel(issue);
   });
 
-  // Follow Action
-  const followBtn = card.querySelector('.follow-option-btn');
-  followBtn.addEventListener('click', async () => {
+  // Follow Action in action bar
+  const followBtn = card.querySelector('.follow-btn');
+  followBtn.addEventListener('click', async (e) => {
+    e.stopPropagation();
     try {
       const res = await fetch(`/api/issues/${issue.id}/follow`, { method: 'POST' });
       if (res.ok) {
         const data = await res.json();
         issue.followed = data.followed;
+        followBtn.classList.toggle('followed-active', data.followed);
         showToast(data.followed ? 'Following report for updates' : 'Unfollowed report');
-        fetchIssues();
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  });
-
-  // Report Action
-  const reportBtn = card.querySelector('.report-option-btn');
-  reportBtn.addEventListener('click', async () => {
-    try {
-      const res = await fetch(`/api/issues/${issue.id}/report`, { method: 'POST' });
-      if (res.ok) {
-        const data = await res.json();
-        issue.reported = data.reported;
-        showToast('Thank you. Issue report submitted for review');
-        fetchIssues();
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  });
-
-  // Verify Action (Community verification)
-  const verifyBtn = card.querySelector('.verify-btn');
-  verifyBtn.addEventListener('click', async () => {
-    try {
-      const res = await fetch(`/api/issues/${issue.id}/verify`, { method: 'POST' });
-      if (res.ok) {
-        const data = await res.json();
-        issue.verifications = data.verifications;
-        issue.verifiedByCurrentUser = data.verified;
         
-        verifyBtn.classList.toggle('verified-active', data.verified);
-        verifyBtn.querySelector('span').textContent = `Verify (${data.verifications})`;
-        
-        showToast(data.verified ? 'Community verification registered' : 'Verification retracted');
-        
-        setTimeout(() => {
+        // If we are showing followed reports only, refresh feed immediately
+        if (state.showFollowedOnly) {
           fetchIssues();
-        }, 800);
+        }
       }
     } catch (err) {
       console.error(err);
@@ -677,7 +502,8 @@ function bindCardEvents(card, issue) {
 
   // Upvote Action
   const upvoteBtn = card.querySelector('.upvote-btn');
-  upvoteBtn.addEventListener('click', async () => {
+  upvoteBtn.addEventListener('click', async (e) => {
+    e.stopPropagation();
     try {
       const res = await fetch(`/api/issues/${issue.id}/vote`, {
         method: 'POST',
@@ -698,7 +524,8 @@ function bindCardEvents(card, issue) {
 
   // Downvote Action
   const downvoteBtn = card.querySelector('.downvote-btn');
-  downvoteBtn.addEventListener('click', async () => {
+  downvoteBtn.addEventListener('click', async (e) => {
+    e.stopPropagation();
     try {
       const res = await fetch(`/api/issues/${issue.id}/vote`, {
         method: 'POST',
@@ -717,61 +544,21 @@ function bindCardEvents(card, issue) {
     }
   });
 
-  // Comments drawer toggler
+  // Comments trigger button opens details drawer and focuses input
   const commentTrigger = card.querySelector('.comment-trigger-btn');
-  const commentsSection = card.querySelector('.comments-section');
-  commentTrigger.addEventListener('click', () => {
-    const isOpen = commentsSection.classList.toggle('open');
-    if (isOpen) commentTrigger.classList.add('comment-active');
-    else commentTrigger.classList.remove('comment-active');
-  });
-
-  // Comment submission form
-  const commentForm = card.querySelector('.comment-form');
-  const commentInput = card.querySelector('.comment-input');
-  commentForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const text = commentInput.value.trim();
-    if (!text) return;
-
-    try {
-      const res = await fetch(`/api/issues/${issue.id}/comments`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text })
-      });
-      if (res.ok) {
-        const newComment = await res.json();
-        issue.comments.push(newComment);
-        commentInput.value = '';
-        
-        const list = card.querySelector('.comments-list');
-        const emptyMsg = list.querySelector('p');
-        if (emptyMsg) emptyMsg.remove();
-        
-        const cItem = document.createElement('div');
-        cItem.className = 'comment-item';
-        cItem.innerHTML = `
-          <div class="comment-meta">
-            <span>${escapeHTML(newComment.user)}</span>
-            <span>${escapeHTML(newComment.timestamp)}</span>
-          </div>
-          <p class="comment-text">${escapeHTML(newComment.text)}</p>
-        `;
-        list.appendChild(cItem);
-        list.scrollTop = list.scrollHeight;
-        
-        card.querySelector('.comment-trigger-btn span').textContent = `Comments (${issue.comments.length})`;
-        showToast('Comment posted');
-      }
-    } catch (err) {
-      console.error(err);
-    }
+  commentTrigger.addEventListener('click', (e) => {
+    e.stopPropagation();
+    openOpsDetailPanel(issue);
+    setTimeout(() => {
+      const input = document.getElementById('opsDetailCommentInput');
+      if (input) input.focus();
+    }, 300);
   });
 
   // Share URL Action
   const shareBtn = card.querySelector('.share-btn');
-  shareBtn.addEventListener('click', () => {
+  shareBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
     const postUrl = `${window.location.origin}/issue/${issue.id}`;
     navigator.clipboard.writeText(postUrl).then(() => {
       showToast('Copied report link to clipboard');
@@ -779,14 +566,6 @@ function bindCardEvents(card, issue) {
       showToast(`Link: ${postUrl}`);
     });
   });
-
-  // Track Location Button Click
-  const trackBtn = card.querySelector('.track-location-btn');
-  if (trackBtn) {
-    trackBtn.addEventListener('click', () => {
-      showReportLocation(issue);
-    });
-  }
 }
 
 // Setup Event Listeners
@@ -1474,6 +1253,68 @@ function setupEventListeners() {
       showToast('Network error resolving issue');
     }
   });
+
+  // Sidebar Drawer Comment Submission Form
+  const detailCommentForm = document.getElementById('opsDetailCommentForm');
+  if (detailCommentForm) {
+    detailCommentForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const issue = state.selectedIssueForOps;
+      if (!issue) return;
+      
+      const input = document.getElementById('opsDetailCommentInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      try {
+        const res = await fetch(`/api/issues/${issue.id}/comments`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text })
+        });
+        if (res.ok) {
+          const newComment = await res.json();
+          issue.comments.push(newComment);
+          input.value = '';
+          renderOpsDetailPanelComments(issue);
+          showToast('Comment posted');
+          
+          // Refresh the main feed to update comment count badge on the card
+          fetchIssues();
+        }
+      } catch (err) {
+        console.error(err);
+        showToast('Error posting comment');
+      }
+    });
+  }
+
+  // Sidebar Drawer Citizen Action (Report environmental abuse) Button
+  const detailReportBtn = document.getElementById('opsDetailReportBtn');
+  if (detailReportBtn) {
+    detailReportBtn.addEventListener('click', async () => {
+      const issue = state.selectedIssueForOps;
+      if (!issue) return;
+
+      try {
+        const res = await fetch(`/api/issues/${issue.id}/report`, { method: 'POST' });
+        if (res.ok) {
+          const data = await res.json();
+          issue.reported = data.reported;
+          detailReportBtn.disabled = true;
+          detailReportBtn.querySelector('span').textContent = 'Reported';
+          detailReportBtn.style.opacity = '0.6';
+          showToast('Thank you. Issue report submitted for review');
+          
+          // Refresh the main feed to show reported state updates
+          fetchIssues();
+        }
+      } catch (err) {
+        console.error(err);
+        showToast('Error submitting report');
+      }
+    });
+  }
 }
 
 // Track Modal State
@@ -1879,6 +1720,69 @@ function openOpsDetailPanel(issue) {
   renderOpsDetailPanel(issue);
 }
 
+function renderOpsDetailPanelComments(issue) {
+  const commentsList = document.getElementById('opsDetailCommentsList');
+  if (!commentsList) return;
+  commentsList.innerHTML = '';
+  if (issue.comments && issue.comments.length > 0) {
+    commentsList.innerHTML = issue.comments.map(c => `
+      <div class="comment-item" style="padding: 8px 10px; background-color: var(--color-bg); border-radius: var(--radius-sm); border: 1px solid var(--color-border); margin-bottom: 6px;">
+        <div class="comment-meta" style="display: flex; justify-content: space-between; font-size: 11px; color: var(--color-text-muted); margin-bottom: 4px;">
+          <span style="font-weight: 700;">${escapeHTML(c.user)}</span>
+          <span>${escapeHTML(c.timestamp)}</span>
+        </div>
+        <p class="comment-text" style="font-size: 12.5px; margin: 0; line-height: 1.4;">${escapeHTML(c.text)}</p>
+      </div>
+    `).join('');
+  } else {
+    commentsList.innerHTML = '<p style="font-size:12px;color:var(--color-text-muted);padding:4px 0;">No comments yet. Start the resolution discussion!</p>';
+  }
+}
+
+function renderPublicTimelineHTML(issue) {
+  let reportedTime = '';
+  let acknowledgedTime = '';
+  let inProgressTime = '';
+  let resolvedTime = '';
+
+  if (issue.timeline) {
+    issue.timeline.forEach(t => {
+      const formatted = new Date(t.timestamp).toLocaleDateString() + ' ' + new Date(t.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      if (t.status === 'Review Queue') reportedTime = formatted;
+      else if (t.status === 'Acknowledged') acknowledgedTime = formatted;
+      else if (t.status === 'In Progress') inProgressTime = formatted;
+      else if (t.status === 'Resolved') resolvedTime = formatted;
+    });
+  }
+
+  return `
+    <div class="card-timeline-section" style="margin-top: 16px; border-top: 1px dashed var(--color-border); padding-top: 16px;">
+      <div class="timeline-title" style="font-size: 12.5px; font-weight: 700; text-transform: uppercase; color: var(--color-text-muted); margin-bottom: 12px;">Public Resolution Timeline</div>
+      <div class="timeline-steps-flow" style="display: flex; align-items: center; justify-content: space-between; gap: 4px;">
+        <div class="step-flow done" style="display: flex; flex-direction: column; align-items: center; text-align: center; flex: 1;">
+          <span class="step-name" style="font-size: 11px; font-weight: 700; color: #16a34a;">Reported</span>
+          <span class="step-time" style="font-size: 9px; color: var(--color-text-muted); margin-top: 2px;">${reportedTime || 'Pending'}</span>
+        </div>
+        <div class="step-line active" style="flex-grow: 1; height: 2px; background-color: #16a34a; margin-top: -12px;"></div>
+        <div class="step-flow done" style="display: flex; flex-direction: column; align-items: center; text-align: center; flex: 1;">
+          <span class="step-name" style="font-size: 11px; font-weight: 700; color: #16a34a;">Acknowledged</span>
+          <span class="step-time" style="font-size: 9px; color: var(--color-text-muted); margin-top: 2px;">${acknowledgedTime || 'Pending'}</span>
+        </div>
+        <div class="step-line active" style="flex-grow: 1; height: 2px; background-color: #16a34a; margin-top: -12px;"></div>
+        <div class="step-flow done" style="display: flex; flex-direction: column; align-items: center; text-align: center; flex: 1;">
+          <span class="step-name" style="font-size: 11px; font-weight: 700; color: #16a34a;">In Progress</span>
+          <span class="step-time" style="font-size: 9px; color: var(--color-text-muted); margin-top: 2px;">${inProgressTime || 'Pending'}</span>
+        </div>
+        <div class="step-line active" style="flex-grow: 1; height: 2px; background-color: #16a34a; margin-top: -12px;"></div>
+        <div class="step-flow done" style="display: flex; flex-direction: column; align-items: center; text-align: center; flex: 1;">
+          <span class="step-name" style="font-size: 11px; font-weight: 700; color: #16a34a;">Resolved</span>
+          <span class="step-time" style="font-size: 9px; color: var(--color-text-muted); margin-top: 2px;">${resolvedTime || 'Pending'}</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 function renderOpsDetailPanel(issue) {
   document.getElementById('opsDetailTitle').textContent = issue.title;
   document.getElementById('opsDetailDistrict').textContent = issue.subLocation;
@@ -1899,7 +1803,6 @@ function renderOpsDetailPanel(issue) {
   }
 
   document.getElementById('opsDetailDesc').textContent = issue.description || 'No description supplied.';
-  document.getElementById('opsDetailVerifications').textContent = issue.verifications || 0;
   document.getElementById('opsDetailUpvotes').textContent = issue.upvotes || 0;
 
   const linksContainer = document.getElementById('opsDetailLinksContainer');
@@ -1922,15 +1825,49 @@ function renderOpsDetailPanel(issue) {
     `;
   }
 
+  // Render comments
+  renderOpsDetailPanelComments(issue);
+
+  // Toggle Citizen Actions Panel group in drawer
+  const citizenActionsField = document.getElementById('opsDetailCitizenActionsField');
+  if (citizenActionsField) {
+    if (state.activePortal === 'public') {
+      citizenActionsField.style.display = 'block';
+      const reportBtn = document.getElementById('opsDetailReportBtn');
+      if (issue.reported) {
+        reportBtn.disabled = true;
+        reportBtn.querySelector('span').textContent = 'Reported';
+        reportBtn.style.opacity = '0.6';
+      } else {
+        reportBtn.disabled = false;
+        reportBtn.querySelector('span').textContent = 'Report Environmental Abuse';
+        reportBtn.style.opacity = '1';
+      }
+    } else {
+      citizenActionsField.style.display = 'none';
+    }
+  }
+
+  // Toggle Municipality panel group contents
   const resContainer = document.getElementById('opsDetailResolutionContainer');
   const resPhotos = document.getElementById('opsDetailResolutionPhotos');
   const resNote = document.getElementById('opsDetailResolutionNote');
 
   if (issue.status === 'Resolved' && issue.resolutionNote) {
     resContainer.style.display = 'block';
-    resNote.textContent = issue.resolutionNote;
+    
+    // Extract resolved date
+    const resolvedStep = issue.timeline ? issue.timeline.find(t => t.status === 'Resolved') : null;
+    const resolvedDate = resolvedStep ? new Date(resolvedStep.timestamp).toLocaleDateString() : new Date(issue.createdAt).toLocaleDateString();
+    
+    resNote.innerHTML = `
+      <div><strong>Resolution Summary Note:</strong></div>
+      <p style="margin-top: 4px; line-height: 1.45;">${escapeHTML(issue.resolutionNote)}</p>
+      <div style="font-size: 11px; color: var(--color-text-muted); margin-top: 8px;">Resolved on: <strong>${resolvedDate}</strong></div>
+    `;
+    
     if (issue.resolutionImages && issue.resolutionImages.length > 0) {
-      resPhotos.innerHTML = issue.resolutionImages.map(img => `<img src="${img}" alt="Resolved proof" onclick="window.open('${img}')" style="max-height:120px; border-radius:4px; object-fit:cover;">`).join('');
+      resPhotos.innerHTML = issue.resolutionImages.map(img => `<img src="${img}" alt="Resolved proof" onclick="window.open('${img}')" style="max-height:120px; border-radius:4px; object-fit:cover; cursor:pointer;">`).join('');
     } else {
       resPhotos.innerHTML = '';
     }
@@ -1938,7 +1875,37 @@ function renderOpsDetailPanel(issue) {
     resContainer.style.display = 'none';
   }
 
-  renderTriageActionRibbon(issue);
+  // Render Timeline if resolved
+  const timelineContainer = document.getElementById('opsDetailTimeline');
+  if (timelineContainer) {
+    if (issue.status === 'Resolved') {
+      timelineContainer.style.display = 'block';
+      timelineContainer.innerHTML = renderPublicTimelineHTML(issue);
+    } else {
+      timelineContainer.style.display = 'none';
+    }
+  }
+
+  // Toggle Status Actions based on active portal
+  const statusActionsField = document.getElementById('opsDetailStatusActionsField');
+  if (statusActionsField) {
+    if (state.activePortal === 'municipality') {
+      statusActionsField.style.display = 'block';
+      renderTriageActionRibbon(issue);
+    } else {
+      statusActionsField.style.display = 'none';
+    }
+  }
+
+  // Toggle Municipality panel-group container visibility
+  const municipalityGroup = document.getElementById('opsDetailMunicipalityGroup');
+  if (municipalityGroup) {
+    if (state.activePortal === 'municipality' || issue.status === 'Resolved') {
+      municipalityGroup.style.display = 'block';
+    } else {
+      municipalityGroup.style.display = 'none';
+    }
+  }
 
   cleanupOpsDetailMap();
   setTimeout(() => {

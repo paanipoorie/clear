@@ -25,7 +25,6 @@ let issues = [
     ],
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 1 day ago
     status: "Acknowledged",
-    verifications: 15,
     internalNotes: "Assigned to the Sector 4 cleanliness squad. Cleanup scheduled for Friday morning.",
     resolutionImages: [],
     resolutionNote: "",
@@ -50,7 +49,6 @@ let issues = [
     ],
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString(), // 12 hours ago
     status: "Review Queue",
-    verifications: 8,
     internalNotes: "",
     resolutionImages: [],
     resolutionNote: "",
@@ -72,7 +70,6 @@ let issues = [
     comments: [],
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 6).toISOString(), // 6 hours ago
     status: "In Progress",
-    verifications: 3,
     internalNotes: "Contracted plumbing team dispatched to clear blockages.",
     resolutionImages: [],
     resolutionNote: "",
@@ -98,7 +95,6 @@ let issues = [
     ],
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
     status: "Resolved",
-    verifications: 28,
     internalNotes: "Hazardous response team dispatched. Sealed leak and neutralised soil.",
     resolutionImages: ["https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&auto=format&fit=crop&q=60"], // mockup image
     resolutionNote: "Our chemical containment team successfully sealed the containers and cleaned up the spill using absorbent sand. The storm drain was verified clean.",
@@ -202,7 +198,6 @@ app.post('/api/issues', (req, res) => {
     comments: [],
     createdAt: new Date().toISOString(),
     status: "Review Queue",
-    verifications: 0,
     internalNotes: "",
     resolutionImages: [],
     resolutionNote: "",
@@ -234,24 +229,6 @@ app.post('/api/issues/:id/vote', (req, res) => {
   res.json({ upvotes: issue.upvotes, downvotes: issue.downvotes });
 });
 
-// Toggle Verification
-app.post('/api/issues/:id/verify', (req, res) => {
-  const id = parseInt(req.params.id);
-  const issue = issues.find(i => i.id === id);
-  if (!issue) {
-    return res.status(404).json({ error: "Issue not found" });
-  }
-
-  if (!issue.verifiedByCurrentUser) {
-    issue.verifications += 1;
-    issue.verifiedByCurrentUser = true;
-  } else {
-    issue.verifications = Math.max(0, issue.verifications - 1);
-    issue.verifiedByCurrentUser = false;
-  }
-
-  res.json({ verifications: issue.verifications, verified: issue.verifiedByCurrentUser });
-});
 
 // Toggle Follow Post
 app.post('/api/issues/:id/follow', (req, res) => {
