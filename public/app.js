@@ -1,5 +1,6 @@
 // Application State
 const state = {
+  activePortal: 'landing', // 'landing', 'public', 'municipality'
   currentSubLocation: '',
   showMyIssues: false,
   showFollowedOnly: false,
@@ -8,7 +9,9 @@ const state = {
   currentUser: {
     username: 'user',
     role: 'Resident Reporter'
-  }
+  },
+  activeOpsTab: 'triage', // 'triage', 'notices'
+  selectedIssueForOps: null
 };
 
 // Map and attachments editor state
@@ -46,6 +49,8 @@ const districtCoords = {
 };
 
 // DOM Elements
+const mainAppLayout = document.getElementById('mainAppLayout');
+const landingPortal = document.getElementById('landingPortal');
 const feedContainer = document.getElementById('feed');
 const feedTitle = document.getElementById('feedTitle');
 const searchInput = document.getElementById('searchInput');
@@ -68,6 +73,15 @@ const mobileMenuBtn = document.getElementById('mobileMenuBtn');
 const sidebar = document.querySelector('.sidebar');
 const toastContainer = document.getElementById('toastContainer');
 
+// Role Viewports
+const citizenViewport = document.getElementById('citizenViewport');
+const municipalTriageViewport = document.getElementById('municipalTriageViewport');
+const municipalNoticesViewport = document.getElementById('municipalNoticesViewport');
+
+// Active ops tab selector helper
+const opsTriageTabBtn = document.getElementById('opsTriageTabBtn');
+const opsNoticesTabBtn = document.getElementById('opsNoticesTabBtn');
+
 // Init application
 document.addEventListener('DOMContentLoaded', () => {
   initApp();
@@ -75,11 +89,94 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function initApp() {
   fetchUser();
-  fetchIssues();
   setupEventListeners();
+  switchPortal('landing');
+}
+
+// Switch between Role selector landing vs app portals
+function switchPortal(portalName) {
+  state.activePortal = portalName;
+  
+  // Close details overlay if open
+  document.getElementById('opsSidePanel').classList.remove('open');
+  cleanupOpsDetailMap();
+  
+  if (portalName === 'landing') {
+    landingPortal.style.display = 'flex';
+    mainAppLayout.style.display = 'none';
+  } else {
+    landingPortal.style.display = 'none';
+    mainAppLayout.style.display = 'flex';
+    
+    // Toggle sidebar groups
+    const citizenNavs = document.querySelectorAll('.citizen-only-nav');
+    const municipalNavs = document.querySelectorAll('.municipal-only-nav');
+    
+    if (portalName === 'public') {
+      // Setup Citizen Portal
+      citizenNavs.forEach(el => el.style.display = '');
+      municipalNavs.forEach(el => el.style.display = 'none');
+      
+      citizenViewport.style.display = 'block';
+      municipalTriageViewport.style.display = 'none';
+      municipalNoticesViewport.style.display = 'none';
+      
+      document.getElementById('roleHeaderBadge').textContent = 'CIVIC PORTAL';
+      document.getElementById('userRoleLabel').textContent = 'Resident Reporter';
+      
+      // Reset sidebar active states
+      updateSidebarActiveBtn(exploreBtn);
+      
+      state.showNoticesOnly = false;
+      state.showMyIssues = false;
+      state.showFollowedOnly = false;
+      
+      fetchIssues();
+    } else if (portalName === 'municipality') {
+      // Setup Municipal Portal
+      citizenNavs.forEach(el => el.style.display = 'none');
+      municipalNavs.forEach(el => el.style.display = '');
+      
+      citizenViewport.style.display = 'none';
+      
+      document.getElementById('roleHeaderBadge').textContent = 'MUNICIPAL OPS';
+      document.getElementById('userRoleLabel').textContent = 'Operations Officer';
+      
+      // Select Triage tab by default
+      switchOpsTab('triage');
+    }
+  }
+}
+
+// Switch Municipal Sub-tabs
+function switchOpsTab(tabName) {
+  state.activeOpsTab = tabName;
+  
+  if (tabName === 'triage') {
+    updateSidebarActiveBtn(opsTriageTabBtn);
+    municipalTriageViewport.style.display = 'block';
+    municipalNoticesViewport.style.display = 'none';
+  } else if (tabName === 'notices') {
+    updateSidebarActiveBtn(opsNoticesTabBtn);
+    municipalTriageViewport.style.display = 'none';
+    municipalNoticesViewport.style.display = 'block';
+  }
+  
+  fetchOpsData();
+}
+
+function updateSidebarActiveBtn(activeBtn) {
+  const allBtns = [exploreBtn, followingBtn, noticesBtn, opsTriageTabBtn, opsNoticesTabBtn];
+  allBtns.forEach(btn => {
+    if (btn) {
+      if (btn === activeBtn) btn.classList.add('active');
+      else btn.classList.remove('active');
+    }
+  });
 }
 
 // REST API helper functions
+
 async function fetchUser() {
   try {
     const res = await fetch('/api/user');
@@ -93,21 +190,47 @@ async function fetchUser() {
   }
 }
 
+// Calculate Urgency Priority automatically based on signals
+function calculatePriorityLabel(issue) {
+  const verifications = issue.verifications || 0;
+  const upvotes = issue.upvotes || 0;
+  const createdAt = new Date(issue.createdAt);
+  const hoursWaiting = Math.max(0, (Date.now() - createdAt.getTime()) / (1000 * 60 * 60));
+
+  // Score = verifications (2.5) + upvotes (1.0) + hours waiting (0.15)
+  const score = (verifications * 2.5) + (upvotes * 1.0) + (hoursWaiting * 0.15);
+  
+  if (score < 8) return 'Low';
+  if (score < 20) return 'Medium';
+  return 'High';
+}
+
+// Fetch official bulletins
+async function fetchNotices() {
+  try {
+    const res = await fetch('/api/notices');
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (err) {
+    console.error('Error loading notices:', err);
+  }
+  return [];
+}
+
 async function fetchIssues() {
   if (state.showNoticesOnly) {
-    // Render notices placeholder
+    // Show spinner
     feedContainer.innerHTML = `
-      <div class="empty-state">
-        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-accent); margin-bottom: 16px; width: 48px; height: 48px;">
-          <path d="M11 5L6 9H2v6h4l5 4V5z"></path>
-          <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-        </svg>
-        <h3>Official Municipal Notices</h3>
-        <p>This tab will display official notices and alerts posted by municipalities and local authorities.</p>
-        <span class="badge" style="margin-top: 12px; font-size: 11px; background-color: var(--color-accent-soft); color: var(--color-accent); padding: 4px 10px; border-radius: 12px; font-weight: 600;">Coming Soon</span>
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Loading notices...</p>
       </div>
     `;
     feedTitle.textContent = "Official Notices";
+    
+    const noticesList = await fetchNotices();
+    renderPublicNotices(noticesList);
     return;
   }
 
@@ -148,9 +271,69 @@ async function fetchIssues() {
   }
 }
 
-// Render issues feed
+// Render notices list on public feed notices tab
+function renderPublicNotices(notices) {
+  if (notices.length === 0) {
+    feedContainer.innerHTML = `
+      <div class="empty-state">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-muted-text); margin-bottom: 16px; width: 48px; height: 48px;">
+          <path d="M11 5L6 9H2v6h4l5 4V5z"></path>
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+        </svg>
+        <h3>No official bulletins published</h3>
+        <p>Your local municipalities have not issued any advisories or warning bulletins at this time.</p>
+      </div>
+    `;
+    return;
+  }
+
+  feedContainer.innerHTML = '';
+  notices.forEach(notice => {
+    // Filter public notices by active sublocation if set
+    if (state.currentSubLocation && notice.subLocation.toUpperCase() !== state.currentSubLocation.toUpperCase()) {
+      return;
+    }
+
+    const card = document.createElement('article');
+    card.className = 'ops-notice-card-item';
+    card.style.backgroundColor = 'var(--color-card-bg)';
+    card.style.border = '1px solid var(--color-border)';
+    card.style.borderRadius = 'var(--radius-md)';
+    card.style.padding = '20px';
+    card.style.marginBottom = '16px';
+    card.style.boxShadow = 'var(--color-shadow)';
+
+    let badgeClass = 'type-advisory';
+    if (notice.type === 'Warning') badgeClass = 'type-warning';
+    else if (notice.type === 'Public Notice') badgeClass = 'type-public-notice';
+    else if (notice.type === 'Drive / Campaign') badgeClass = 'type-drive-campaign';
+
+    card.innerHTML = `
+      <div class="ops-notice-card-header" style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+        <h3 class="ops-notice-card-title" style="font-size:15px; font-weight:700; color:var(--color-primary-text); margin:0;">${escapeHTML(notice.title)}</h3>
+        <span class="ops-notice-badge ${badgeClass}">${escapeHTML(notice.type)}</span>
+      </div>
+      <p class="ops-notice-desc" style="font-size:13px; color:var(--color-secondary-text); line-height:1.5; margin-bottom:14px; margin-top: 0;">${escapeHTML(notice.description)}</p>
+      <div class="ops-notice-meta" style="display:flex; justify-content:space-between; font-size:10px; color:var(--color-muted-text); border-top:1px dashed var(--color-border); padding-top:8px;">
+        <span>📍 District: <strong>${escapeHTML(notice.subLocation)}</strong></span>
+        <span>Published: ${new Date(notice.createdAt).toLocaleDateString()} ${notice.expiryDate ? `&bull; Expiry: ${new Date(notice.expiryDate).toLocaleDateString()}` : ''}</span>
+      </div>
+    `;
+    feedContainer.appendChild(card);
+  });
+
+  if (feedContainer.innerHTML === '') {
+    feedContainer.innerHTML = `
+      <div class="empty-state">
+        <h3>No bulletins found in ${state.currentSubLocation}</h3>
+        <p>Try switching to All Punjab to see bulletins from other districts.</p>
+      </div>
+    `;
+  }
+}
+
+// Render Issues Feed for Citizen Portal
 function renderIssues(issues) {
-  // Update header text based on filters
   if (state.showMyIssues) {
     feedTitle.textContent = "My Registered Issues";
   } else if (state.showFollowedOnly) {
@@ -177,6 +360,9 @@ function renderIssues(issues) {
 
   feedContainer.innerHTML = '';
   issues.forEach(issue => {
+    // Filter out rejected issues from citizen portal view
+    if (issue.status === 'Rejected') return;
+
     const card = document.createElement('article');
     card.className = 'post-card';
     card.id = `issue-${issue.id}`;
@@ -238,6 +424,48 @@ function renderIssues(issues) {
       `;
     }
 
+    // Auto priority score badges
+    const priority = calculatePriorityLabel(issue);
+    let prioClass = 'prio-low';
+    if (priority === 'Medium') prioClass = 'prio-medium';
+    else if (priority === 'High') prioClass = 'prio-high';
+
+    // Status format badge
+    let statusHTML = `<span class="badge" style="background-color: var(--color-bg); font-weight:600; text-transform:uppercase; border:1px solid var(--color-border); padding: 2px 8px; border-radius:12px; margin-left:8px;">${issue.status}</span>`;
+    if (issue.status === 'Resolved') {
+      statusHTML = `<span class="badge" style="background-color: #d1fae5; color: #065f46; font-weight:600; text-transform:uppercase; padding: 2px 8px; border-radius:12px; margin-left:8px;">Resolved</span>`;
+    } else if (issue.status === 'In Progress') {
+      statusHTML = `<span class="badge" style="background-color: #fef3c7; color: #92400e; font-weight:600; text-transform:uppercase; padding: 2px 8px; border-radius:12px; margin-left:8px;">In Progress</span>`;
+    }
+
+    // Public timeline trace - shown only after Resolved
+    let timelineHTML = '';
+    if (issue.status === 'Resolved') {
+      timelineHTML = `
+        <div class="card-timeline-section">
+          <div class="timeline-title">Public Resolution Timeline</div>
+          <div class="timeline-steps-flow">
+            <div class="step-flow done">Reported</div>
+            <div class="step-line active"></div>
+            <div class="step-flow done">Acknowledged</div>
+            <div class="step-line active"></div>
+            <div class="step-flow done">In Progress</div>
+            <div class="step-line active"></div>
+            <div class="step-flow done">Resolved</div>
+          </div>
+          <div class="resolution-summary-box">
+            <strong>Resolution Summary Note:</strong>
+            <p>${escapeHTML(issue.resolutionNote)}</p>
+            ${issue.resolutionImages && issue.resolutionImages.length > 0 ? `
+              <div class="res-gallery-preview" style="margin-top:10px;">
+                <img src="${issue.resolutionImages[0]}" class="res-image-thumb" alt="Resolution photographic proof" style="max-height:150px; width:100%; object-fit:cover; border-radius:6px; cursor:pointer;" onclick="window.open('${issue.resolutionImages[0]}')">
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      `;
+    }
+
     card.innerHTML = `
       <div class="post-card-header">
         <div class="post-card-title-group">
@@ -245,7 +473,8 @@ function renderIssues(issues) {
           <div class="post-card-meta">
             <span class="post-card-location">${escapeHTML(issue.location)}, ${escapeHTML(issue.subLocation)}</span>
             <span>&bull;</span>
-            <span>Active environmental report</span>
+            <span class="prio-badge ${prioClass}">${priority} Priority</span>
+            ${statusHTML}
             ${issue.reported ? '<span class="reported-badge">Reported</span>' : ''}
           </div>
         </div>
@@ -280,6 +509,8 @@ function renderIssues(issues) {
           </ul>
         </div>
       ` : ''}
+
+      ${timelineHTML}
       
       <div class="post-card-actions">
         <!-- Vote Buttons -->
@@ -300,6 +531,14 @@ function renderIssues(issues) {
         </button>
         
         <div class="action-pill-divider"></div>
+
+        <!-- Verification action -->
+        <button class="action-pill verify-btn ${issue.verifiedByCurrentUser ? 'verified-active' : ''}" aria-label="Verify issue report">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="icon icon-sm">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+          <span>Verify (${issue.verifications || 0})</span>
+        </button>
         
         <!-- Comments button -->
         <button class="action-pill comment-trigger-btn">
@@ -348,13 +587,12 @@ function renderIssues(issues) {
       </section>
     `;
     
-    // Add event bindings to buttons inside cards
     bindCardEvents(card, issue);
     feedContainer.appendChild(card);
   });
 }
 
-// Bind interactive event handlers to individual post cards
+// Bind interactive event handlers to citizen post cards
 function bindCardEvents(card, issue) {
   // Option dropdown menu toggling
   const trigger = card.querySelector('.btn-options-trigger');
@@ -362,7 +600,6 @@ function bindCardEvents(card, issue) {
   
   trigger.addEventListener('click', (e) => {
     e.stopPropagation();
-    // Close other dropdowns
     document.querySelectorAll('.post-options-dropdown.open').forEach(d => {
       if (d !== dropdown) d.classList.remove('open');
     });
@@ -378,7 +615,7 @@ function bindCardEvents(card, issue) {
         const data = await res.json();
         issue.followed = data.followed;
         showToast(data.followed ? 'Following report for updates' : 'Unfollowed report');
-        fetchIssues(); // Refresh feed
+        fetchIssues();
       }
     } catch (err) {
       console.error(err);
@@ -394,7 +631,31 @@ function bindCardEvents(card, issue) {
         const data = await res.json();
         issue.reported = data.reported;
         showToast('Thank you. Issue report submitted for review');
-        fetchIssues(); // Refresh feed
+        fetchIssues();
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  });
+
+  // Verify Action (Community verification)
+  const verifyBtn = card.querySelector('.verify-btn');
+  verifyBtn.addEventListener('click', async () => {
+    try {
+      const res = await fetch(`/api/issues/${issue.id}/verify`, { method: 'POST' });
+      if (res.ok) {
+        const data = await res.json();
+        issue.verifications = data.verifications;
+        issue.verifiedByCurrentUser = data.verified;
+        
+        verifyBtn.classList.toggle('verified-active', data.verified);
+        verifyBtn.querySelector('span').textContent = `Verify (${data.verifications})`;
+        
+        showToast(data.verified ? 'Community verification registered' : 'Verification retracted');
+        
+        setTimeout(() => {
+          fetchIssues();
+        }, 800);
       }
     } catch (err) {
       console.error(err);
@@ -414,7 +675,6 @@ function bindCardEvents(card, issue) {
         const data = await res.json();
         card.querySelector('.upvote-count').textContent = data.upvotes;
         upvoteBtn.classList.add('vote-btn-active-up');
-        // Deactivate downvote classes if applicable
         card.querySelector('.downvote-btn').classList.remove('vote-btn-active-down');
         showToast('Upvoted environmental report');
       }
@@ -449,11 +709,8 @@ function bindCardEvents(card, issue) {
   const commentsSection = card.querySelector('.comments-section');
   commentTrigger.addEventListener('click', () => {
     const isOpen = commentsSection.classList.toggle('open');
-    if (isOpen) {
-      commentTrigger.classList.add('comment-active');
-    } else {
-      commentTrigger.classList.remove('comment-active');
-    }
+    if (isOpen) commentTrigger.classList.add('comment-active');
+    else commentTrigger.classList.remove('comment-active');
   });
 
   // Comment submission form
@@ -472,11 +729,9 @@ function bindCardEvents(card, issue) {
       });
       if (res.ok) {
         const newComment = await res.json();
-        // Insert comment into local comments array
         issue.comments.push(newComment);
         commentInput.value = '';
         
-        // Refresh local list without reload
         const list = card.querySelector('.comments-list');
         const emptyMsg = list.querySelector('p');
         if (emptyMsg) emptyMsg.remove();
@@ -491,11 +746,8 @@ function bindCardEvents(card, issue) {
           <p class="comment-text">${escapeHTML(newComment.text)}</p>
         `;
         list.appendChild(cItem);
-        
-        // Scroll list to bottom
         list.scrollTop = list.scrollHeight;
         
-        // Update label count
         card.querySelector('.comment-trigger-btn span').textContent = `Comments (${issue.comments.length})`;
         showToast('Comment posted');
       }
@@ -504,14 +756,13 @@ function bindCardEvents(card, issue) {
     }
   });
 
-  // Share post URL Action
+  // Share URL Action
   const shareBtn = card.querySelector('.share-btn');
   shareBtn.addEventListener('click', () => {
     const postUrl = `${window.location.origin}/issue/${issue.id}`;
     navigator.clipboard.writeText(postUrl).then(() => {
       showToast('Copied report link to clipboard');
     }).catch(err => {
-      // Fallback
       showToast(`Link: ${postUrl}`);
     });
   });
@@ -527,6 +778,19 @@ function bindCardEvents(card, issue) {
 
 // Setup Event Listeners
 function setupEventListeners() {
+  // Portal selector triggers
+  document.getElementById('enterPublicBtn').addEventListener('click', () => switchPortal('public'));
+  document.getElementById('enterMunicipalBtn').addEventListener('click', () => switchPortal('municipality'));
+  document.getElementById('headerRoleSwitcherBtn').addEventListener('click', () => switchPortal('landing'));
+  document.getElementById('menuSwitchRoleBtn').addEventListener('click', () => {
+    profileDropdown.classList.remove('open');
+    switchPortal('landing');
+  });
+
+  // Ops Tab Buttons Click Handling (Sidebar)
+  opsTriageTabBtn.addEventListener('click', () => switchOpsTab('triage'));
+  opsNoticesTabBtn.addEventListener('click', () => switchOpsTab('notices'));
+
   // Mobile menu sidebar toggle
   mobileMenuBtn.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -541,20 +805,7 @@ function setupEventListeners() {
     locationBoxBtn.setAttribute('aria-expanded', isOpen);
   });
 
-  function updateNavActiveState(activeId) {
-    const navButtons = [exploreBtn, followingBtn, noticesBtn];
-    navButtons.forEach(btn => {
-      if (btn) {
-        if (btn.id === activeId) {
-          btn.classList.add('active');
-        } else {
-          btn.classList.remove('active');
-        }
-      }
-    });
-  }
-
-  // Explore / Reset filters btn
+  // Explore button clicked
   exploreBtn.addEventListener('click', () => {
     state.currentSubLocation = '';
     state.showMyIssues = false;
@@ -562,24 +813,23 @@ function setupEventListeners() {
     state.showNoticesOnly = false;
     state.searchQuery = '';
     searchInput.value = '';
+    document.getElementById('selectedLocationName').textContent = 'Punjab';
     
-    // Reset sidebar visual active states
-    updateNavActiveState('exploreBtn');
+    updateSidebarActiveBtn(exploreBtn);
     sublocationButtons.forEach(b => {
       if (b.dataset.sub === '') b.classList.add('active');
       else b.classList.remove('active');
     });
 
-    // Close location dropdown
     sublocationList.classList.remove('open');
     locationBoxBtn.classList.remove('open');
     locationBoxBtn.setAttribute('aria-expanded', 'false');
 
     fetchIssues();
-    sidebar.classList.remove('open'); // Close mobile menu if open
+    sidebar.classList.remove('open');
   });
 
-  // Following filter click
+  // Following button clicked
   followingBtn.addEventListener('click', () => {
     state.currentSubLocation = '';
     state.showMyIssues = false;
@@ -587,11 +837,11 @@ function setupEventListeners() {
     state.showNoticesOnly = false;
     state.searchQuery = '';
     searchInput.value = '';
+    document.getElementById('selectedLocationName').textContent = 'Punjab';
 
-    updateNavActiveState('followingBtn');
+    updateSidebarActiveBtn(followingBtn);
     sublocationButtons.forEach(b => b.classList.remove('active'));
 
-    // Close location dropdown
     sublocationList.classList.remove('open');
     locationBoxBtn.classList.remove('open');
     locationBoxBtn.setAttribute('aria-expanded', 'false');
@@ -600,7 +850,7 @@ function setupEventListeners() {
     sidebar.classList.remove('open');
   });
 
-  // Notices click
+  // Notices button clicked (Citizen view)
   noticesBtn.addEventListener('click', () => {
     state.currentSubLocation = '';
     state.showMyIssues = false;
@@ -608,11 +858,11 @@ function setupEventListeners() {
     state.showNoticesOnly = true;
     state.searchQuery = '';
     searchInput.value = '';
+    document.getElementById('selectedLocationName').textContent = 'Punjab';
 
-    updateNavActiveState('noticesBtn');
+    updateSidebarActiveBtn(noticesBtn);
     sublocationButtons.forEach(b => b.classList.remove('active'));
 
-    // Close location dropdown
     sublocationList.classList.remove('open');
     locationBoxBtn.classList.remove('open');
     locationBoxBtn.setAttribute('aria-expanded', 'false');
@@ -621,47 +871,53 @@ function setupEventListeners() {
     sidebar.classList.remove('open');
   });
 
-  // Location filter click
+  // Location selector list change filter
   sublocationButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       sublocationButtons.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       
-      // Explore goes active if we select a specific location
-      state.showFollowedOnly = false;
-      state.showNoticesOnly = false;
-      state.showMyIssues = false;
-      updateNavActiveState('exploreBtn');
-      
+      const label = btn.dataset.sub || 'Punjab';
+      document.getElementById('selectedLocationName').textContent = label;
       state.currentSubLocation = btn.dataset.sub;
       
-      // Close dropdown to keep sidebar compact
       sublocationList.classList.remove('open');
       locationBoxBtn.classList.remove('open');
       locationBoxBtn.setAttribute('aria-expanded', 'false');
 
-      fetchIssues();
-      sidebar.classList.remove('open'); // Close mobile menu
+      if (state.activePortal === 'public') {
+        // Reset citizen visual active button to Explore unless viewing notices
+        if (!state.showNoticesOnly) {
+          state.showFollowedOnly = false;
+          state.showMyIssues = false;
+          updateSidebarActiveBtn(exploreBtn);
+        }
+        fetchIssues();
+      } else if (state.activePortal === 'municipality') {
+        fetchOpsData();
+      }
+      
+      sidebar.classList.remove('open');
     });
   });
 
-  // Profile Menu Dropdown triggers
+  // Profile triggers
   profileMenuTrigger.addEventListener('click', (e) => {
     e.stopPropagation();
     profileDropdown.classList.toggle('open');
   });
 
-  // My Issues filter clicked
   myIssuesBtn.addEventListener('click', () => {
     state.showMyIssues = true;
     state.currentSubLocation = '';
     state.showFollowedOnly = false;
     state.showNoticesOnly = false;
+    document.getElementById('selectedLocationName').textContent = 'Punjab';
+    
     sublocationButtons.forEach(b => b.classList.remove('active'));
-    updateNavActiveState('');
+    updateSidebarActiveBtn(null);
     profileDropdown.classList.remove('open');
     
-    // Close location dropdown
     sublocationList.classList.remove('open');
     locationBoxBtn.classList.remove('open');
     locationBoxBtn.setAttribute('aria-expanded', 'false');
@@ -670,7 +926,6 @@ function setupEventListeners() {
     sidebar.classList.remove('open');
   });
 
-  // Logout Click
   logoutBtn.addEventListener('click', async () => {
     profileDropdown.classList.remove('open');
     try {
@@ -692,21 +947,18 @@ function setupEventListeners() {
     // Reset form fields
     createIssueForm.reset();
 
-    // Reset location chip text and style
     const locationBtn = document.getElementById('modalLocationBtn');
     if (locationBtn) {
       locationBtn.classList.remove('selected');
       document.getElementById('locationBtnText').textContent = 'Add Location';
     }
 
-    // Hide location badge
     const statusText = document.getElementById('locationStatusText');
     if (statusText) {
       statusText.style.display = 'none';
       statusText.textContent = '';
     }
 
-    // Disable district dropdown
     const subLocSelect = document.getElementById('issueSubLocation');
     if (subLocSelect) {
       subLocSelect.disabled = true;
@@ -738,35 +990,21 @@ function setupEventListeners() {
       `;
     }
 
-    // Clear image previews
     const previewsGrid = document.getElementById('photoPreviewsGrid');
-    if (previewsGrid) {
-      previewsGrid.innerHTML = '';
-    }
+    if (previewsGrid) previewsGrid.innerHTML = '';
 
-    // Clear attached links list
     const linksList = document.getElementById('attachedLinksList');
-    if (linksList) {
-      linksList.innerHTML = '';
-    }
+    if (linksList) linksList.innerHTML = '';
 
-    // Hide inline link container
     const inlineLinkContainer = document.getElementById('inlineLinkContainer');
-    if (inlineLinkContainer) {
-      inlineLinkContainer.style.display = 'none';
-    }
+    if (inlineLinkContainer) inlineLinkContainer.style.display = 'none';
+
     const linkInput = document.getElementById('issueLinkInput');
-    if (linkInput) {
-      linkInput.value = '';
-    }
+    if (linkInput) linkInput.value = '';
 
-    // Hide map picker
     const mapPicker = document.getElementById('mapPickerContainer');
-    if (mapPicker) {
-      mapPicker.style.display = 'none';
-    }
+    if (mapPicker) mapPicker.style.display = 'none';
 
-    // Clean up Leaflet marker and instance
     if (mapMarker) {
       mapMarker.remove();
       mapMarker = null;
@@ -781,7 +1019,6 @@ function setupEventListeners() {
     const container = document.getElementById('mapPickerContainer');
     container.style.display = 'block';
 
-    // Request browser geolocation permission
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -791,12 +1028,10 @@ function setupEventListeners() {
         },
         (error) => {
           console.warn('Geolocation error/denied. Defaulting to Punjab center.', error);
-          // Default to center of Punjab (around 31.1471, 75.3412)
           initLeafletMap(31.1471, 75.3412);
         }
       );
     } else {
-      // Geolocation not supported, default
       initLeafletMap(31.1471, 75.3412);
     }
   }
@@ -809,7 +1044,6 @@ function setupEventListeners() {
         attribution: '&copy; OpenStreetMap contributors'
       }).addTo(mapInstance);
       
-      // Clicking on map drops/moves pin
       mapInstance.on('click', (e) => {
         setMapMarker(e.latlng.lat, e.latlng.lng);
       });
@@ -817,10 +1051,8 @@ function setupEventListeners() {
       mapInstance.setView([lat, lng], 13);
     }
 
-    // Set initial marker
     setMapMarker(lat, lng);
     
-    // Force Leaflet to recalculate map layout since it was initially hidden
     setTimeout(() => {
       mapInstance.invalidateSize();
     }, 100);
@@ -858,8 +1090,6 @@ function setupEventListeners() {
     resetEditorState();
   });
 
-  // Location chip click triggers map picker
-  const modalLocationBtn = document.getElementById('modalLocationBtn');
   modalLocationBtn.addEventListener('click', () => {
     const picker = document.getElementById('mapPickerContainer');
     if (picker.style.display === 'none') {
@@ -877,10 +1107,8 @@ function setupEventListeners() {
       return;
     }
 
-    // Hide map
     document.getElementById('mapPickerContainer').style.display = 'none';
 
-    // Update location chip state and display
     modalLocationBtn.classList.add('selected');
     document.getElementById('locationBtnText').textContent = 'Location Confirmed';
 
@@ -888,7 +1116,6 @@ function setupEventListeners() {
     statusBadge.style.display = 'inline-flex';
     statusBadge.innerHTML = `📍 ${selectedCoordinates.lat.toFixed(4)}, ${selectedCoordinates.lng.toFixed(4)}`;
 
-    // Enable district selector
     const subLocSelect = document.getElementById('issueSubLocation');
     subLocSelect.disabled = false;
     subLocSelect.focus();
@@ -896,7 +1123,6 @@ function setupEventListeners() {
     showToast('Location coordinates confirmed');
   });
 
-  // Cancel Map Button
   const cancelMapBtn = document.getElementById('cancelMapBtn');
   cancelMapBtn.addEventListener('click', () => {
     document.getElementById('mapPickerContainer').style.display = 'none';
@@ -916,12 +1142,9 @@ function setupEventListeners() {
       reader.onload = (event) => {
         const dataUrl = event.target.result;
         
-        // Prevent duplicate images
         if (attachedImages.includes(dataUrl)) return;
-        
         attachedImages.push(dataUrl);
         
-        // Create preview item DOM element
         const previewItem = document.createElement('div');
         previewItem.className = 'photo-preview-item';
         previewItem.innerHTML = `
@@ -929,12 +1152,9 @@ function setupEventListeners() {
           <button type="button" class="photo-preview-remove" aria-label="Remove photo">&times;</button>
         `;
         
-        // Remove button handler
         previewItem.querySelector('.photo-preview-remove').addEventListener('click', () => {
           const idx = attachedImages.indexOf(dataUrl);
-          if (idx > -1) {
-            attachedImages.splice(idx, 1);
-          }
+          if (idx > -1) attachedImages.splice(idx, 1);
           previewItem.remove();
         });
         
@@ -952,7 +1172,6 @@ function setupEventListeners() {
   const linkInput = document.getElementById('issueLinkInput');
   const linksList = document.getElementById('attachedLinksList');
 
-  // Toggle link input popover
   linkIconBtn.addEventListener('click', () => {
     if (inlineLinkContainer.style.display === 'none') {
       inlineLinkContainer.style.display = 'flex';
@@ -972,7 +1191,6 @@ function setupEventListeners() {
     const linkVal = linkInput.value.trim();
     if (!linkVal) return;
     
-    // Check URL validity
     try {
       new URL(linkVal);
     } catch (_) {
@@ -987,7 +1205,6 @@ function setupEventListeners() {
 
     attachedLinks.push(linkVal);
 
-    // Create link tag DOM element
     const linkItem = document.createElement('li');
     linkItem.className = 'attached-link-item';
     linkItem.innerHTML = `
@@ -995,12 +1212,9 @@ function setupEventListeners() {
       <button type="button" class="attached-link-remove" aria-label="Remove link">&times;</button>
     `;
 
-    // Remove button handler
     linkItem.querySelector('.attached-link-remove').addEventListener('click', () => {
       const idx = attachedLinks.indexOf(linkVal);
-      if (idx > -1) {
-        attachedLinks.splice(idx, 1);
-      }
+      if (idx > -1) attachedLinks.splice(idx, 1);
       linkItem.remove();
     });
 
@@ -1010,7 +1224,6 @@ function setupEventListeners() {
     showToast('Link attached');
   });
 
-  // Enter key submit on inline link input
   linkInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -1046,7 +1259,7 @@ function setupEventListeners() {
           title,
           location: 'Punjab',
           subLocation,
-          imageType: 'default', // Since categories are removed, we default to standard SVG placeholder
+          imageType: 'default',
           description,
           coordinates: selectedCoordinates,
           images: attachedImages,
@@ -1058,8 +1271,6 @@ function setupEventListeners() {
         createModal.classList.remove('open');
         resetEditorState();
         showToast('Environmental report registered successfully');
-        
-        // Refresh feed to show new post
         fetchIssues();
       } else {
         showToast('Error registering report. Please check fields.');
@@ -1076,7 +1287,11 @@ function setupEventListeners() {
     clearTimeout(searchTimeout);
     state.searchQuery = e.target.value.trim();
     searchTimeout = setTimeout(() => {
-      fetchIssues();
+      if (state.activePortal === 'public') {
+        fetchIssues();
+      } else if (state.activePortal === 'municipality') {
+        fetchOpsData();
+      }
     }, 250);
   });
 
@@ -1091,24 +1306,178 @@ function setupEventListeners() {
 
   // Close dropdowns/menus when clicking elsewhere
   document.addEventListener('click', (e) => {
-    if (!profileDropdown.contains(e.target) && e.target !== profileMenuTrigger) {
+    if (profileDropdown && !profileDropdown.contains(e.target) && e.target !== profileMenuTrigger) {
       profileDropdown.classList.remove('open');
     }
-    // Close post dropdowns
     if (!e.target.closest('.post-card-options')) {
       document.querySelectorAll('.post-options-dropdown.open').forEach(d => {
         d.classList.remove('open');
       });
     }
-    // Close location dropdown
-    if (!sublocationList.contains(e.target) && !locationBoxBtn.contains(e.target)) {
+    if (sublocationList && !sublocationList.contains(e.target) && !locationBoxBtn.contains(e.target)) {
       sublocationList.classList.remove('open');
       locationBoxBtn.classList.remove('open');
       locationBoxBtn.setAttribute('aria-expanded', 'false');
     }
-    // Close track modal when clicking on overlay background
     if (trackModal && e.target === trackModal) {
       trackModal.classList.remove('open');
+    }
+  });
+
+  // ==========================================
+  // MUNICIPALITY OPERATIONS INTERACTIVE HANDLERS
+  // ==========================================
+
+  // Ops details side panel close
+  const opsSidePanel = document.getElementById('opsSidePanel');
+  document.getElementById('closeOpsSidePanel').addEventListener('click', () => {
+    opsSidePanel.classList.remove('open');
+    state.selectedIssueForOps = null;
+    cleanupOpsDetailMap();
+  });
+
+  // Ops internal notes save handler
+  document.getElementById('btnSaveInternalNotes').addEventListener('click', async () => {
+    const notesVal = document.getElementById('opsInternalNotesInput').value.trim();
+    if (!state.selectedIssueForOps) return;
+
+    try {
+      const res = await fetch(`/api/issues/${state.selectedIssueForOps.id}/notes`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ internalNotes: notesVal })
+      });
+      if (res.ok) {
+        showToast('Internal municipality notes updated');
+        state.selectedIssueForOps.internalNotes = notesVal;
+        fetchOpsData(); // Refresh board
+      }
+    } catch (err) {
+      console.error(err);
+      showToast('Connection error. Failed to save notes.');
+    }
+  });
+
+  // Ops Notices form submit handler
+  document.getElementById('noticePublishForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const title = document.getElementById('noticeTitle').value.trim();
+    const description = document.getElementById('noticeDescription').value.trim();
+    const subLocation = document.getElementById('noticeDistrict').value;
+    const type = document.getElementById('noticeType').value;
+    const expiryDate = document.getElementById('noticeExpiry').value;
+
+    if (!title || !description || !subLocation || !type) {
+      showToast('Please fill in all required notice fields');
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/notices', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, description, subLocation, type, expiryDate })
+      });
+      if (res.ok) {
+        showToast(`Official ${type} notice published successfully`);
+        document.getElementById('noticePublishForm').reset();
+        fetchOpsData(); // Reload ops bulletins
+      } else {
+        showToast('Failed to publish bulletin');
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  });
+
+  // Resolution modal closing
+  const resModal = document.getElementById('resolutionModal');
+  document.getElementById('closeResolutionModalBtn').addEventListener('click', () => {
+    resModal.classList.remove('open');
+    resetResolutionForm();
+  });
+  document.getElementById('cancelResolutionModalBtn').addEventListener('click', () => {
+    resModal.classList.remove('open');
+    resetResolutionForm();
+  });
+
+  // Resolution Photo input change base64 conversion
+  const resPhotoInput = document.getElementById('resolutionPhotosInput');
+  const resPhotoPreview = document.getElementById('resolutionPhotoPreview');
+  const resImgEl = document.getElementById('resImgEl');
+  let resolutionImageBase64 = null;
+
+  resPhotoInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file || !file.type.startsWith('image/')) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      resolutionImageBase64 = event.target.result;
+      resImgEl.src = resolutionImageBase64;
+      resPhotoPreview.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  });
+
+  document.getElementById('removeResImgBtn').addEventListener('click', () => {
+    resolutionImageBase64 = null;
+    resImgEl.src = '';
+    resPhotoPreview.style.display = 'none';
+    resPhotoInput.value = '';
+  });
+
+  function resetResolutionForm() {
+    document.getElementById('resolutionSubmitForm').reset();
+    resolutionImageBase64 = null;
+    resImgEl.src = '';
+    resPhotoPreview.style.display = 'none';
+  }
+
+  // Confirm Resolution form submit
+  document.getElementById('resolutionSubmitForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const note = document.getElementById('resolutionNoteInput').value.trim();
+    
+    if (!resolutionImageBase64) {
+      showToast('At least one resolution photo is required');
+      return;
+    }
+    if (!note || note.length < 10) {
+      showToast('Resolution note requires at least 10 characters');
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/issues/${state.selectedIssueForOps.id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          status: 'Resolved',
+          resolutionImages: [resolutionImageBase64],
+          resolutionNote: note
+        })
+      });
+
+      if (res.ok) {
+        resModal.classList.remove('open');
+        resetResolutionForm();
+        
+        // Notify user followers simulator
+        showToast('Followers notified: Report marked Resolved!');
+        
+        // Reload details side panel if visible
+        const updatedIssue = await res.json();
+        state.selectedIssueForOps = updatedIssue;
+        renderOpsDetailPanel(updatedIssue);
+        
+        fetchOpsData(); // Reload Kanban board
+      } else {
+        showToast('Error marking issue resolved');
+      }
+    } catch (err) {
+      console.error(err);
+      showToast('Network error resolving issue');
     }
   });
 }
@@ -1170,7 +1539,6 @@ function showReportLocation(issue) {
       trackMapMarker = L.marker([lat, lng]).addTo(trackMapInstance);
     }
 
-    // Force size recalculation
     trackMapInstance.invalidateSize();
   }, 100);
 }
@@ -1188,13 +1556,438 @@ function showToast(message) {
   
   toastContainer.appendChild(toast);
   
-  // Fade out and remove
   setTimeout(() => {
-    toast.style.animation = 'none'; // reset animation
+    toast.style.animation = 'none';
     toast.style.transition = 'opacity 0.3s ease';
     toast.style.opacity = '0';
     setTimeout(() => toast.remove(), 300);
   }, 2500);
+}
+
+// ==========================================
+// MUNICIPALITY OPERATIONS DASHBOARD LOGIC
+// ==========================================
+
+async function fetchOpsData() {
+  if (state.activePortal !== 'municipality') return;
+
+  try {
+    const issuesRes = await fetch('/api/issues');
+    if (!issuesRes.ok) return;
+    let issues = await issuesRes.json();
+
+    // Support location filter on Kanban columns
+    if (state.currentSubLocation) {
+      issues = issues.filter(issue => issue.subLocation.toUpperCase() === state.currentSubLocation.toUpperCase());
+    }
+
+    // Support search query filter on Kanban columns
+    if (state.searchQuery) {
+      const q = state.searchQuery.toLowerCase();
+      issues = issues.filter(issue => 
+        issue.title.toLowerCase().includes(q) || 
+        issue.description.toLowerCase().includes(q)
+      );
+    }
+
+    // Render summaries
+    renderOpsDashboardSummaries(issues);
+
+    if (state.activeOpsTab === 'triage') {
+      renderKanbanBoard(issues);
+    } else if (state.activeOpsTab === 'notices') {
+      const notices = await fetchNotices();
+      renderOpsNoticesFeed(notices);
+    }
+  } catch (err) {
+    console.error('Error fetching Ops data:', err);
+  }
+}
+
+// Display four dashboard summary metrics cards
+function renderOpsDashboardSummaries(issues) {
+  const pending = issues.filter(i => i.status === 'Review Queue').length;
+  const acknowledged = issues.filter(i => i.status === 'Acknowledged').length;
+  const inProgress = issues.filter(i => i.status === 'In Progress').length;
+  const resolved = issues.filter(i => i.status === 'Resolved').length;
+
+  document.getElementById('countPending').textContent = pending;
+  document.getElementById('countAcknowledged').textContent = acknowledged;
+  document.getElementById('countInProgress').textContent = inProgress;
+  document.getElementById('countResolvedToday').textContent = resolved;
+}
+
+// Render notices in Ops Notices Management Tab
+function renderOpsNoticesFeed(notices) {
+  const feed = document.getElementById('opsNoticesFeed');
+  
+  // Filter notices list by current active sublocation if set
+  if (state.currentSubLocation) {
+    notices = notices.filter(n => n.subLocation.toUpperCase() === state.currentSubLocation.toUpperCase());
+  }
+
+  if (notices.length === 0) {
+    feed.innerHTML = '<p class="empty-notices-msg">No notices published yet.</p>';
+    return;
+  }
+
+  feed.innerHTML = '';
+  notices.forEach(n => {
+    const item = document.createElement('div');
+    item.className = 'ops-notice-card-item';
+    
+    let typeClass = 'type-advisory';
+    if (n.type === 'Warning') typeClass = 'type-warning';
+    else if (n.type === 'Public Notice') typeClass = 'type-public-notice';
+    else if (n.type === 'Drive / Campaign') typeClass = 'type-drive-campaign';
+
+    item.innerHTML = `
+      <div class="ops-notice-card-header">
+        <h4 class="ops-notice-card-title">${escapeHTML(n.title)}</h4>
+        <span class="ops-notice-badge ${typeClass}">${escapeHTML(n.type)}</span>
+      </div>
+      <p class="ops-notice-desc" style="margin-top:0;">${escapeHTML(n.description)}</p>
+      <div class="ops-notice-meta">
+        <span>District: <strong>${escapeHTML(n.subLocation)}</strong></span>
+        <span>Published: ${new Date(n.createdAt).toLocaleDateString()}</span>
+      </div>
+    `;
+    feed.appendChild(item);
+  });
+}
+
+// Render Kanban Column Boards
+function renderKanbanBoard(issues) {
+  const cols = {
+    'Review Queue': document.getElementById('cardsReviewQueue'),
+    'Acknowledged': document.getElementById('cardsAcknowledged'),
+    'In Progress': document.getElementById('cardsInProgress'),
+    'Resolved': document.getElementById('cardsResolved')
+  };
+
+  // Reset columns
+  Object.values(cols).forEach(col => {
+    if (col) col.innerHTML = '';
+  });
+
+  // Counts
+  const counts = {
+    'Review Queue': 0,
+    'Acknowledged': 0,
+    'In Progress': 0,
+    'Resolved': 0
+  };
+
+  issues.forEach(issue => {
+    if (issue.status === 'Rejected') return;
+
+    counts[issue.status] += 1;
+    const colContainer = cols[issue.status];
+    if (!colContainer) return;
+
+    const card = document.createElement('div');
+    card.className = 'ops-issue-card';
+    card.id = `ops-card-${issue.id}`;
+    
+    const priority = calculatePriorityLabel(issue);
+    let prioClass = 'prio-low';
+    if (priority === 'Medium') prioClass = 'prio-medium';
+    else if (priority === 'High') prioClass = 'prio-high';
+
+    // Build Review Queue button triage ribbon
+    let actionsHTML = '';
+    if (issue.status === 'Review Queue') {
+      actionsHTML = `
+        <div class="ops-card-actions">
+          <button class="btn-ops-action btn-ops-ack" data-action="ack" title="Move report to Acknowledged">Acknowledge</button>
+          <button class="btn-ops-action btn-ops-rej" data-action="rej" title="Reject this report">Reject</button>
+          <button class="btn-ops-action btn-ops-dup" data-action="dup" title="Flag report as a duplicate citation">Mark Duplicate</button>
+        </div>
+      `;
+    }
+
+    card.innerHTML = `
+      <h4 class="ops-card-title">${escapeHTML(issue.title)}</h4>
+      <div class="ops-card-meta">
+        <span class="ops-card-district">${escapeHTML(issue.subLocation)}</span>
+        <span class="prio-badge ${prioClass}">${priority}</span>
+      </div>
+      ${actionsHTML}
+    `;
+
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('.ops-card-actions')) return;
+      openOpsDetailPanel(issue);
+    });
+
+    if (issue.status === 'Review Queue') {
+      card.querySelector('.btn-ops-ack').addEventListener('click', async (e) => {
+        e.stopPropagation();
+        await updateIssueStatus(issue.id, 'Acknowledged');
+      });
+
+      card.querySelector('.btn-ops-rej').addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const reason = prompt('Please specify a rejection reason:');
+        if (reason === null) return;
+        await updateIssueStatus(issue.id, 'Rejected', null, null, reason || 'Rejected by staff review');
+      });
+
+      card.querySelector('.btn-ops-dup').addEventListener('click', (e) => {
+        e.stopPropagation();
+        showToast('Duplicate flag marked (Triage placeholder)');
+      });
+    }
+
+    colContainer.appendChild(card);
+  });
+
+  document.getElementById('countColPending').textContent = counts['Review Queue'];
+  document.getElementById('countColAcknowledged').textContent = counts['Acknowledged'];
+  document.getElementById('countColInProgress').textContent = counts['In Progress'];
+  document.getElementById('countColResolved').textContent = counts['Resolved'];
+}
+
+// REST call to update status
+async function updateIssueStatus(id, newStatus, resolutionImages = null, resolutionNote = null, rejectReason = null) {
+  try {
+    const body = { status: newStatus };
+    if (resolutionImages) body.resolutionImages = resolutionImages;
+    if (resolutionNote) body.resolutionNote = resolutionNote;
+    if (rejectReason) body.rejectReason = rejectReason;
+
+    const res = await fetch(`/api/issues/${id}/status`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    if (res.ok) {
+      showToast(`Status updated to: ${newStatus}`);
+      fetchOpsData();
+      
+      if (state.selectedIssueForOps && state.selectedIssueForOps.id === id) {
+        const updated = await res.json();
+        state.selectedIssueForOps = updated;
+        renderOpsDetailPanel(updated);
+      }
+    } else {
+      const data = await res.json();
+      showToast(data.error || 'Failed to update report status');
+    }
+  } catch (err) {
+    console.error(err);
+    showToast('Network error updating status');
+  }
+}
+
+// Side detail map
+let opsDetailMapInstance = null;
+let opsDetailMapMarker = null;
+
+function cleanupOpsDetailMap() {
+  if (opsDetailMapMarker) {
+    opsDetailMapMarker.remove();
+    opsDetailMapMarker = null;
+  }
+  if (opsDetailMapInstance) {
+    opsDetailMapInstance.remove();
+    opsDetailMapInstance = null;
+  }
+}
+
+function openOpsDetailPanel(issue) {
+  state.selectedIssueForOps = issue;
+  document.getElementById('opsSidePanel').classList.add('open');
+  renderOpsDetailPanel(issue);
+}
+
+function renderOpsDetailPanel(issue) {
+  document.getElementById('opsDetailTitle').textContent = issue.title;
+  document.getElementById('opsDetailDistrict').textContent = issue.subLocation;
+  
+  const statusEl = document.getElementById('opsDetailStatus');
+  statusEl.textContent = issue.status;
+  statusEl.className = 'badge status-badge-detail';
+  if (issue.status === 'Resolved') {
+    statusEl.style.backgroundColor = '#d1fae5';
+    statusEl.style.color = '#065f46';
+  } else if (issue.status === 'In Progress') {
+    statusEl.style.backgroundColor = '#fef3c7';
+    statusEl.style.color = '#92400e';
+  } else {
+    statusEl.style.backgroundColor = '#eff6ff';
+    statusEl.style.color = '#2563eb';
+  }
+
+  const priority = calculatePriorityLabel(issue);
+  const prioEl = document.getElementById('opsDetailPriority');
+  prioEl.textContent = priority + ' Priority';
+  prioEl.className = 'priority-val badge';
+  if (priority === 'High') {
+    prioEl.style.backgroundColor = '#fef2f2';
+    prioEl.style.color = '#dc2626';
+  } else if (priority === 'Medium') {
+    prioEl.style.backgroundColor = '#fffbeb';
+    prioEl.style.color = '#d97706';
+  } else {
+    prioEl.style.backgroundColor = '#f1f5f9';
+    prioEl.style.color = '#64748b';
+  }
+
+  document.getElementById('opsDetailDesc').textContent = issue.description || 'No description supplied.';
+  document.getElementById('opsDetailVerifications').textContent = issue.verifications || 0;
+  document.getElementById('opsDetailUpvotes').textContent = issue.upvotes || 0;
+
+  const linksContainer = document.getElementById('opsDetailLinksContainer');
+  const linksUl = document.getElementById('opsDetailLinks');
+  if (issue.links && issue.links.length > 0) {
+    linksContainer.style.display = 'block';
+    linksUl.innerHTML = issue.links.map(l => `<li><a href="${l}" target="_blank" rel="noopener noreferrer">${escapeHTML(l)}</a></li>`).join('');
+  } else {
+    linksContainer.style.display = 'none';
+  }
+
+  const gallery = document.getElementById('opsDetailPhotos');
+  if (issue.images && issue.images.length > 0) {
+    gallery.innerHTML = issue.images.map(img => `<img src="${img}" class="ops-detail-photo" alt="Details photo" onclick="window.open('${img}')">`).join('');
+  } else {
+    gallery.innerHTML = `
+      <div style="background-color:#f1f5f9; padding:15px; border-radius:6px; text-align:center; width:100%; border:1px dashed var(--color-border);">
+        <p style="font-size:11px; color:var(--color-muted-text); margin:0;">No citizen photos attached.</p>
+      </div>
+    `;
+  }
+
+  document.getElementById('opsInternalNotesInput').value = issue.internalNotes || '';
+
+  const timelineUl = document.getElementById('opsDetailTimeline');
+  timelineUl.innerHTML = '';
+  if (issue.timeline && issue.timeline.length > 0) {
+    issue.timeline.forEach(event => {
+      const node = document.createElement('div');
+      node.className = `timeline-node ${event.status === 'Resolved' ? 'resolved' : 'active'}`;
+      node.innerHTML = `
+        <div class="node-status">${escapeHTML(event.status)}</div>
+        <div class="node-time">${new Date(event.timestamp).toLocaleString()}</div>
+      `;
+      timelineUl.appendChild(node);
+    });
+  }
+
+  const resContainer = document.getElementById('opsDetailResolutionContainer');
+  const resPhotos = document.getElementById('opsDetailResolutionPhotos');
+  const resNote = document.getElementById('opsDetailResolutionNote');
+
+  if (issue.status === 'Resolved' && issue.resolutionNote) {
+    resContainer.style.display = 'block';
+    resNote.textContent = issue.resolutionNote;
+    if (issue.resolutionImages && issue.resolutionImages.length > 0) {
+      resPhotos.innerHTML = issue.resolutionImages.map(img => `<img src="${img}" alt="Resolved proof" onclick="window.open('${img}')" style="max-height:120px; border-radius:4px; object-fit:cover;">`).join('');
+    } else {
+      resPhotos.innerHTML = '';
+    }
+  } else {
+    resContainer.style.display = 'none';
+  }
+
+  renderTriageActionRibbon(issue);
+
+  cleanupOpsDetailMap();
+  setTimeout(() => {
+    let lat = 31.1471;
+    let lng = 75.3412;
+    let hasCoords = false;
+
+    if (issue.coordinates && issue.coordinates.lat && issue.coordinates.lng) {
+      lat = issue.coordinates.lat;
+      lng = issue.coordinates.lng;
+      hasCoords = true;
+    } else if (districtCoords[issue.subLocation.toUpperCase()]) {
+      const coords = districtCoords[issue.subLocation.toUpperCase()];
+      lat = coords.lat;
+      lng = coords.lng;
+    }
+
+    document.getElementById('opsDetailCoords').textContent = hasCoords ? `📍 GPS: ${lat.toFixed(4)}, ${lng.toFixed(4)}` : `📍 Approximate Center: ${issue.subLocation}`;
+
+    opsDetailMapInstance = L.map('opsDetailMap').setView([lat, lng], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap'
+    }).addTo(opsDetailMapInstance);
+
+    opsDetailMapMarker = L.marker([lat, lng]).addTo(opsDetailMapInstance);
+    opsDetailMapInstance.invalidateSize();
+  }, 200);
+}
+
+// Build action triage ribbon based on status flow
+function renderTriageActionRibbon(issue) {
+  const ribbon = document.getElementById('triageActionRibbon');
+  ribbon.innerHTML = '';
+
+  const label = document.createElement('span');
+  label.style.fontWeight = '600';
+  label.style.fontSize = '12px';
+  label.style.color = 'var(--color-secondary-text)';
+  label.style.marginRight = 'auto';
+  label.style.alignSelf = 'center';
+  
+  if (issue.status === 'Review Queue') {
+    label.textContent = 'Awaiting triage decision:';
+    ribbon.appendChild(label);
+
+    const ackBtn = document.createElement('button');
+    ackBtn.className = 'btn btn-primary btn-sm';
+    ackBtn.style.backgroundColor = '#2563eb';
+    ackBtn.style.borderColor = '#2563eb';
+    ackBtn.textContent = 'Acknowledge';
+    ackBtn.addEventListener('click', () => updateIssueStatus(issue.id, 'Acknowledged'));
+    ribbon.appendChild(ackBtn);
+
+    const rejBtn = document.createElement('button');
+    rejBtn.className = 'btn btn-secondary btn-sm';
+    rejBtn.style.color = '#dc2626';
+    rejBtn.style.borderColor = '#fecaca';
+    rejBtn.textContent = 'Reject';
+    rejBtn.addEventListener('click', () => {
+      const reason = prompt('Specify rejection reason:');
+      if (reason === null) return;
+      updateIssueStatus(issue.id, 'Rejected', null, null, reason || 'Rejected by staff review');
+    });
+    ribbon.appendChild(rejBtn);
+  } else if (issue.status === 'Acknowledged') {
+    label.textContent = 'Ready to launch field crews:';
+    ribbon.appendChild(label);
+
+    const startBtn = document.createElement('button');
+    startBtn.className = 'btn btn-primary btn-sm';
+    startBtn.style.backgroundColor = '#f5a623';
+    startBtn.style.borderColor = '#f5a623';
+    startBtn.textContent = 'Start Work';
+    startBtn.addEventListener('click', () => updateIssueStatus(issue.id, 'In Progress'));
+    ribbon.appendChild(startBtn);
+  } else if (issue.status === 'In Progress') {
+    label.textContent = 'Action ongoing. Ready to resolve?';
+    ribbon.appendChild(label);
+
+    const resolveBtn = document.createElement('button');
+    resolveBtn.className = 'btn btn-primary btn-sm';
+    resolveBtn.style.backgroundColor = '#059669';
+    resolveBtn.style.borderColor = '#059669';
+    resolveBtn.textContent = 'Resolve Report';
+    resolveBtn.addEventListener('click', () => {
+      document.getElementById('resolutionModal').classList.add('open');
+    });
+    ribbon.appendChild(resolveBtn);
+  } else if (issue.status === 'Resolved') {
+    label.textContent = '✅ Issue successfully resolved.';
+    ribbon.appendChild(label);
+  } else if (issue.status === 'Rejected') {
+    label.textContent = '❌ Rejection decision completed.';
+    ribbon.appendChild(label);
+  }
 }
 
 // Helper to escape HTML to prevent XSS
