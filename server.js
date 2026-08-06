@@ -12,7 +12,7 @@ let issues = [
     id: 1,
     title: "Illegal dumping behind residential area",
     location: "Punjab",
-    subLocation: "SAS NAGAR",
+    subLocation: "S.A.S NAGAR",
     description: "Piles of trash bags and plastic debris accumulating behind the residential block, causing odor and attracting stray animals.",
     imageType: "dumping",
     upvotes: 42,
@@ -127,7 +127,7 @@ let notices = [
     title: "Cleanliness Drive: Sector 32",
     description: "The Municipal Corporation is organizing a community waste cleaning and sorting drive this Sunday. Cleanup tools and refreshments will be provided.",
     location: "Punjab",
-    subLocation: "SAS NAGAR",
+    subLocation: "S.A.S NAGAR",
     type: "Drive / Campaign",
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
     expiryDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 2).toISOString().split('T')[0] // 2 days from now

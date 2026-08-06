@@ -181,17 +181,41 @@
               <polyline points="6 9 12 15 18 9"></polyline>
             </svg>
           </button>
-          <ul class="sublocation-list" id="sublocationList">
-            <li><button class="sublocation-btn active" data-sub="">All Punjab</button></li>
-            <li><button class="sublocation-btn" data-sub="SAS NAGAR">SAS NAGAR</button></li>
-            <li><button class="sublocation-btn" data-sub="SANGRUR">SANGRUR</button></li>
-            <li><button class="sublocation-btn" data-sub="PATIALA">PATIALA</button></li>
-            <li><button class="sublocation-btn" data-sub="PATHANKOT">PATHANKOT</button></li>
-            <li><button class="sublocation-btn" data-sub="MANSA">MANSA</button></li>
-            <li><button class="sublocation-btn" data-sub="LUDHIANA">LUDHIANA</button></li>
-            <li><button class="sublocation-btn" data-sub="KAPURTHALA">KAPURTHALA</button></li>
-            <li><button class="sublocation-btn" data-sub="FIROZPUR">FIROZPUR</button></li>
-          </ul>
+          <div class="sublocation-list" id="sublocationList">
+            <div class="sublocation-search-box">
+              <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input type="text" id="districtSearchInput" placeholder="Search district..." autocomplete="off">
+            </div>
+            <ul class="sublocation-items">
+              <li><button class="sublocation-btn active" data-sub="">All Punjab</button></li>
+              <li><button class="sublocation-btn" data-sub="AMRITSAR">Amritsar</button></li>
+              <li><button class="sublocation-btn" data-sub="BARNALA">Barnala</button></li>
+              <li><button class="sublocation-btn" data-sub="BATHINDA">Bathinda</button></li>
+              <li><button class="sublocation-btn" data-sub="FARIDKOT">Faridkot</button></li>
+              <li><button class="sublocation-btn" data-sub="FATEHGARH SAHIB">Fatehgarh Sahib</button></li>
+              <li><button class="sublocation-btn" data-sub="FAZILKA">Fazilka</button></li>
+              <li><button class="sublocation-btn" data-sub="FIROZPUR">Ferozepur</button></li>
+              <li><button class="sublocation-btn" data-sub="GURDASPUR">Gurdaspur</button></li>
+              <li><button class="sublocation-btn" data-sub="HOSHIARPUR">Hoshiarpur</button></li>
+              <li><button class="sublocation-btn" data-sub="JALANDHAR">Jalandhar</button></li>
+              <li><button class="sublocation-btn" data-sub="KAPURTHALA">Kapurthala</button></li>
+              <li><button class="sublocation-btn" data-sub="LUDHIANA">Ludhiana</button></li>
+              <li><button class="sublocation-btn" data-sub="MALERKOTLA">Malerkotla</button></li>
+              <li><button class="sublocation-btn" data-sub="MANSA">Mansa</button></li>
+              <li><button class="sublocation-btn" data-sub="MOGA">Moga</button></li>
+              <li><button class="sublocation-btn" data-sub="PATHANKOT">Pathankot</button></li>
+              <li><button class="sublocation-btn" data-sub="PATIALA">Patiala</button></li>
+              <li><button class="sublocation-btn" data-sub="RUPNAGAR">Rupnagar</button></li>
+              <li><button class="sublocation-btn" data-sub="S.A.S NAGAR">S.A.S Nagar</button></li>
+              <li><button class="sublocation-btn" data-sub="SANGRUR">Sangrur</button></li>
+              <li><button class="sublocation-btn" data-sub="SHAHEED BHAGAT SINGH NAGAR">Shaheed Bhagat Singh Nagar</button></li>
+              <li><button class="sublocation-btn" data-sub="SRI MUKTSAR SAHIB">Sri Muktsar Sahib</button></li>
+              <li><button class="sublocation-btn" data-sub="TARN TARAN">Tarn Taran</button></li>
+            </ul>
+          </div>
         </div>
 
         <!-- Shared User Profile (Sticky to bottom of sidebar) -->
@@ -446,9 +470,9 @@
             <option value="PATHANKOT">PATHANKOT</option>
             <option value="PATIALA">PATIALA</option>
             <option value="RUPNAGAR">RUPNAGAR</option>
-            <option value="SAS NAGAR">SAS NAGAR</option>
+            <option value="S.A.S NAGAR">S.A.S Nagar</option>
             <option value="SANGRUR">SANGRUR</option>
-            <option value="SBS NAGAR">SBS NAGAR</option>
+            <option value="SHAHEED BHAGAT SINGH NAGAR">Shaheed Bhagat Singh Nagar</option>
             <option value="SRI MUKTSAR SAHIB">SRI MUKTSAR SAHIB</option>
             <option value="TARN TARAN">TARN TARAN</option>
           </select>

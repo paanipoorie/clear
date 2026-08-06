@@ -44,9 +44,9 @@ const districtCoords = {
   'PATHANKOT': { lat: 32.2659, lng: 75.6461 },
   'PATIALA': { lat: 30.3398, lng: 76.3869 },
   'RUPNAGAR': { lat: 30.9753, lng: 76.5273 },
-  'SAS NAGAR': { lat: 30.6970, lng: 76.6993 },
+  'S.A.S NAGAR': { lat: 30.6970, lng: 76.6993 },
   'SANGRUR': { lat: 30.2450, lng: 75.8423 },
-  'SBS NAGAR': { lat: 31.1256, lng: 76.1264 },
+  'SHAHEED BHAGAT SINGH NAGAR': { lat: 31.1256, lng: 76.1264 },
   'SRI MUKTSAR SAHIB': { lat: 30.4739, lng: 74.5142 },
   'TARN TARAN': { lat: 31.4522, lng: 74.9272 }
 };
@@ -806,7 +806,33 @@ function setupEventListeners() {
     const isOpen = sublocationList.classList.toggle('open');
     locationBoxBtn.classList.toggle('open', isOpen);
     locationBoxBtn.setAttribute('aria-expanded', isOpen);
+    
+    const districtSearchInput = document.getElementById('districtSearchInput');
+    if (isOpen && districtSearchInput) {
+      districtSearchInput.value = '';
+      districtSearchInput.focus();
+      sublocationButtons.forEach(btn => {
+        const li = btn.closest('li');
+        if (li) li.style.display = 'block';
+      });
+    }
   });
+
+  // District search input listener
+  const districtSearchInput = document.getElementById('districtSearchInput');
+  if (districtSearchInput) {
+    districtSearchInput.addEventListener('input', (e) => {
+      const query = e.target.value.toLowerCase().trim();
+      sublocationButtons.forEach(btn => {
+        const text = btn.textContent.toLowerCase();
+        const li = btn.closest('li');
+        if (li) {
+          const matches = text.includes(query) || (btn.dataset.sub === "" && query === "");
+          li.style.display = matches ? 'block' : 'none';
+        }
+      });
+    });
+  }
 
   // Explore button clicked
   exploreBtn.addEventListener('click', () => {
@@ -880,13 +906,22 @@ function setupEventListeners() {
       sublocationButtons.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       
-      const label = btn.dataset.sub || 'Punjab';
+      const label = btn.dataset.sub ? btn.textContent : 'Punjab';
       document.getElementById('selectedLocationName').textContent = label;
       state.currentSubLocation = btn.dataset.sub;
       
       sublocationList.classList.remove('open');
       locationBoxBtn.classList.remove('open');
       locationBoxBtn.setAttribute('aria-expanded', 'false');
+
+      const districtSearchInput = document.getElementById('districtSearchInput');
+      if (districtSearchInput) {
+        districtSearchInput.value = '';
+        sublocationButtons.forEach(b => {
+          const li = b.closest('li');
+          if (li) li.style.display = 'block';
+        });
+      }
 
       if (state.activePortal === 'public') {
         // Reset citizen visual active button to Explore unless viewing notices
@@ -985,9 +1020,9 @@ function setupEventListeners() {
         <option value="PATHANKOT">PATHANKOT</option>
         <option value="PATIALA">PATIALA</option>
         <option value="RUPNAGAR">RUPNAGAR</option>
-        <option value="SAS NAGAR">SAS NAGAR</option>
+        <option value="S.A.S NAGAR">S.A.S Nagar</option>
         <option value="SANGRUR">SANGRUR</option>
-        <option value="SBS NAGAR">SBS NAGAR</option>
+        <option value="SHAHEED BHAGAT SINGH NAGAR">Shaheed Bhagat Singh Nagar</option>
         <option value="SRI MUKTSAR SAHIB">SRI MUKTSAR SAHIB</option>
         <option value="TARN TARAN">TARN TARAN</option>
       `;
