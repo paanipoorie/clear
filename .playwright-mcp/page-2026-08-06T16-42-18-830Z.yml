@@ -1,0 +1,58 @@
+- generic [ref=f1e1]:
+  - banner [ref=f1e2]:
+    - generic [ref=f1e3]:
+      - button "Toggle navigation menu" [active] [ref=f1e192] [cursor=pointer]
+      - heading "C.L.E.AR." [level=1] [ref=f1e4]
+      - generic [ref=f1e5]: CIVIC PORTAL
+    - button "Notifications" [ref=f1e10] [cursor=pointer]
+  - generic [ref=f1e15]:
+    - complementary [ref=f1e16]:
+      - button "Explore" [ref=f1e18] [cursor=pointer]
+      - button "Create" [ref=f1e23] [cursor=pointer]
+      - generic [ref=f1e25]:
+        - generic [ref=f1e26]: Location
+        - button "Punjab" [ref=f1e27] [cursor=pointer]
+        - list:
+          - listitem [ref=f1e34]:
+            - button "All Punjab" [ref=f1e35] [cursor=pointer]
+          - listitem [ref=f1e36]:
+            - button "SAS NAGAR" [ref=f1e37] [cursor=pointer]
+          - listitem [ref=f1e38]:
+            - button "SANGRUR" [ref=f1e39] [cursor=pointer]
+          - listitem [ref=f1e40]:
+            - button "PATIALA" [ref=f1e41] [cursor=pointer]
+          - listitem [ref=f1e42]:
+            - button "PATHANKOT" [ref=f1e43] [cursor=pointer]
+          - listitem [ref=f1e44]:
+            - button "MANSA" [ref=f1e45] [cursor=pointer]
+          - listitem [ref=f1e46]:
+            - button "LUDHIANA" [ref=f1e47] [cursor=pointer]
+          - listitem [ref=f1e48]:
+            - button "KAPURTHALA" [ref=f1e49] [cursor=pointer]
+          - listitem [ref=f1e50]:
+            - button "FIROZPUR" [ref=f1e51] [cursor=pointer]
+      - generic [ref=f1e53]:
+        - generic [ref=f1e58]:
+          - generic [ref=f1e59]: user
+          - generic [ref=f1e60]: Resident Reporter
+        - button "Profile options" [ref=f1e61] [cursor=pointer]
+    - main [ref=f1e66]:
+      - heading "Reports in SAS NAGAR" [level=2] [ref=f1e194]
+      - article [ref=f1e195]:
+        - generic [ref=f1e196]:
+          - generic [ref=f1e197]:
+            - heading "Illegal dumping behind residential area" [level=3] [ref=f1e198]
+            - generic [ref=f1e199]:
+              - generic [ref=f1e200]: Punjab, SAS NAGAR
+              - generic [ref=f1e201]: •
+              - generic [ref=f1e202]: Active environmental report
+          - button "Post actions" [ref=f1e204] [cursor=pointer]
+        - paragraph [ref=f1e213]: Piles of trash bags and plastic debris accumulating behind the residential block, causing odor and attracting stray animals.
+        - generic [ref=f1e214]:
+          - button "Upvote" [ref=f1e215] [cursor=pointer]:
+            - generic [ref=f1e218]: "42"
+          - button "Downvote" [ref=f1e219] [cursor=pointer]:
+            - generic [ref=f1e222]: "3"
+          - button "Comments (2)" [ref=f1e223] [cursor=pointer]
+          - button "Share post" [ref=f1e227] [cursor=pointer]
+          - generic [ref=f1e231]: SAS NAGAR

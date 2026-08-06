@@ -1,0 +1,114 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - heading "C.L.E.AR." [level=1] [ref=e4]
+      - generic [ref=e5]: CIVIC PORTAL
+    - textbox "Find anything..." [ref=e8]
+    - button "Notifications" [ref=e10] [cursor=pointer]
+  - generic [ref=e15]:
+    - complementary [ref=e16]:
+      - button "Explore" [ref=e18] [cursor=pointer]
+      - button "Create" [ref=e23] [cursor=pointer]
+      - generic [ref=e25]:
+        - generic [ref=e26]: Location
+        - button "Punjab" [ref=e27] [cursor=pointer]
+        - list:
+          - listitem [ref=e34]:
+            - button "All Punjab" [ref=e35] [cursor=pointer]
+          - listitem [ref=e36]:
+            - button "SAS NAGAR" [ref=e37] [cursor=pointer]
+          - listitem [ref=e38]:
+            - button "SANGRUR" [ref=e39] [cursor=pointer]
+          - listitem [ref=e40]:
+            - button "PATIALA" [ref=e41] [cursor=pointer]
+          - listitem [ref=e42]:
+            - button "PATHANKOT" [ref=e43] [cursor=pointer]
+          - listitem [ref=e44]:
+            - button "MANSA" [ref=e45] [cursor=pointer]
+          - listitem [ref=e46]:
+            - button "LUDHIANA" [ref=e47] [cursor=pointer]
+          - listitem [ref=e48]:
+            - button "KAPURTHALA" [ref=e49] [cursor=pointer]
+          - listitem [ref=e50]:
+            - button "FIROZPUR" [ref=e51] [cursor=pointer]
+      - generic [ref=e53]:
+        - generic [ref=e58]:
+          - generic [ref=e59]: user
+          - generic [ref=e60]: Resident Reporter
+        - button "Profile options" [ref=e61] [cursor=pointer]
+    - main [ref=e66]:
+      - heading "Active Local Reports" [level=2] [ref=e68]
+      - generic [ref=e69]:
+        - article [ref=e264]:
+          - generic [ref=e265]:
+            - generic [ref=e266]:
+              - heading "Stray plastic burning near schools" [level=3] [ref=e267]
+              - generic [ref=e268]:
+                - generic [ref=e269]: Punjab, LUDHIANA
+                - generic [ref=e270]: •
+                - generic [ref=e271]: Active environmental report
+            - button "Post actions" [ref=e273] [cursor=pointer]
+          - paragraph [ref=e285]: A large pile of garbage bags is being burned, generating toxic smoke near the public school campus.
+          - generic [ref=e286]:
+            - button "Upvote" [ref=e287] [cursor=pointer]:
+              - generic [ref=e290]: "1"
+            - button "Downvote" [ref=e291] [cursor=pointer]:
+              - generic [ref=e294]: "0"
+            - button "Comments (0)" [ref=e296] [cursor=pointer]
+            - button "Share post" [ref=e300] [cursor=pointer]
+            - generic [ref=e304]: LUDHIANA
+        - article [ref=e307]:
+          - generic [ref=e308]:
+            - generic [ref=e309]:
+              - heading "Unclogged drain overflowing onto main road" [level=3] [ref=e310]
+              - generic [ref=e311]:
+                - generic [ref=e312]: Punjab, PATIALA
+                - generic [ref=e313]: •
+                - generic [ref=e314]: Active environmental report
+            - button "Post actions" [ref=e316] [cursor=pointer]
+          - paragraph [ref=e326]: Monsoon clogging in the sewer drainage system leading to wastewater overflowing onto the public street, creating a traffic bottleneck and hygiene issue.
+          - generic [ref=e327]:
+            - button "Upvote" [ref=e328] [cursor=pointer]:
+              - generic [ref=e331]: "15"
+            - button "Downvote" [ref=e332] [cursor=pointer]:
+              - generic [ref=e335]: "0"
+            - button "Comments (0)" [ref=e337] [cursor=pointer]
+            - button "Share post" [ref=e341] [cursor=pointer]
+            - generic [ref=e345]: PATIALA
+        - article [ref=e348]:
+          - generic [ref=e349]:
+            - generic [ref=e350]:
+              - heading "open waste burning causing the smoke" [level=3] [ref=e351]
+              - generic [ref=e352]:
+                - generic [ref=e353]: Punjab, LUDHIANA
+                - generic [ref=e354]: •
+                - generic [ref=e355]: Active environmental report
+            - button "Post actions" [ref=e357] [cursor=pointer]
+          - paragraph [ref=e366]: Dry leaves and plastic waste being burned in the open field opposite the public school, causing severe smoke and breathing difficulties.
+          - generic [ref=e367]:
+            - button "Upvote" [ref=e368] [cursor=pointer]:
+              - generic [ref=e371]: "28"
+            - button "Downvote" [ref=e372] [cursor=pointer]:
+              - generic [ref=e375]: "1"
+            - button "Comments (1)" [ref=e377] [cursor=pointer]
+            - button "Share post" [ref=e381] [cursor=pointer]
+            - generic [ref=e385]: LUDHIANA
+        - article [ref=e388]:
+          - generic [ref=e389]:
+            - generic [ref=e390]:
+              - heading "Illegal dumping behind residential area" [level=3] [ref=e391]
+              - generic [ref=e392]:
+                - generic [ref=e393]: Punjab, SAS NAGAR
+                - generic [ref=e394]: •
+                - generic [ref=e395]: Active environmental report
+            - button "Post actions" [ref=e397] [cursor=pointer]
+          - paragraph [ref=e406]: Piles of trash bags and plastic debris accumulating behind the residential block, causing odor and attracting stray animals.
+          - generic [ref=e407]:
+            - button "Upvote" [ref=e408] [cursor=pointer]:
+              - generic [ref=e411]: "42"
+            - button "Downvote" [ref=e412] [cursor=pointer]:
+              - generic [ref=e415]: "3"
+            - button "Comments (2)" [ref=e417] [cursor=pointer]
+            - button "Share post" [ref=e421] [cursor=pointer]
+            - generic [ref=e425]: SAS NAGAR
+  - generic [ref=e246]: Environmental report registered successfully
