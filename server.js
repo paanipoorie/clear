@@ -314,6 +314,44 @@ let currentUser = {
 // Simulated Notification store
 let notifications = [];
 
+// Persistence helper for in-memory database
+const fs = require('fs');
+const os = require('os');
+const DATA_DIR = path.join(os.homedir(), '.gemini', 'antigravity-cli', 'clear-db');
+if (!fs.existsSync(DATA_DIR)) {
+  fs.mkdirSync(DATA_DIR, { recursive: true });
+}
+const ISSUES_PATH = path.join(DATA_DIR, 'issues.json');
+const NOTICES_PATH = path.join(DATA_DIR, 'notices.json');
+
+function saveDatabase() {
+  try {
+    fs.writeFileSync(ISSUES_PATH, JSON.stringify(issues, null, 2), 'utf8');
+    fs.writeFileSync(NOTICES_PATH, JSON.stringify(notices, null, 2), 'utf8');
+  } catch (e) {
+    console.error("Failed to save database:", e);
+  }
+}
+
+function loadDatabase() {
+  if (fs.existsSync(ISSUES_PATH)) {
+    try {
+      issues = JSON.parse(fs.readFileSync(ISSUES_PATH, 'utf8'));
+    } catch (e) {
+      console.error("Failed to load issues:", e);
+    }
+  }
+  if (fs.existsSync(NOTICES_PATH)) {
+    try {
+      notices = JSON.parse(fs.readFileSync(NOTICES_PATH, 'utf8'));
+    } catch (e) {
+      console.error("Failed to load notices:", e);
+    }
+  }
+}
+
+loadDatabase();
+
 // API Routes
 
 // Get all issues with filters (subLocation, myIssues, search, followedOnly)
@@ -390,6 +428,7 @@ app.post('/api/issues', (req, res) => {
   };
 
   issues.push(newIssue);
+  saveDatabase();
   res.status(201).json(newIssue);
 });
 
@@ -407,6 +446,7 @@ app.post('/api/issues/:id/vote', (req, res) => {
     issue.upvotes += 1;
   }
 
+  saveDatabase();
   res.json({ upvotes: issue.upvotes });
 });
 
@@ -420,6 +460,7 @@ app.post('/api/issues/:id/follow', (req, res) => {
   }
 
   issue.followed = !issue.followed;
+  saveDatabase();
   res.json({ followed: issue.followed });
 });
 
@@ -477,6 +518,7 @@ app.patch('/api/issues/:id/status', (req, res) => {
     }
   }
 
+  saveDatabase();
   res.json(issue);
 });
 
@@ -514,6 +556,7 @@ app.post('/api/issues/:id/appeal', (req, res) => {
     timestamp: issue.appealedAt
   });
 
+  saveDatabase();
   res.json(issue);
 });
 
@@ -528,6 +571,7 @@ app.patch('/api/issues/:id/notes', (req, res) => {
   }
 
   issue.internalNotes = internalNotes || "";
+  saveDatabase();
   res.json({ success: true, internalNotes: issue.internalNotes });
 });
 
@@ -552,6 +596,7 @@ app.post('/api/issues/:id/comments', (req, res) => {
   };
 
   issue.comments.push(newComment);
+  saveDatabase();
   res.status(201).json(newComment);
 });
 
@@ -590,6 +635,7 @@ app.post('/api/notices', (req, res) => {
   };
 
   notices.push(newNotice);
+  saveDatabase();
   res.status(201).json(newNotice);
 });
 

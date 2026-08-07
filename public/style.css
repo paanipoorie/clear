@@ -8,6 +8,8 @@
   /* Main Palette */
   --color-bg: #FAFBF9;
   --color-card-bg: #FFFFFF;
+  --color-app-bg: var(--color-bg);
+  --color-kanban-bg: #F3F5F2;
   
   --color-primary: #4F8B3B;          /* Forest Green - primary action */
   --color-primary-hover: #335A29;    /* Dark Forest Green - hover state */
@@ -75,6 +77,64 @@
   
   /* Motion transitions */
   --transition-speed: 150ms;
+}
+
+/* Dark Theme Tokens */
+[data-theme="dark"] {
+  --color-bg: #121410;
+  --color-card-bg: #1B1E19;
+  --color-app-bg: linear-gradient(180deg, #141712 0%, #0d0f0c 100%);
+  --color-kanban-bg: linear-gradient(180deg, #22261f 0%, #161814 100%);
+  
+  --color-primary: #6bb352;
+  --color-primary-hover: #8ac873;
+  --color-primary-soft: #252e20;
+  --color-accent-secondary: #99cb6b;
+  --color-border: #2E362A;
+  --color-border-hover: #6bb352;
+  
+  --color-accent: var(--color-primary);
+  --color-accent-hover: var(--color-primary-hover);
+  --color-accent-soft: var(--color-primary-soft);
+  
+  --color-text-main: #F2F5F1;
+  --color-text-muted: #A1B29D;
+  --color-text-subtle: #72826F;
+  --color-destructive: #FF6B53;
+  --color-destructive-soft: #2E1E1C;
+  
+  --color-status-review-bg: #23261C;
+  --color-status-review-text: #C0D17F;
+  --color-status-review-border: #3A3F2F;
+  
+  --color-status-ack-bg: #1A2820;
+  --color-status-ack-text: #71C28F;
+  --color-status-ack-border: #273E31;
+  
+  --color-status-progress-bg: #35321A;
+  --color-status-progress-text: #EAD267;
+  --color-status-progress-border: #4D4925;
+  
+  --color-status-resolved-bg: #1A2820;
+  --color-status-resolved-text: #71C28F;
+  --color-status-resolved-border: #273E31;
+  
+  --color-status-rejected-bg: #2E1E1C;
+  --color-status-rejected-text: #FF6B53;
+  --color-status-rejected-border: #4E322F;
+
+  --shadow-flat-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-flat-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  --shadow-flat-primary: 0 4px 12px rgba(107, 179, 82, 0.08);
+  --shadow-flat-dark: 0 4px 12px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-button-hover: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .leaflet-tile-container {
+  filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+}
+[data-theme="dark"] .leaflet-container {
+  background: #121410;
 }
 
 /* ==========================================================================
@@ -284,6 +344,21 @@ textarea {
    New Authentication & Workspace Selector Flow (Peerly-inspired Layout)
    ========================================================================== */
 .auth-portal-wrapper {
+  /* Force light theme variables on landing portal */
+  --color-bg: #FAFBF9;
+  --color-card-bg: #FFFFFF;
+  --color-primary: #4F8B3B;
+  --color-primary-hover: #335A29;
+  --color-primary-soft: #F3F8B8;
+  --color-accent-secondary: #88B55C;
+  --color-border: #DDE5D7;
+  --color-border-hover: #4F8B3B;
+  --color-text-main: #171F14;
+  --color-text-muted: #5C6E58;
+  --color-text-subtle: #8A9D85;
+  --color-destructive: #D9381E;
+  --color-destructive-soft: #FDF2F0;
+
   position: fixed;
   top: 0;
   left: 0;
@@ -798,6 +873,7 @@ textarea {
   flex-direction: column;
   min-height: 100vh;
   width: 100%;
+  background: var(--color-app-bg);
 }
 
 .app-layout {
@@ -1287,7 +1363,9 @@ textarea {
   margin: 0;
   word-break: break-word;
   display: -webkit-box;
+  /* stylelint-disable-next-line property-no-vendor-prefix */
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -2567,7 +2645,7 @@ textarea {
 
 /* Independent scrolling for each Kanban column */
 .kanban-col {
-  background-color: #F3F5F2 !important;
+  background: var(--color-kanban-bg) !important;
   border: var(--border-width) solid var(--color-border) !important;
   border-radius: var(--radius-lg) !important;
   display: flex;
@@ -2615,6 +2693,7 @@ textarea {
   gap: 16px !important;
   flex-grow: 1;
   overflow-y: auto;
+  max-height: calc(100vh - 320px);
   min-height: 0;
   padding: 2px;
 }
@@ -2661,7 +2740,9 @@ textarea {
   line-height: 1.45;
   margin: 0;
   display: -webkit-box;
+  /* stylelint-disable-next-line property-no-vendor-prefix */
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
