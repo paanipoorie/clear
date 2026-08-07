@@ -463,6 +463,7 @@ textarea {
   display: flex;
   align-items: center;
   gap: 16px;
+  flex: 1;
 }
 
 .logo {
@@ -488,15 +489,12 @@ textarea {
   text-transform: uppercase !important;
 }
 
-#roleHeaderBadge {
-  background-color: var(--color-primary-soft) !important;
-  color: var(--color-primary-hover) !important;
-}
-
 .header-center {
-  flex: 1;
-  max-width: 500px;
-  margin: 0 32px;
+  width: 100%;
+  max-width: 550px;
+  margin: 0 16px;
+  display: flex;
+  justify-content: center;
 }
 
 .search-container {
@@ -535,6 +533,8 @@ textarea {
   display: flex;
   align-items: center;
   gap: 12px;
+  flex: 1;
+  justify-content: flex-end;
 }
 
 .btn-switch-portal {
@@ -2769,5 +2769,71 @@ textarea {
 
   .header-center {
     display: none; /* Hide search */
+  }
+}
+
+/* ==========================================================================
+   Brand Logo Component Styles
+   ========================================================================== */
+brand-logo {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.brand-logo-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 100%;
+  white-space: nowrap;
+}
+
+.brand-logo-icon {
+  height: 32px;
+  width: auto;
+  display: block;
+  flex-shrink: 0;
+}
+
+.brand-logo-text {
+  font-family: 'Damion', 'Style Script', 'Vibur', cursive, sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--color-primary);
+  text-transform: lowercase;
+  white-space: nowrap;
+  line-height: 1;
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+  letter-spacing: normal;
+}
+
+/* Responsiveness: Mobile scaled wordmark */
+@media (max-width: 768px) {
+  .brand-logo-icon {
+    height: 26px;
+  }
+
+  .brand-logo-text {
+    font-size: 22px;
+  }
+
+  .brand-logo-content {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .brand-logo-icon {
+    height: 22px;
+  }
+
+  .brand-logo-text {
+    font-size: 19px;
+  }
+
+  .brand-logo-content {
+    gap: 6px;
   }
 }

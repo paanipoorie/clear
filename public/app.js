@@ -144,7 +144,6 @@ function switchPortal(portalName) {
       municipalResolvedViewport.style.display = 'none';
       municipalNoticesViewport.style.display = 'none';
       
-      document.getElementById('roleHeaderBadge').textContent = 'CIVIC PORTAL';
       document.getElementById('userRoleLabel').textContent = 'Resident Reporter';
       
       // Reset sidebar active states
@@ -162,7 +161,6 @@ function switchPortal(portalName) {
       
       citizenViewport.style.display = 'none';
       
-      document.getElementById('roleHeaderBadge').textContent = `MUNICIPAL OPS • ${MOCK_MUNICIPALITY_DISTRICT}`;
       document.getElementById('userRoleLabel').textContent = `Operations Officer (${MOCK_MUNICIPALITY_DISTRICT})`;
       
       // Select Triage tab by default
@@ -816,11 +814,18 @@ function setupEventListeners() {
   // Portal selector triggers
   document.getElementById('enterPublicBtn').addEventListener('click', () => switchPortal('public'));
   document.getElementById('enterMunicipalBtn').addEventListener('click', () => switchPortal('municipality'));
-  document.getElementById('headerRoleSwitcherBtn').addEventListener('click', () => switchPortal('landing'));
-  document.getElementById('menuSwitchRoleBtn').addEventListener('click', () => {
-    profileDropdown.classList.remove('open');
-    switchPortal('landing');
-  });
+  const headerRoleSwitcherBtn = document.getElementById('headerRoleSwitcherBtn');
+  if (headerRoleSwitcherBtn) {
+    headerRoleSwitcherBtn.addEventListener('click', () => switchPortal('landing'));
+  }
+  
+  const menuSwitchRoleBtn = document.getElementById('menuSwitchRoleBtn');
+  if (menuSwitchRoleBtn) {
+    menuSwitchRoleBtn.addEventListener('click', () => {
+      profileDropdown.classList.remove('open');
+      switchPortal('landing');
+    });
+  }
 
   // Ops Tab Buttons Click Handling (Sidebar)
   opsTriageTabBtn.addEventListener('click', () => switchOpsTab('triage'));
