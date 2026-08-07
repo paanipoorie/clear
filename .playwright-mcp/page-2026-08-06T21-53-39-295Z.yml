@@ -1,0 +1,102 @@
+- generic [ref=f1e29]:
+  - banner [ref=f1e30]:
+    - generic [ref=f1e31]:
+      - heading "C.L.E.A.R." [level=1] [ref=f1e32]
+      - generic [ref=f1e33]: MUNICIPAL OPS • LUDHIANA
+    - textbox "Find reports or districts..." [ref=f1e36]
+    - button "Switch Role" [ref=f1e38] [cursor=pointer]
+  - generic [ref=f1e42]:
+    - complementary [ref=f1e43]:
+      - generic [ref=f1e44]:
+        - button "Triage Board" [ref=f1e45] [cursor=pointer]
+        - button "Resolved Issues" [active] [ref=f1e48] [cursor=pointer]
+        - button "Manage Notices" [ref=f1e52] [cursor=pointer]
+      - generic [ref=f1e57]:
+        - generic [ref=f1e62]:
+          - generic [ref=f1e63]: user
+          - generic [ref=f1e64]: Operations Officer (LUDHIANA)
+        - button "Profile options" [ref=f1e65] [cursor=pointer]
+    - main [ref=f1e70]:
+      - generic [ref=f1e101]:
+        - heading "Resolved Reports" [level=2] [ref=f1e103]
+        - generic [ref=f1e104]:
+          - article [ref=f1e105] [cursor=pointer]:
+            - generic [ref=f1e106]:
+              - generic [ref=f1e107]:
+                - heading "open waste burning causing the smoke" [level=3] [ref=f1e108]
+                - generic [ref=f1e109]:
+                  - generic [ref=f1e110]: Punjab, LUDHIANA
+                  - generic [ref=f1e111]: Resolved
+                  - generic [ref=f1e112]: • Resolved on 8/7/2026
+              - button "Post actions" [ref=f1e114]
+            - img "Report cover photo" [ref=f1e120]
+            - paragraph [ref=f1e121]: Dry leaves and plastic waste being burned in the open field opposite the public school, causing severe smoke and breathing difficulties.
+            - generic [ref=f1e122]:
+              - generic [ref=f1e123]: Public Resolution Timeline
+              - generic [ref=f1e124]:
+                - generic [ref=f1e125]:
+                  - generic [ref=f1e126]: Reported
+                  - generic [ref=f1e127]: 8/6/2026 03:08 PM
+                - generic [ref=f1e129]:
+                  - generic [ref=f1e130]: Acknowledged
+                  - generic [ref=f1e131]: 8/7/2026 03:09 AM
+                - generic [ref=f1e133]:
+                  - generic [ref=f1e134]: In Progress
+                  - generic [ref=f1e135]: 8/7/2026 03:13 AM
+                - generic [ref=f1e137]:
+                  - generic [ref=f1e138]: Resolved
+                  - generic [ref=f1e139]: 8/7/2026 03:15 AM
+              - generic [ref=f1e140]:
+                - strong [ref=f1e141]: "Resolution Summary Note:"
+                - paragraph [ref=f1e142]: The field was cleaned of all waste and leaves, and school zone is clear.
+                - img "Resolution photographic proof" [ref=f1e144]
+            - generic [ref=f1e145]:
+              - button "Upvote" [ref=f1e146]:
+                - generic [ref=f1e149]: "28"
+              - button "Downvote" [ref=f1e150]:
+                - generic [ref=f1e153]: "1"
+              - button "Verify issue report" [ref=f1e155]:
+                - generic [ref=f1e158]: Verify (8)
+              - button "Comments (1)" [ref=f1e159]
+              - button "Share post" [ref=f1e163]
+              - button "Track" [ref=f1e167]
+          - article [ref=f1e172] [cursor=pointer]:
+            - generic [ref=f1e173]:
+              - generic [ref=f1e174]:
+                - heading "Hazardous chemical leakage in industrial park" [level=3] [ref=f1e175]
+                - generic [ref=f1e176]:
+                  - generic [ref=f1e177]: Punjab, LUDHIANA
+                  - generic [ref=f1e178]: Resolved
+                  - generic [ref=f1e179]: • Resolved on 8/6/2026
+              - button "Post actions" [ref=f1e181]
+            - img "Report cover photo" [ref=f1e187]
+            - paragraph [ref=f1e188]: Chemical containers leaking near the storm drain in sector 4. Corrosive fluid pooling on the ground.
+            - generic [ref=f1e189]:
+              - generic [ref=f1e190]: Public Resolution Timeline
+              - generic [ref=f1e191]:
+                - generic [ref=f1e192]:
+                  - generic [ref=f1e193]: Reported
+                  - generic [ref=f1e194]: 8/5/2026 03:08 AM
+                - generic [ref=f1e196]:
+                  - generic [ref=f1e197]: Acknowledged
+                  - generic [ref=f1e198]: 8/5/2026 05:08 AM
+                - generic [ref=f1e200]:
+                  - generic [ref=f1e201]: In Progress
+                  - generic [ref=f1e202]: 8/5/2026 11:08 AM
+                - generic [ref=f1e204]:
+                  - generic [ref=f1e205]: Resolved
+                  - generic [ref=f1e206]: 8/6/2026 03:08 AM
+              - generic [ref=f1e207]:
+                - strong [ref=f1e208]: "Resolution Summary Note:"
+                - paragraph [ref=f1e209]: Our chemical containment team successfully sealed the containers and cleaned up the spill using absorbent sand. The storm drain was verified clean.
+                - img "Resolution photographic proof" [ref=f1e211]
+            - generic [ref=f1e212]:
+              - button "Upvote" [ref=f1e213]:
+                - generic [ref=f1e216]: "65"
+              - button "Downvote" [ref=f1e217]:
+                - generic [ref=f1e220]: "2"
+              - button "Verify issue report" [ref=f1e222]:
+                - generic [ref=f1e225]: Verify (28)
+              - button "Comments (1)" [ref=f1e226]
+              - button "Share post" [ref=f1e230]
+              - button "Track" [ref=f1e234]

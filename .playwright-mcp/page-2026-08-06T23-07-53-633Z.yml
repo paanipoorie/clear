@@ -1,0 +1,51 @@
+- generic [ref=f10e29]:
+  - banner [ref=f10e30]:
+    - generic [ref=f10e31]:
+      - heading "C.L.E.A.R." [level=1] [ref=f10e32]
+      - generic [ref=f10e33]: MUNICIPAL OPS • LUDHIANA
+    - textbox "Find reports or districts..." [ref=f10e36]
+    - button "Switch Role" [ref=f10e38] [cursor=pointer]
+  - generic [ref=f10e47]:
+    - complementary [ref=f10e48]:
+      - generic [ref=f10e204]:
+        - button "Triage Board" [ref=f10e205] [cursor=pointer]
+        - button "Resolved Issues" [ref=f10e208] [cursor=pointer]
+        - button "Manage Notices" [ref=f10e212] [cursor=pointer]
+      - generic [ref=f10e74]:
+        - generic [ref=f10e79]:
+          - generic [ref=f10e80]: user
+          - generic [ref=f10e81]: Operations Officer (LUDHIANA)
+        - button "Profile options" [ref=f10e82] [cursor=pointer]
+    - main [ref=f10e87]:
+      - generic [ref=f10e216]:
+        - generic [ref=f10e217]:
+          - generic [ref=f10e218]:
+            - generic [ref=f10e219]: Pending Review
+            - generic [ref=f10e220]: "1"
+            - generic [ref=f10e221]: Awaiting triage decision
+          - generic [ref=f10e222]:
+            - generic [ref=f10e223]: Acknowledged
+            - generic [ref=f10e224]: "0"
+            - generic [ref=f10e225]: Triaged & accepted
+          - generic [ref=f10e226]:
+            - generic [ref=f10e227]: In Progress
+            - generic [ref=f10e228]: "0"
+            - generic [ref=f10e229]: Active field crew dispatch
+        - generic [ref=f10e230]:
+          - generic [ref=f10e231]:
+            - generic [ref=f10e232]:
+              - heading "Review Queue" [level=3] [ref=f10e233]
+              - generic [ref=f10e234]: "1"
+            - generic [ref=f10e236] [cursor=pointer]:
+              - heading "open waste burning causing the smoke" [level=4] [ref=f10e237]
+              - generic [ref=f10e238]: LUDHIANA
+              - generic [ref=f10e240]:
+                - button "Acknowledge" [ref=f10e241]
+                - button "Reject" [ref=f10e242]
+                - button "Mark Duplicate" [ref=f10e243]
+          - generic [ref=f10e245]:
+            - heading "Acknowledged" [level=3] [ref=f10e246]
+            - generic [ref=f10e247]: "0"
+          - generic [ref=f10e250]:
+            - heading "In Progress" [level=3] [ref=f10e251]
+            - generic [ref=f10e252]: "0"

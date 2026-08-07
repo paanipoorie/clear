@@ -210,10 +210,10 @@ app.post('/api/issues', (req, res) => {
   res.status(201).json(newIssue);
 });
 
-// Vote (upvote / downvote)
+// Vote (upvote only)
 app.post('/api/issues/:id/vote', (req, res) => {
   const id = parseInt(req.params.id);
-  const { direction } = req.body; // 'up' or 'down'
+  const { direction } = req.body; // 'up'
 
   const issue = issues.find(i => i.id === id);
   if (!issue) {
@@ -222,11 +222,9 @@ app.post('/api/issues/:id/vote', (req, res) => {
 
   if (direction === 'up') {
     issue.upvotes += 1;
-  } else if (direction === 'down') {
-    issue.downvotes += 1;
   }
 
-  res.json({ upvotes: issue.upvotes, downvotes: issue.downvotes });
+  res.json({ upvotes: issue.upvotes });
 });
 
 
@@ -240,18 +238,6 @@ app.post('/api/issues/:id/follow', (req, res) => {
 
   issue.followed = !issue.followed;
   res.json({ followed: issue.followed });
-});
-
-// Report Post
-app.post('/api/issues/:id/report', (req, res) => {
-  const id = parseInt(req.params.id);
-  const issue = issues.find(i => i.id === id);
-  if (!issue) {
-    return res.status(404).json({ error: "Issue not found" });
-  }
-
-  issue.reported = true;
-  res.json({ reported: issue.reported });
 });
 
 // Update Status (Municipality Triage)

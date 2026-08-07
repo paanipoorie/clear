@@ -358,7 +358,16 @@ function renderIssues(issues) {
     }
   }
   
-  if (issues.length === 0) {
+  // Filter issues for citizen portal view
+  const filteredIssues = issues.filter(issue => {
+    // Filter out rejected issues
+    if (issue.status === 'Rejected') return false;
+    // Explorer (active feed) should NEVER display resolved reports
+    if (!state.showFollowedOnly && issue.status === 'Resolved') return false;
+    return true;
+  });
+
+  if (filteredIssues.length === 0) {
     feedContainer.innerHTML = `
       <div class="empty-state">
         <svg class="icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -373,69 +382,63 @@ function renderIssues(issues) {
   }
 
   feedContainer.innerHTML = '';
-  issues.forEach(issue => {
-    // Filter out rejected issues from citizen portal view
-    if (issue.status === 'Rejected') return;
-    feedContainer.appendChild(createPostCardElement(issue));
+  filteredIssues.forEach(issue => {
+    feedContainer.appendChild(ReportPost(issue));
   });
 }
 
+// Helper to get image array for an issue (enforcing placeholder images)
+function getIssueImages(issue) {
+  if (issue.images && issue.images.length > 0) {
+    return issue.images;
+  }
+  const placeholders = {
+    dumping: "https://images.unsplash.com/photo-1611284446314-60a58ac0deb9?w=800&auto=format&fit=crop&q=60",
+    burning: "https://images.unsplash.com/photo-1534088568595-a066f410bcda?w=800&auto=format&fit=crop&q=60",
+    water: "https://images.unsplash.com/photo-1504370805625-d32c54b16100?w=800&auto=format&fit=crop&q=60",
+    default: "https://images.unsplash.com/photo-1532187643603-ba119ca4109e?w=800&auto=format&fit=crop&q=60"
+  };
+  return [placeholders[issue.imageType] || placeholders.default];
+}
+
 // Reusable Post Card component creator
-function createPostCardElement(issue) {
+function ReportPost(issue) {
   const card = document.createElement('article');
   card.className = 'post-card';
   card.id = `issue-${issue.id}`;
 
-  // Image (optional)
-  let imageHTML = '';
+  // Image (mandatory, fallback to placeholder)
   const mainImages = (issue.status === 'Resolved' && issue.resolutionImages && issue.resolutionImages.length > 0)
     ? issue.resolutionImages
-    : issue.images;
+    : getIssueImages(issue);
 
-  if (mainImages && mainImages.length > 0) {
-    imageHTML = `
-      <div class="post-card-image-wrapper">
-        <img src="${mainImages[0]}" class="post-card-image" alt="Report photo">
-      </div>
-    `;
-  }
-
-  // Status badge inline class mapping
-  let statusClass = 'status-review-queue';
-  if (issue.status === 'Resolved') statusClass = 'status-resolved';
-  else if (issue.status === 'In Progress') statusClass = 'status-in-progress';
-  else if (issue.status === 'Acknowledged') statusClass = 'status-acknowledged';
-  else if (issue.status === 'Rejected') statusClass = 'status-rejected';
+  const imageHTML = `
+    <div class="post-card-image-wrapper">
+      <img src="${mainImages[0]}" class="post-card-image" alt="Report photo">
+    </div>
+  `;
 
   // Order:
   // Title
-  // District • Status
-  // Image (optional)
+  // District (No Status badge)
+  // Image (mandatory)
   // Description preview
   // Action bar
   card.innerHTML = `
     <h3 class="post-card-title">${escapeHTML(issue.title)}</h3>
     <div class="post-card-meta">
       <span class="post-card-district">${escapeHTML(issue.subLocation)}</span>
-      <span class="meta-dot">&bull;</span>
-      <span class="status-badge-inline ${statusClass}">${escapeHTML(issue.status)}</span>
     </div>
     ${imageHTML}
     ${issue.description ? `<p class="post-card-desc-preview">${escapeHTML(issue.description)}</p>` : ''}
     <div class="post-card-actions">
-      <!-- Vote Buttons -->
+      <!-- Upvote button -->
       <button class="action-pill upvote-btn" aria-label="Upvote">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="icon icon-sm">
           <polyline points="18 15 12 9 6 15"></polyline>
         </svg>
         <span class="upvote-count">${issue.upvotes}</span>
-      </button>
-      
-      <button class="action-pill downvote-btn" aria-label="Downvote">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="icon icon-sm">
-          <polyline points="6 9 12 15 18 9"></polyline>
-        </svg>
-        <span class="downvote-count">${issue.downvotes}</span>
+        <span>Upvotes</span>
       </button>
       
       <!-- Comments button -->
@@ -444,6 +447,7 @@ function createPostCardElement(issue) {
           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
         </svg>
         <span class="comment-count">${issue.comments ? issue.comments.length : 0}</span>
+        <span>Comments</span>
       </button>
       
       <!-- Follow button (📍) -->
@@ -452,6 +456,7 @@ function createPostCardElement(issue) {
           <path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"></path>
           <circle cx="12" cy="10" r="3"></circle>
         </svg>
+        <span>Follow</span>
       </button>
       
       <!-- Share button -->
@@ -460,6 +465,7 @@ function createPostCardElement(issue) {
           <line x1="22" y1="2" x2="11" y2="13"></line>
           <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
         </svg>
+        <span>Share</span>
       </button>
     </div>
   `;
@@ -514,30 +520,7 @@ function bindCardEvents(card, issue) {
         const data = await res.json();
         card.querySelector('.upvote-count').textContent = data.upvotes;
         upvoteBtn.classList.add('vote-btn-active-up');
-        card.querySelector('.downvote-btn').classList.remove('vote-btn-active-down');
         showToast('Upvoted environmental report');
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  });
-
-  // Downvote Action
-  const downvoteBtn = card.querySelector('.downvote-btn');
-  downvoteBtn.addEventListener('click', async (e) => {
-    e.stopPropagation();
-    try {
-      const res = await fetch(`/api/issues/${issue.id}/vote`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ direction: 'down' })
-      });
-      if (res.ok) {
-        const data = await res.json();
-        card.querySelector('.downvote-count').textContent = data.downvotes;
-        downvoteBtn.classList.add('vote-btn-active-down');
-        card.querySelector('.upvote-btn').classList.remove('vote-btn-active-up');
-        showToast('Downvoted environmental report');
       }
     } catch (err) {
       console.error(err);
@@ -1289,32 +1272,7 @@ function setupEventListeners() {
     });
   }
 
-  // Sidebar Drawer Citizen Action (Report environmental abuse) Button
-  const detailReportBtn = document.getElementById('opsDetailReportBtn');
-  if (detailReportBtn) {
-    detailReportBtn.addEventListener('click', async () => {
-      const issue = state.selectedIssueForOps;
-      if (!issue) return;
 
-      try {
-        const res = await fetch(`/api/issues/${issue.id}/report`, { method: 'POST' });
-        if (res.ok) {
-          const data = await res.json();
-          issue.reported = data.reported;
-          detailReportBtn.disabled = true;
-          detailReportBtn.querySelector('span').textContent = 'Reported';
-          detailReportBtn.style.opacity = '0.6';
-          showToast('Thank you. Issue report submitted for review');
-          
-          // Refresh the main feed to show reported state updates
-          fetchIssues();
-        }
-      } catch (err) {
-        console.error(err);
-        showToast('Error submitting report');
-      }
-    });
-  }
 }
 
 // Track Modal State
@@ -1405,13 +1363,12 @@ function showToast(message) {
 
 // Calculate priority score for sorting the Review Queue
 function calculatePriorityScore(issue) {
-  const verifications = issue.verifications || 0;
   const upvotes = issue.upvotes || 0;
   const createdAt = new Date(issue.createdAt);
   const hoursWaiting = Math.max(0, (Date.now() - createdAt.getTime()) / (1000 * 60 * 60));
 
-  // Score = verifications (2.5) + upvotes (1.0) + hours waiting (0.15)
-  return (verifications * 2.5) + (upvotes * 1.0) + (hoursWaiting * 0.15);
+  // Score = upvotes (1.5) + hours waiting (0.15)
+  return (upvotes * 1.5) + (hoursWaiting * 0.15);
 }
 
 async function fetchOpsData() {
@@ -1522,26 +1479,25 @@ function renderResolvedIssuesFeed(issues) {
     const card = document.createElement('div');
     card.className = 'ops-resolved-card-item';
     
-    // Check if custom resolution images exist
-    let resolutionPhotosHTML = '';
-    if (issue.resolutionImages && issue.resolutionImages.length > 0) {
-      resolutionPhotosHTML = `
-        <div class="ops-resolved-card-photos">
-          ${issue.resolutionImages.map(img => `<img src="${img}" alt="Resolution proof" onclick="window.open('${img}')">`).join('')}
-        </div>
-      `;
-    }
+    // Check if custom resolution images exist, fallback to placeholder
+    const resImgs = (issue.resolutionImages && issue.resolutionImages.length > 0)
+      ? issue.resolutionImages
+      : ["https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=800&auto=format&fit=crop&q=60"];
+
+    const resolutionPhotosHTML = `
+      <div class="ops-resolved-card-photos">
+        ${resImgs.map(img => `<img src="${img}" alt="Resolution proof" onclick="window.open('${img}')">`).join('')}
+      </div>
+    `;
     
-    // Check if citizen images exist
-    let citizenPhotosHTML = '';
-    if (issue.images && issue.images.length > 0) {
-      citizenPhotosHTML = `
-        <div class="ops-resolved-card-photos" style="margin-bottom: 8px;">
-          <span style="font-size: 11px; color: var(--color-muted-text); display: block; width: 100%;">Citizen Proof:</span>
-          ${issue.images.map(img => `<img src="${img}" alt="Citizen report photo" onclick="window.open('${img}')" style="height: 60px;">`).join('')}
-        </div>
-      `;
-    }
+    // Get citizen images, fallback to placeholder
+    const citizenImages = getIssueImages(issue);
+    const citizenPhotosHTML = `
+      <div class="ops-resolved-card-photos" style="margin-bottom: 8px;">
+        <span style="font-size: 11px; color: var(--color-muted-text); display: block; width: 100%;">Citizen Proof:</span>
+        ${citizenImages.map(img => `<img src="${img}" alt="Citizen report photo" onclick="window.open('${img}')" style="height: 60px;">`).join('')}
+      </div>
+    `;
 
     const resolvedDate = issue.timeline 
       ? new Date(issue.timeline.filter(t => t.status === 'Resolved')[0]?.timestamp || issue.createdAt).toLocaleDateString()
@@ -1789,21 +1745,9 @@ function renderOpsDetailPanel(issue) {
   
   const statusEl = document.getElementById('opsDetailStatus');
   statusEl.textContent = issue.status;
-  statusEl.className = 'status-badge-detail';
-  if (issue.status === 'Resolved') {
-    statusEl.classList.add('status-resolved');
-  } else if (issue.status === 'In Progress') {
-    statusEl.classList.add('status-in-progress');
-  } else if (issue.status === 'Acknowledged') {
-    statusEl.classList.add('status-acknowledged');
-  } else if (issue.status === 'Review Queue') {
-    statusEl.classList.add('status-review-queue');
-  } else {
-    statusEl.classList.add('status-rejected');
-  }
+  statusEl.className = 'val-text';
 
   document.getElementById('opsDetailDesc').textContent = issue.description || 'No description supplied.';
-  document.getElementById('opsDetailUpvotes').textContent = issue.upvotes || 0;
 
   const linksContainer = document.getElementById('opsDetailLinksContainer');
   const linksUl = document.getElementById('opsDetailLinks');
@@ -1815,38 +1759,11 @@ function renderOpsDetailPanel(issue) {
   }
 
   const gallery = document.getElementById('opsDetailPhotos');
-  if (issue.images && issue.images.length > 0) {
-    gallery.innerHTML = issue.images.map(img => `<img src="${img}" class="ops-detail-photo" alt="Details photo" onclick="window.open('${img}')">`).join('');
-  } else {
-    gallery.innerHTML = `
-      <div class="empty-photos-frame">
-        <p>No citizen photos attached.</p>
-      </div>
-    `;
-  }
+  const detailImages = getIssueImages(issue);
+  gallery.innerHTML = detailImages.map(img => `<img src="${img}" class="ops-detail-photo" alt="Details photo" onclick="window.open('${img}')">`).join('');
 
   // Render comments
   renderOpsDetailPanelComments(issue);
-
-  // Toggle Citizen Actions Panel group in drawer
-  const citizenActionsField = document.getElementById('opsDetailCitizenActionsField');
-  if (citizenActionsField) {
-    if (state.activePortal === 'public') {
-      citizenActionsField.style.display = 'block';
-      const reportBtn = document.getElementById('opsDetailReportBtn');
-      if (issue.reported) {
-        reportBtn.disabled = true;
-        reportBtn.querySelector('span').textContent = 'Reported';
-        reportBtn.style.opacity = '0.6';
-      } else {
-        reportBtn.disabled = false;
-        reportBtn.querySelector('span').textContent = 'Report Environmental Abuse';
-        reportBtn.style.opacity = '1';
-      }
-    } else {
-      citizenActionsField.style.display = 'none';
-    }
-  }
 
   // Toggle Municipality panel group contents
   const resContainer = document.getElementById('opsDetailResolutionContainer');
@@ -1866,11 +1783,11 @@ function renderOpsDetailPanel(issue) {
       <div style="font-size: 11px; color: var(--color-text-muted); margin-top: 8px;">Resolved on: <strong>${resolvedDate}</strong></div>
     `;
     
-    if (issue.resolutionImages && issue.resolutionImages.length > 0) {
-      resPhotos.innerHTML = issue.resolutionImages.map(img => `<img src="${img}" alt="Resolved proof" onclick="window.open('${img}')" style="max-height:120px; border-radius:4px; object-fit:cover; cursor:pointer;">`).join('');
-    } else {
-      resPhotos.innerHTML = '';
+    let resImgs = issue.resolutionImages;
+    if (!resImgs || resImgs.length === 0) {
+      resImgs = ["https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=800&auto=format&fit=crop&q=60"];
     }
+    resPhotos.innerHTML = resImgs.map(img => `<img src="${img}" alt="Resolved proof" onclick="window.open('${img}')" style="max-height:120px; border-radius:4px; object-fit:cover; cursor:pointer;">`).join('');
   } else {
     resContainer.style.display = 'none';
   }

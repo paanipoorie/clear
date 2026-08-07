@@ -1,0 +1,103 @@
+- generic [active] [ref=f4e28]:
+  - generic [ref=f4e29]:
+    - banner [ref=f4e30]:
+      - generic [ref=f4e31]:
+        - heading "C.L.E.A.R." [level=1] [ref=f4e32]
+        - generic [ref=f4e33]: MUNICIPAL OPS • LUDHIANA
+      - textbox "Find reports or districts..." [ref=f4e36]
+      - button "Switch Role" [ref=f4e38] [cursor=pointer]
+    - generic [ref=f4e42]:
+      - complementary [ref=f4e43]:
+        - generic [ref=f4e44]:
+          - button "Triage Board" [ref=f4e45] [cursor=pointer]
+          - button "Resolved Issues" [ref=f4e48] [cursor=pointer]
+          - button "Manage Notices" [ref=f4e52] [cursor=pointer]
+        - generic [ref=f4e57]:
+          - generic [ref=f4e62]:
+            - generic [ref=f4e63]: user
+            - generic [ref=f4e64]: Operations Officer (LUDHIANA)
+          - button "Profile options" [ref=f4e65] [cursor=pointer]
+      - main [ref=f4e70]:
+        - generic [ref=f4e71]:
+          - generic [ref=f4e72]:
+            - generic [ref=f4e73]:
+              - generic [ref=f4e74]: Pending Review
+              - generic [ref=f4e75]: "0"
+              - generic [ref=f4e76]: Awaiting triage decision
+            - generic [ref=f4e77]:
+              - generic [ref=f4e78]: Acknowledged
+              - generic [ref=f4e79]: "0"
+              - generic [ref=f4e80]: Triaged & accepted
+            - generic [ref=f4e81]:
+              - generic [ref=f4e82]: In Progress
+              - generic [ref=f4e83]: "1"
+              - generic [ref=f4e84]: Active field crew dispatch
+          - generic [ref=f4e85]:
+            - generic [ref=f4e87]:
+              - heading "Review Queue" [level=3] [ref=f4e88]
+              - text: "0"
+            - generic [ref=f4e98]:
+              - heading "Acknowledged" [level=3] [ref=f4e99]
+              - text: "0"
+            - generic [ref=f4e100]:
+              - generic [ref=f4e101]:
+                - heading "In Progress" [level=3] [ref=f4e102]
+                - text: "1"
+              - generic [ref=f4e182]:
+                - heading "Open burning of industrial garbage" [level=4] [ref=f4e183]
+                - generic [ref=f4e184]: LUDHIANA
+  - generic [ref=f4e104]:
+    - generic [ref=f4e105]:
+      - heading "Report Inspection" [level=3] [ref=f4e106]
+      - button "Close details panel" [ref=f4e107] [cursor=pointer]: ×
+    - generic [ref=f4e108]:
+      - generic [ref=f4e109]:
+        - heading "General" [level=4] [ref=f4e110]
+        - generic [ref=f4e111]:
+          - generic [ref=f4e112]:
+            - generic [ref=f4e113]: Title
+            - generic [ref=f4e114]: Open burning of industrial garbage
+          - generic [ref=f4e115]:
+            - generic [ref=f4e116]: District
+            - generic [ref=f4e117]: LUDHIANA
+          - generic [ref=f4e118]:
+            - generic [ref=f4e119]: Status
+            - generic [ref=f4e120]: In Progress
+      - generic [ref=f4e121]:
+        - heading "Evidence" [level=4] [ref=f4e122]
+        - generic [ref=f4e123]:
+          - text: Images
+          - paragraph [ref=f4e186]: No citizen photos attached.
+        - generic [ref=f4e127]:
+          - text: Description
+          - paragraph [ref=f4e128]: Large piles of plastic insulation and industrial scrap being burned daily in the open fields of Sector 4 Industrial Area.
+        - generic [ref=f4e129]:
+          - text: Map
+          - generic [ref=f4e130]:
+            - button "Marker" [ref=f4e187] [cursor=pointer]
+            - generic:
+              - generic [ref=f4e188]:
+                - button "Zoom in" [ref=f4e189] [cursor=pointer]: +
+                - button "Zoom out" [ref=f4e190] [cursor=pointer]: −
+              - generic [ref=f4e191]:
+                - link "Leaflet" [ref=f4e192] [cursor=pointer]:
+                  - /url: https://leafletjs.com
+                - text: "| © OpenStreetMap"
+          - generic [ref=f4e141]: "GPS: 30.9010, 75.8573"
+      - generic [ref=f4e142]:
+        - heading "Community" [level=4] [ref=f4e143]
+        - generic [ref=f4e144]:
+          - generic [ref=f4e145]:
+            - generic [ref=f4e146]: Verification Count
+            - generic [ref=f4e147]: "0"
+          - generic [ref=f4e148]:
+            - generic [ref=f4e149]: Upvotes
+            - generic [ref=f4e150]: "1"
+      - generic [ref=f4e151]:
+        - heading "Municipality" [level=4] [ref=f4e152]
+        - generic [ref=f4e153]:
+          - text: Status Actions
+          - generic [ref=f4e154]:
+            - generic [ref=f4e197]: Action ongoing. Ready to resolve?
+            - button "Resolve Report" [ref=f4e198] [cursor=pointer]
+  - generic [ref=f4e176]: "Status updated to: In Progress"

@@ -1,0 +1,52 @@
+- generic [ref=e29]:
+  - banner [ref=e30]:
+    - generic [ref=e31]:
+      - heading "C.L.E.A.R." [level=1] [ref=e32]
+      - generic [ref=e33]: MUNICIPAL OPS • LUDHIANA
+    - textbox "Find reports or districts..." [ref=e36]
+    - button "Switch Role" [ref=e38] [cursor=pointer]
+  - generic [ref=e42]:
+    - complementary [ref=e43]:
+      - generic [ref=e44]:
+        - button "Triage Board" [ref=e45] [cursor=pointer]
+        - button "Resolved Issues" [ref=e48] [cursor=pointer]
+        - button "Manage Notices" [ref=e52] [cursor=pointer]
+      - generic [ref=e57]:
+        - generic [ref=e62]:
+          - generic [ref=e63]: user
+          - generic [ref=e64]: Operations Officer (LUDHIANA)
+        - button "Profile options" [ref=e65] [cursor=pointer]
+    - main [ref=e70]:
+      - generic [ref=e71]:
+        - generic [ref=e72]:
+          - generic [ref=e73]:
+            - generic [ref=e74]: Pending Review
+            - generic [ref=e75]: "1"
+            - generic [ref=e76]: Awaiting triage decision
+          - generic [ref=e77]:
+            - generic [ref=e78]: Acknowledged
+            - generic [ref=e79]: "0"
+            - generic [ref=e80]: Triaged & accepted
+          - generic [ref=e81]:
+            - generic [ref=e82]: In Progress
+            - generic [ref=e83]: "0"
+            - generic [ref=e84]: Active field crew dispatch
+        - generic [ref=e85]:
+          - generic [ref=e86]:
+            - generic [ref=e87]:
+              - heading "Review Queue" [level=3] [ref=e88]
+              - generic [ref=e89]: "1"
+            - generic [ref=e91] [cursor=pointer]:
+              - heading "open waste burning causing the smoke" [level=4] [ref=e92]
+              - generic [ref=e93]:
+                - generic [ref=e94]: LUDHIANA
+                - generic [ref=e95]: • 12 hours ago
+              - generic [ref=e96]:
+                - generic "Community Verifications" [ref=e97]: 8 verifications
+                - generic "Upvotes" [ref=e101]: 28 upvotes
+          - generic [ref=e105]:
+            - heading "Acknowledged" [level=3] [ref=e106]
+            - generic [ref=e107]: "0"
+          - generic [ref=e110]:
+            - heading "In Progress" [level=3] [ref=e111]
+            - generic [ref=e112]: "0"

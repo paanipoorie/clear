@@ -1,0 +1,89 @@
+- generic [ref=f5e29]:
+  - banner [ref=f5e30]:
+    - generic [ref=f5e31]:
+      - heading "C.L.E.A.R." [level=1] [ref=f5e32]
+      - generic [ref=f5e33]: CIVIC PORTAL
+    - textbox "Find reports or districts..." [ref=f5e36]
+    - generic [ref=f5e37]:
+      - button "Switch Role" [ref=f5e38] [cursor=pointer]
+      - button "Notifications" [ref=f5e42] [cursor=pointer]
+  - generic [ref=f5e47]:
+    - complementary [ref=f5e48]:
+      - generic [ref=f5e49]:
+        - button "Explore" [ref=f5e50] [cursor=pointer]
+        - button "Following" [ref=f5e54] [cursor=pointer]
+        - button "Notices" [ref=f5e57] [cursor=pointer]
+      - button "Create Report" [ref=f5e62] [cursor=pointer]
+      - generic [ref=f5e64]:
+        - generic [ref=f5e65]: Location Filter
+        - button "Punjab" [expanded] [ref=f5e66] [cursor=pointer]
+        - list [ref=f5e183]:
+          - listitem [ref=f5e184]:
+            - button "All Punjab" [ref=f5e185] [cursor=pointer]
+          - listitem [ref=f5e186]:
+            - button "SAS NAGAR" [ref=f5e187] [cursor=pointer]
+          - listitem [ref=f5e188]:
+            - button "SANGRUR" [ref=f5e189] [cursor=pointer]
+          - listitem [ref=f5e190]:
+            - button "PATIALA" [ref=f5e191] [cursor=pointer]
+          - listitem [ref=f5e192]:
+            - button "PATHANKOT" [ref=f5e193] [cursor=pointer]
+          - listitem [ref=f5e194]:
+            - button "MANSA" [ref=f5e195] [cursor=pointer]
+          - listitem [ref=f5e196]:
+            - button "LUDHIANA" [ref=f5e197] [cursor=pointer]
+          - listitem [ref=f5e198]:
+            - button "KAPURTHALA" [ref=f5e199] [cursor=pointer]
+          - listitem [ref=f5e200]:
+            - button "FIROZPUR" [ref=f5e201] [cursor=pointer]
+      - generic [ref=f5e74]:
+        - generic [ref=f5e79]:
+          - generic [ref=f5e80]: user
+          - generic [ref=f5e81]: Resident Reporter
+        - button "Profile options" [ref=f5e82] [cursor=pointer]
+    - main [ref=f5e87]:
+      - generic [ref=f5e88]:
+        - heading "Active Local Reports" [level=2] [ref=f5e90]
+        - generic [ref=f5e91]:
+          - article [ref=f5e92]:
+            - generic [ref=f5e93]:
+              - generic [ref=f5e94]:
+                - heading "Unclogged drain overflowing onto main road" [level=3] [ref=f5e95]
+                - generic [ref=f5e96]:
+                  - generic [ref=f5e97]: Punjab, PATIALA
+                  - generic [ref=f5e98]: In Progress
+              - generic [ref=f5e99]:
+                - button "Post actions" [active] [ref=f5e100] [cursor=pointer]
+                - generic [ref=f5e202]:
+                  - button "Follow Post" [ref=f5e203] [cursor=pointer]
+                  - button "Report" [ref=f5e204] [cursor=pointer]
+            - paragraph [ref=f5e110]: Monsoon clogging in the sewer drainage system leading to wastewater overflowing onto the public street, creating a traffic bottleneck and hygiene issue.
+            - generic [ref=f5e111]:
+              - button "Upvote" [ref=f5e112] [cursor=pointer]:
+                - generic [ref=f5e115]: "15"
+              - button "Downvote" [ref=f5e116] [cursor=pointer]:
+                - generic [ref=f5e119]: "0"
+              - button "Verify issue report" [ref=f5e121] [cursor=pointer]:
+                - generic [ref=f5e124]: Verify (3)
+              - button "Comments (0)" [ref=f5e125] [cursor=pointer]
+              - button "Share post" [ref=f5e129] [cursor=pointer]
+              - button "Track" [ref=f5e133] [cursor=pointer]
+          - article [ref=f5e138]:
+            - generic [ref=f5e139]:
+              - generic [ref=f5e140]:
+                - heading "Illegal dumping behind residential area" [level=3] [ref=f5e141]
+                - generic [ref=f5e142]:
+                  - generic [ref=f5e143]: Punjab, SAS NAGAR
+                  - generic [ref=f5e144]: Acknowledged
+              - button "Post actions" [ref=f5e146] [cursor=pointer]
+            - paragraph [ref=f5e155]: Piles of trash bags and plastic debris accumulating behind the residential block, causing odor and attracting stray animals.
+            - generic [ref=f5e156]:
+              - button "Upvote" [ref=f5e157] [cursor=pointer]:
+                - generic [ref=f5e160]: "42"
+              - button "Downvote" [ref=f5e161] [cursor=pointer]:
+                - generic [ref=f5e164]: "3"
+              - button "Verify issue report" [ref=f5e166] [cursor=pointer]:
+                - generic [ref=f5e169]: Verify (15)
+              - button "Comments (2)" [ref=f5e170] [cursor=pointer]
+              - button "Share post" [ref=f5e174] [cursor=pointer]
+              - button "Track" [ref=f5e178] [cursor=pointer]

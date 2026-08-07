@@ -1,0 +1,107 @@
+- generic [active] [ref=f3e28]:
+  - generic [ref=f3e29]:
+    - banner [ref=f3e30]:
+      - generic [ref=f3e31]:
+        - heading "C.L.E.A.R." [level=1] [ref=f3e32]
+        - generic [ref=f3e33]: MUNICIPAL OPS • LUDHIANA
+      - textbox "Find reports or districts..." [ref=f3e36]
+      - button "Switch Role" [ref=f3e38] [cursor=pointer]
+    - generic [ref=f3e47]:
+      - complementary [ref=f3e48]:
+        - generic [ref=f3e363]:
+          - button "Triage Board" [ref=f3e364] [cursor=pointer]
+          - button "Resolved Issues" [ref=f3e367] [cursor=pointer]
+          - button "Manage Notices" [ref=f3e371] [cursor=pointer]
+        - generic [ref=f3e74]:
+          - generic [ref=f3e79]:
+            - generic [ref=f3e80]: user
+            - generic [ref=f3e81]: Operations Officer (LUDHIANA)
+          - button "Profile options" [ref=f3e82] [cursor=pointer]
+      - main [ref=f3e87]:
+        - generic [ref=f3e375]:
+          - generic [ref=f3e376]:
+            - generic [ref=f3e377]:
+              - generic [ref=f3e378]: Pending Review
+              - generic [ref=f3e379]: "1"
+              - generic [ref=f3e380]: Awaiting triage decision
+            - generic [ref=f3e381]:
+              - generic [ref=f3e382]: Acknowledged
+              - generic [ref=f3e383]: "0"
+              - generic [ref=f3e384]: Triaged & accepted
+            - generic [ref=f3e385]:
+              - generic [ref=f3e386]: In Progress
+              - generic [ref=f3e387]: "0"
+              - generic [ref=f3e388]: Active field crew dispatch
+          - generic [ref=f3e389]:
+            - generic [ref=f3e390]:
+              - generic [ref=f3e391]:
+                - heading "Review Queue" [level=3] [ref=f3e392]
+                - text: "1"
+              - generic [ref=f3e394]:
+                - heading "Open burning of industrial garbage" [level=4] [ref=f3e395]
+                - generic [ref=f3e396]: LUDHIANA
+                - generic [ref=f3e397]:
+                  - button "Acknowledge" [ref=f3e398]
+                  - button "Reject" [ref=f3e399]
+                  - button "Mark Duplicate" [ref=f3e400]
+            - generic [ref=f3e402]:
+              - heading "Acknowledged" [level=3] [ref=f3e403]
+              - text: "0"
+            - generic [ref=f3e405]:
+              - heading "In Progress" [level=3] [ref=f3e406]
+              - text: "0"
+  - generic [ref=f3e408]:
+    - generic [ref=f3e409]:
+      - heading "Report Inspection" [level=3] [ref=f3e410]
+      - button "Close details panel" [ref=f3e411] [cursor=pointer]: ×
+    - generic [ref=f3e412]:
+      - generic [ref=f3e413]:
+        - heading "General" [level=4] [ref=f3e414]
+        - generic [ref=f3e415]:
+          - generic [ref=f3e416]:
+            - generic [ref=f3e417]: Title
+            - generic [ref=f3e418]: Open burning of industrial garbage
+          - generic [ref=f3e419]:
+            - generic [ref=f3e420]: District
+            - generic [ref=f3e421]: LUDHIANA
+          - generic [ref=f3e422]:
+            - generic [ref=f3e423]: Status
+            - generic [ref=f3e424]: Review Queue
+      - generic [ref=f3e425]:
+        - heading "Evidence" [level=4] [ref=f3e426]
+        - generic [ref=f3e427]:
+          - text: Images
+          - paragraph [ref=f3e430]: No citizen photos attached.
+        - generic [ref=f3e431]:
+          - text: Description
+          - paragraph [ref=f3e432]: Large piles of plastic insulation and industrial scrap being burned daily in the open fields of Sector 4 Industrial Area.
+        - generic [ref=f3e433]:
+          - text: Map
+          - generic [ref=f3e434]:
+            - button "Marker" [ref=f3e435] [cursor=pointer]
+            - generic:
+              - generic [ref=f3e436]:
+                - button "Zoom in" [ref=f3e437] [cursor=pointer]: +
+                - button "Zoom out" [ref=f3e438] [cursor=pointer]: −
+              - generic [ref=f3e439]:
+                - link "Leaflet" [ref=f3e440] [cursor=pointer]:
+                  - /url: https://leafletjs.com
+                - text: "| © OpenStreetMap"
+          - generic [ref=f3e445]: "GPS: 30.9010, 75.8573"
+      - generic [ref=f3e446]:
+        - heading "Community" [level=4] [ref=f3e447]
+        - generic [ref=f3e448]:
+          - generic [ref=f3e449]:
+            - generic [ref=f3e450]: Verification Count
+            - generic [ref=f3e451]: "0"
+          - generic [ref=f3e452]:
+            - generic [ref=f3e453]: Upvotes
+            - generic [ref=f3e454]: "1"
+      - generic [ref=f3e455]:
+        - heading "Municipality" [level=4] [ref=f3e456]
+        - generic [ref=f3e457]:
+          - text: Status Actions
+          - generic [ref=f3e458]:
+            - generic [ref=f3e459]: "Awaiting triage decision:"
+            - button "Acknowledge" [ref=f3e460] [cursor=pointer]
+            - button "Reject" [ref=f3e461] [cursor=pointer]

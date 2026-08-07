@@ -1,0 +1,68 @@
+- generic [ref=f2e29]:
+  - banner [ref=f2e30]:
+    - generic [ref=f2e31]:
+      - heading "C.L.E.A.R." [level=1] [ref=f2e32]
+      - generic [ref=f2e33]: CIVIC PORTAL
+    - textbox "Find reports or districts..." [ref=f2e36]
+    - generic [ref=f2e37]:
+      - button "Switch Role" [ref=f2e38] [cursor=pointer]
+      - button "Notifications" [ref=f2e42] [cursor=pointer]
+  - generic [ref=f2e47]:
+    - complementary [ref=f2e48]:
+      - generic [ref=f2e49]:
+        - button "Explore" [ref=f2e50] [cursor=pointer]
+        - button "Following" [ref=f2e54] [cursor=pointer]
+        - button "Notices" [active] [ref=f2e57] [cursor=pointer]
+      - button "Create Report" [ref=f2e62] [cursor=pointer]
+      - generic [ref=f2e64]:
+        - generic [ref=f2e65]: Location Filter
+        - button "Punjab" [ref=f2e66] [cursor=pointer]
+      - generic [ref=f2e74]:
+        - generic [ref=f2e79]:
+          - generic [ref=f2e80]: user
+          - generic [ref=f2e81]: Resident Reporter
+        - button "Profile options" [ref=f2e82] [cursor=pointer]
+    - main [ref=f2e87]:
+      - generic [ref=f2e88]:
+        - heading "Official Notices" [level=2] [ref=f2e651]
+        - generic [ref=f2e91]:
+          - article [ref=f2e652]:
+            - generic [ref=f2e653]:
+              - heading "Scheduled Power Grid Maintenance" [level=3] [ref=f2e654]
+              - generic [ref=f2e655]: Public Notice
+            - paragraph [ref=f2e656]: Planned power grid maintenance on Sunday from 8 AM to 2 PM in Ludhiana Central zone.
+            - generic [ref=f2e657]:
+              - generic [ref=f2e658]:
+                - text: "📍 District:"
+                - strong [ref=f2e659]: LUDHIANA
+              - generic [ref=f2e660]: "Published: 8/7/2026"
+          - article [ref=f2e661]:
+            - generic [ref=f2e662]:
+              - heading "Intense Stubble Burning Advisory" [level=3] [ref=f2e663]
+              - generic [ref=f2e664]: Advisory
+            - paragraph [ref=f2e665]: Air quality levels are expected to drop. Please wear N95 masks.
+            - generic [ref=f2e666]:
+              - generic [ref=f2e667]:
+                - text: "📍 District:"
+                - strong [ref=f2e668]: LUDHIANA
+              - generic [ref=f2e669]: "Published: 8/7/2026"
+          - article [ref=f2e670]:
+            - generic [ref=f2e671]:
+              - heading "Air Quality Advisory - PM2.5 Alert" [level=3] [ref=f2e672]
+              - generic [ref=f2e673]: Warning
+            - paragraph [ref=f2e674]: Due to seasonal stubble burning and low wind speeds, air quality in Ludhiana has dropped to 'Poor'. Senior citizens and children are advised to limit outdoor exposure.
+            - generic [ref=f2e675]:
+              - generic [ref=f2e676]:
+                - text: "📍 District:"
+                - strong [ref=f2e677]: LUDHIANA
+              - generic [ref=f2e678]: "Published: 8/6/2026 • Expiry: 8/13/2026"
+          - article [ref=f2e679]:
+            - generic [ref=f2e680]:
+              - 'heading "Cleanliness Drive: Sector 32" [level=3] [ref=f2e681]'
+              - generic [ref=f2e682]: Drive / Campaign
+            - paragraph [ref=f2e683]: The Municipal Corporation is organizing a community waste cleaning and sorting drive this Sunday. Cleanup tools and refreshments will be provided.
+            - generic [ref=f2e684]:
+              - generic [ref=f2e685]:
+                - text: "📍 District:"
+                - strong [ref=f2e686]: SAS NAGAR
+              - generic [ref=f2e687]: "Published: 8/6/2026 • Expiry: 8/8/2026"

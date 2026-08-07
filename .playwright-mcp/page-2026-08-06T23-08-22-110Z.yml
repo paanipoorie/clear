@@ -1,0 +1,40 @@
+- generic [ref=f10e29]:
+  - banner [ref=f10e30]:
+    - generic [ref=f10e31]:
+      - heading "C.L.E.A.R." [level=1] [ref=f10e32]
+      - generic [ref=f10e33]: MUNICIPAL OPS • LUDHIANA
+    - textbox "Find reports or districts..." [ref=f10e36]
+    - button "Switch Role" [ref=f10e38] [cursor=pointer]
+  - generic [ref=f10e47]:
+    - complementary [ref=f10e48]:
+      - generic [ref=f10e204]:
+        - button "Triage Board" [ref=f10e205] [cursor=pointer]
+        - button "Resolved Issues" [active] [ref=f10e208] [cursor=pointer]
+        - button "Manage Notices" [ref=f10e212] [cursor=pointer]
+      - generic [ref=f10e74]:
+        - generic [ref=f10e79]:
+          - generic [ref=f10e80]: user
+          - generic [ref=f10e81]: Operations Officer (LUDHIANA)
+        - button "Profile options" [ref=f10e82] [cursor=pointer]
+    - main [ref=f10e87]:
+      - generic [ref=f10e254]:
+        - heading "Resolved Reports" [level=2] [ref=f10e256]
+        - generic [ref=f10e258]:
+          - generic [ref=f10e259]:
+            - heading "Hazardous chemical leakage in industrial park" [level=4] [ref=f10e260]
+            - generic [ref=f10e261]:
+              - generic [ref=f10e262]:
+                - text: "District:"
+                - strong [ref=f10e263]: LUDHIANA
+              - generic [ref=f10e264]: •
+              - generic [ref=f10e265]:
+                - text: "Resolved Date:"
+                - strong [ref=f10e266]: 8/6/2026
+          - paragraph [ref=f10e267]: Chemical containers leaking near the storm drain in sector 4. Corrosive fluid pooling on the ground.
+          - generic [ref=f10e268]:
+            - generic [ref=f10e269]: "Citizen Proof:"
+            - img "Citizen report photo" [ref=f10e270]
+          - generic [ref=f10e271]:
+            - strong [ref=f10e272]: "Resolution Action:"
+            - paragraph [ref=f10e273]: Our chemical containment team successfully sealed the containers and cleaned up the spill using absorbent sand. The storm drain was verified clean.
+            - img "Resolution proof" [ref=f10e275]

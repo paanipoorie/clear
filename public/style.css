@@ -1123,12 +1123,6 @@ textarea {
   border-color: var(--color-primary);
 }
 
-.action-pill.downvote-btn:hover,
-.action-pill.downvote-btn.vote-btn-active-down {
-  background-color: var(--color-destructive-soft);
-  color: var(--color-destructive);
-  border-color: var(--color-destructive);
-}
 
 .action-pill.follow-btn.followed-active {
   background-color: var(--color-primary-soft);

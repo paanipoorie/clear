@@ -1,0 +1,75 @@
+- generic [ref=e29]:
+  - banner [ref=e30]:
+    - generic [ref=e31]:
+      - heading "C.L.E.A.R." [level=1] [ref=e32]
+      - generic [ref=e33]: MUNICIPAL OPS • LUDHIANA
+    - textbox "Find reports or districts..." [ref=e36]
+    - button "Switch Role" [ref=e38] [cursor=pointer]
+  - generic [ref=e46]:
+    - complementary [ref=e47]:
+      - generic [ref=e331]:
+        - button "Triage Board" [ref=e332] [cursor=pointer]
+        - button "Resolved Issues" [ref=e335] [cursor=pointer]
+        - button "Manage Notices" [active] [ref=e339] [cursor=pointer]
+      - generic [ref=e91]:
+        - generic [ref=e96]:
+          - generic [ref=e97]: user
+          - generic [ref=e98]: Operations Officer (LUDHIANA)
+        - button "Profile options" [ref=e99] [cursor=pointer]
+    - main [ref=e104]:
+      - generic [ref=e374]:
+        - generic [ref=e375]:
+          - heading "Publish Official Notice" [level=3] [ref=e376]
+          - generic [ref=e377]:
+            - generic [ref=e378]:
+              - generic [ref=e379]: Notice Title
+              - textbox "Notice Title" [ref=e380]:
+                - /placeholder: e.g. Scheduled Sewer Cleaning
+            - generic [ref=e381]:
+              - generic [ref=e382]: Description / Message
+              - textbox "Description / Message" [ref=e383]:
+                - /placeholder: Detail warnings, schedules, or impact area information...
+            - generic [ref=e385]:
+              - generic [ref=e386]: Notice Type
+              - combobox "Notice Type" [ref=e387]:
+                - option "Advisory" [selected]
+                - option "Warning"
+                - option "Public Notice"
+                - option "Drive / Campaign"
+            - generic [ref=e388]:
+              - generic [ref=e389]: Optional Expiry Date
+              - textbox "Optional Expiry Date" [ref=e390]
+            - button "Publish Bulletin" [ref=e391] [cursor=pointer]
+        - generic [ref=e392]:
+          - heading "Active Published Bulletins" [level=3] [ref=e393]
+          - generic [ref=e394]:
+            - generic [ref=e395]:
+              - generic [ref=e396]:
+                - heading "Scheduled Power Grid Maintenance" [level=4] [ref=e397]
+                - generic [ref=e398]: Public Notice
+              - paragraph [ref=e399]: Planned power grid maintenance on Sunday from 8 AM to 2 PM in Ludhiana Central zone.
+              - generic [ref=e400]:
+                - generic [ref=e401]:
+                  - text: "District:"
+                  - strong [ref=e402]: LUDHIANA
+                - generic [ref=e403]: "Published: 8/7/2026"
+            - generic [ref=e404]:
+              - generic [ref=e405]:
+                - heading "Intense Stubble Burning Advisory" [level=4] [ref=e406]
+                - generic [ref=e407]: Advisory
+              - paragraph [ref=e408]: Air quality levels are expected to drop. Please wear N95 masks.
+              - generic [ref=e409]:
+                - generic [ref=e410]:
+                  - text: "District:"
+                  - strong [ref=e411]: LUDHIANA
+                - generic [ref=e412]: "Published: 8/7/2026"
+            - generic [ref=e413]:
+              - generic [ref=e414]:
+                - heading "Air Quality Advisory - PM2.5 Alert" [level=4] [ref=e415]
+                - generic [ref=e416]: Warning
+              - paragraph [ref=e417]: Due to seasonal stubble burning and low wind speeds, air quality in Ludhiana has dropped to 'Poor'. Senior citizens and children are advised to limit outdoor exposure.
+              - generic [ref=e418]:
+                - generic [ref=e419]:
+                  - text: "District:"
+                  - strong [ref=e420]: LUDHIANA
+                - generic [ref=e421]: "Published: 8/6/2026"

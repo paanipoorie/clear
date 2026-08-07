@@ -1,0 +1,43 @@
+- generic [ref=f1e29]:
+  - banner [ref=f1e30]:
+    - generic [ref=f1e31]:
+      - heading "C.L.E.A.R." [level=1] [ref=f1e32]
+      - generic [ref=f1e33]: MUNICIPAL OPS • LUDHIANA
+    - textbox "Find reports or districts..." [ref=f1e36]
+    - button "Switch Role" [ref=f1e38] [cursor=pointer]
+  - generic [ref=f1e42]:
+    - complementary [ref=f1e43]:
+      - generic [ref=f1e44]:
+        - button "Triage Board" [ref=f1e45] [cursor=pointer]
+        - button "Resolved Issues" [ref=f1e48] [cursor=pointer]
+        - button "Manage Notices" [ref=f1e52] [cursor=pointer]
+      - generic [ref=f1e57]:
+        - generic [ref=f1e62]:
+          - generic [ref=f1e63]: user
+          - generic [ref=f1e64]: Operations Officer (LUDHIANA)
+        - button "Profile options" [ref=f1e65] [cursor=pointer]
+    - main [ref=f1e70]:
+      - generic [ref=f1e71]:
+        - generic [ref=f1e72]:
+          - generic [ref=f1e73]:
+            - generic [ref=f1e74]: Pending Review
+            - generic [ref=f1e75]: "0"
+            - generic [ref=f1e76]: Awaiting triage decision
+          - generic [ref=f1e77]:
+            - generic [ref=f1e78]: Acknowledged
+            - generic [ref=f1e79]: "0"
+            - generic [ref=f1e80]: Triaged & accepted
+          - generic [ref=f1e81]:
+            - generic [ref=f1e82]: In Progress
+            - generic [ref=f1e83]: "0"
+            - generic [ref=f1e84]: Active field crew dispatch
+        - generic [ref=f1e85]:
+          - generic [ref=f1e87]:
+            - heading "Review Queue" [level=3] [ref=f1e88]
+            - generic [ref=f1e89]: "0"
+          - generic [ref=f1e92]:
+            - heading "Acknowledged" [level=3] [ref=f1e93]
+            - generic [ref=f1e94]: "0"
+          - generic [ref=f1e97]:
+            - heading "In Progress" [level=3] [ref=f1e98]
+            - generic [ref=f1e99]: "0"

@@ -1,0 +1,200 @@
+- generic [ref=f1e29]:
+  - banner [ref=f1e30]:
+    - generic [ref=f1e31]:
+      - heading "C.L.E.A.R." [level=1] [ref=f1e32]
+      - generic [ref=f1e33]: MUNICIPAL OPS
+    - textbox "Find reports or districts..." [ref=f1e36]
+    - generic [ref=f1e37]:
+      - button "Switch Role" [ref=f1e38] [cursor=pointer]
+      - button "Notifications" [ref=f1e42] [cursor=pointer]
+  - generic [ref=f1e46]:
+    - complementary [ref=f1e47]:
+      - generic [ref=f1e316]:
+        - button "Triage Board" [ref=f1e317] [cursor=pointer]
+        - button "Manage Notices" [ref=f1e320] [cursor=pointer]
+      - generic [ref=f1e63]:
+        - generic [ref=f1e64]: Location Filter
+        - button "Punjab" [ref=f1e65] [cursor=pointer]
+        - list:
+          - listitem [ref=f1e72]:
+            - button "All Punjab" [ref=f1e73] [cursor=pointer]
+          - listitem [ref=f1e74]:
+            - button "SAS NAGAR" [ref=f1e75] [cursor=pointer]
+          - listitem [ref=f1e76]:
+            - button "SANGRUR" [ref=f1e77] [cursor=pointer]
+          - listitem [ref=f1e78]:
+            - button "PATIALA" [ref=f1e79] [cursor=pointer]
+          - listitem [ref=f1e80]:
+            - button "PATHANKOT" [ref=f1e81] [cursor=pointer]
+          - listitem [ref=f1e82]:
+            - button "MANSA" [ref=f1e83] [cursor=pointer]
+          - listitem [ref=f1e84]:
+            - button "LUDHIANA" [ref=f1e85] [cursor=pointer]
+          - listitem [ref=f1e86]:
+            - button "KAPURTHALA" [ref=f1e87] [cursor=pointer]
+          - listitem [ref=f1e88]:
+            - button "FIROZPUR" [ref=f1e89] [cursor=pointer]
+      - generic [ref=f1e91]:
+        - generic [ref=f1e96]:
+          - generic [ref=f1e97]: user
+          - generic [ref=f1e98]: Operations Officer
+        - button "Profile options" [ref=f1e99] [cursor=pointer]
+    - main [ref=f1e104]:
+      - generic [ref=f1e105]:
+        - heading "Active Local Reports" [level=2] [ref=f1e107]
+        - generic [ref=f1e108]:
+          - article [ref=f1e109]:
+            - generic [ref=f1e110]:
+              - generic [ref=f1e111]:
+                - heading "Unclogged drain overflowing onto main road" [level=3] [ref=f1e112]
+                - generic [ref=f1e113]:
+                  - generic [ref=f1e114]: Punjab, PATIALA
+                  - generic [ref=f1e115]: •
+                  - generic [ref=f1e116]: High Priority
+                  - generic [ref=f1e117]: In Progress
+              - button "Post actions" [ref=f1e119] [cursor=pointer]
+            - paragraph [ref=f1e129]: Monsoon clogging in the sewer drainage system leading to wastewater overflowing onto the public street, creating a traffic bottleneck and hygiene issue.
+            - generic [ref=f1e130]:
+              - button "Upvote" [ref=f1e131] [cursor=pointer]:
+                - generic [ref=f1e134]: "15"
+              - button "Downvote" [ref=f1e135] [cursor=pointer]:
+                - generic [ref=f1e138]: "0"
+              - button "Verify issue report" [ref=f1e140] [cursor=pointer]:
+                - generic [ref=f1e143]: Verify (3)
+              - button "Comments (0)" [ref=f1e144] [cursor=pointer]
+              - button "Share post" [ref=f1e148] [cursor=pointer]
+              - button "Track" [ref=f1e152] [cursor=pointer]
+          - article [ref=f1e157]:
+            - generic [ref=f1e158]:
+              - generic [ref=f1e159]:
+                - heading "open waste burning causing the smoke" [level=3] [ref=f1e160]
+                - generic [ref=f1e161]:
+                  - generic [ref=f1e162]: Punjab, LUDHIANA
+                  - generic [ref=f1e163]: •
+                  - generic [ref=f1e164]: High Priority
+                  - generic [ref=f1e165]: Review Queue
+              - button "Post actions" [ref=f1e167] [cursor=pointer]
+            - paragraph [ref=f1e176]: Dry leaves and plastic waste being burned in the open field opposite the public school, causing severe smoke and breathing difficulties.
+            - generic [ref=f1e177]:
+              - button "Upvote" [ref=f1e178] [cursor=pointer]:
+                - generic [ref=f1e181]: "28"
+              - button "Downvote" [ref=f1e182] [cursor=pointer]:
+                - generic [ref=f1e185]: "1"
+              - button "Verify issue report" [ref=f1e187] [cursor=pointer]:
+                - generic [ref=f1e190]: Verify (8)
+              - button "Comments (1)" [ref=f1e191] [cursor=pointer]
+              - button "Share post" [ref=f1e195] [cursor=pointer]
+              - button "Track" [ref=f1e199] [cursor=pointer]
+          - article [ref=f1e204]:
+            - generic [ref=f1e205]:
+              - generic [ref=f1e206]:
+                - heading "Illegal dumping behind residential area" [level=3] [ref=f1e207]
+                - generic [ref=f1e208]:
+                  - generic [ref=f1e209]: Punjab, SAS NAGAR
+                  - generic [ref=f1e210]: •
+                  - generic [ref=f1e211]: High Priority
+                  - generic [ref=f1e212]: Acknowledged
+              - button "Post actions" [ref=f1e214] [cursor=pointer]
+            - paragraph [ref=f1e223]: Piles of trash bags and plastic debris accumulating behind the residential block, causing odor and attracting stray animals.
+            - generic [ref=f1e224]:
+              - button "Upvote" [ref=f1e225] [cursor=pointer]:
+                - generic [ref=f1e228]: "42"
+              - button "Downvote" [ref=f1e229] [cursor=pointer]:
+                - generic [ref=f1e232]: "3"
+              - button "Verify issue report" [ref=f1e234] [cursor=pointer]:
+                - generic [ref=f1e237]: Verify (15)
+              - button "Comments (2)" [ref=f1e238] [cursor=pointer]
+              - button "Share post" [ref=f1e242] [cursor=pointer]
+              - button "Track" [ref=f1e246] [cursor=pointer]
+          - article [ref=f1e251]:
+            - generic [ref=f1e252]:
+              - generic [ref=f1e253]:
+                - heading "Hazardous chemical leakage in industrial park" [level=3] [ref=f1e254]
+                - generic [ref=f1e255]:
+                  - generic [ref=f1e256]: Punjab, LUDHIANA
+                  - generic [ref=f1e257]: •
+                  - generic [ref=f1e258]: High Priority
+                  - generic [ref=f1e259]: Resolved
+              - button "Post actions" [ref=f1e261] [cursor=pointer]
+            - paragraph [ref=f1e273]: Chemical containers leaking near the storm drain in sector 4. Corrosive fluid pooling on the ground.
+            - generic [ref=f1e274]:
+              - generic [ref=f1e275]: Public Resolution Timeline
+              - generic [ref=f1e276]:
+                - generic [ref=f1e277]: Reported
+                - generic [ref=f1e279]: Acknowledged
+                - generic [ref=f1e281]: In Progress
+                - generic [ref=f1e283]: Resolved
+              - generic [ref=f1e284]:
+                - strong [ref=f1e285]: "Resolution Summary Note:"
+                - paragraph [ref=f1e286]: Our chemical containment team successfully sealed the containers and cleaned up the spill using absorbent sand. The storm drain was verified clean.
+                - img "Resolution photographic proof" [ref=f1e288] [cursor=pointer]
+            - generic [ref=f1e289]:
+              - button "Upvote" [ref=f1e290] [cursor=pointer]:
+                - generic [ref=f1e293]: "65"
+              - button "Downvote" [ref=f1e294] [cursor=pointer]:
+                - generic [ref=f1e297]: "2"
+              - button "Verify issue report" [ref=f1e299] [cursor=pointer]:
+                - generic [ref=f1e302]: Verify (28)
+              - button "Comments (1)" [ref=f1e303] [cursor=pointer]
+              - button "Share post" [ref=f1e307] [cursor=pointer]
+              - button "Track" [ref=f1e311] [cursor=pointer]
+      - generic [ref=f1e324]:
+        - heading "Operations Triaging" [level=2] [ref=f1e326]
+        - generic [ref=f1e327]:
+          - generic [ref=f1e328]:
+            - generic [ref=f1e329]: Pending Review
+            - generic [ref=f1e330]: "1"
+            - generic [ref=f1e331]: Awaiting triage decision
+          - generic [ref=f1e332]:
+            - generic [ref=f1e333]: Acknowledged
+            - generic [ref=f1e334]: "1"
+            - generic [ref=f1e335]: Triaged & accepted
+          - generic [ref=f1e336]:
+            - generic [ref=f1e337]: In Progress
+            - generic [ref=f1e338]: "1"
+            - generic [ref=f1e339]: Active field crew dispatch
+          - generic [ref=f1e340]:
+            - generic [ref=f1e341]: Resolved Today
+            - generic [ref=f1e342]: "1"
+            - generic [ref=f1e343]: Completed resolutions
+        - generic [ref=f1e344]:
+          - generic [ref=f1e345]:
+            - generic [ref=f1e346]:
+              - heading "Review Queue" [level=3] [ref=f1e347]
+              - generic [ref=f1e348]: "1"
+            - generic [ref=f1e350] [cursor=pointer]:
+              - heading "open waste burning causing the smoke" [level=4] [ref=f1e351]
+              - generic [ref=f1e352]:
+                - generic [ref=f1e353]: LUDHIANA
+                - generic [ref=f1e354]: High
+              - generic [ref=f1e355]:
+                - button "Acknowledge" [ref=f1e356]
+                - button "Reject" [ref=f1e357]
+                - button "Mark Duplicate" [ref=f1e358]
+          - generic [ref=f1e359]:
+            - generic [ref=f1e360]:
+              - heading "Acknowledged" [level=3] [ref=f1e361]
+              - generic [ref=f1e362]: "1"
+            - generic [ref=f1e364] [cursor=pointer]:
+              - heading "Illegal dumping behind residential area" [level=4] [ref=f1e365]
+              - generic [ref=f1e366]:
+                - generic [ref=f1e367]: SAS NAGAR
+                - generic [ref=f1e368]: High
+          - generic [ref=f1e369]:
+            - generic [ref=f1e370]:
+              - heading "In Progress" [level=3] [ref=f1e371]
+              - generic [ref=f1e372]: "1"
+            - generic [ref=f1e374] [cursor=pointer]:
+              - heading "Unclogged drain overflowing onto main road" [level=4] [ref=f1e375]
+              - generic [ref=f1e376]:
+                - generic [ref=f1e377]: PATIALA
+                - generic [ref=f1e378]: High
+          - generic [ref=f1e379]:
+            - generic [ref=f1e380]:
+              - heading "Resolved" [level=3] [ref=f1e381]
+              - generic [ref=f1e382]: "1"
+            - generic [ref=f1e384] [cursor=pointer]:
+              - heading "Hazardous chemical leakage in industrial park" [level=4] [ref=f1e385]
+              - generic [ref=f1e386]:
+                - generic [ref=f1e387]: LUDHIANA
+                - generic [ref=f1e388]: High

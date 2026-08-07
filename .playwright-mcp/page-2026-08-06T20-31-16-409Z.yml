@@ -1,0 +1,153 @@
+- generic [ref=e29]:
+  - banner [ref=e30]:
+    - generic [ref=e31]:
+      - heading "C.L.E.A.R." [level=1] [ref=e32]
+      - generic [ref=e33]: CIVIC PORTAL
+    - textbox "Find reports or districts..." [ref=e36]
+    - generic [ref=e37]:
+      - button "Switch Role" [ref=e38] [cursor=pointer]
+      - button "Notifications" [ref=e42] [cursor=pointer]
+  - generic [ref=e46]:
+    - complementary [ref=e47]:
+      - generic [ref=e48]:
+        - button "Explore" [ref=e49] [cursor=pointer]
+        - button "Following" [ref=e53] [cursor=pointer]
+        - button "Notices" [ref=e56] [cursor=pointer]
+      - button "Create Report" [ref=e61] [cursor=pointer]
+      - generic [ref=e63]:
+        - generic [ref=e64]: Location Filter
+        - button "Punjab" [ref=e65] [cursor=pointer]
+        - list:
+          - listitem [ref=e72]:
+            - button "All Punjab" [ref=e73] [cursor=pointer]
+          - listitem [ref=e74]:
+            - button "SAS NAGAR" [ref=e75] [cursor=pointer]
+          - listitem [ref=e76]:
+            - button "SANGRUR" [ref=e77] [cursor=pointer]
+          - listitem [ref=e78]:
+            - button "PATIALA" [ref=e79] [cursor=pointer]
+          - listitem [ref=e80]:
+            - button "PATHANKOT" [ref=e81] [cursor=pointer]
+          - listitem [ref=e82]:
+            - button "MANSA" [ref=e83] [cursor=pointer]
+          - listitem [ref=e84]:
+            - button "LUDHIANA" [ref=e85] [cursor=pointer]
+          - listitem [ref=e86]:
+            - button "KAPURTHALA" [ref=e87] [cursor=pointer]
+          - listitem [ref=e88]:
+            - button "FIROZPUR" [ref=e89] [cursor=pointer]
+      - generic [ref=e91]:
+        - generic [ref=e96]:
+          - generic [ref=e97]: user
+          - generic [ref=e98]: Resident Reporter
+        - button "Profile options" [ref=e99] [cursor=pointer]
+    - main [ref=e104]:
+      - generic [ref=e105]:
+        - heading "Active Local Reports" [level=2] [ref=e107]
+        - generic [ref=e108]:
+          - article [ref=e109]:
+            - generic [ref=e110]:
+              - generic [ref=e111]:
+                - heading "Unclogged drain overflowing onto main road" [level=3] [ref=e112]
+                - generic [ref=e113]:
+                  - generic [ref=e114]: Punjab, PATIALA
+                  - generic [ref=e115]: •
+                  - generic [ref=e116]: High Priority
+                  - generic [ref=e117]: In Progress
+              - button "Post actions" [ref=e119] [cursor=pointer]
+            - paragraph [ref=e129]: Monsoon clogging in the sewer drainage system leading to wastewater overflowing onto the public street, creating a traffic bottleneck and hygiene issue.
+            - generic [ref=e130]:
+              - button "Upvote" [ref=e131] [cursor=pointer]:
+                - generic [ref=e134]: "15"
+              - button "Downvote" [ref=e135] [cursor=pointer]:
+                - generic [ref=e138]: "0"
+              - button "Verify issue report" [ref=e140] [cursor=pointer]:
+                - generic [ref=e143]: Verify (3)
+              - button "Comments (0)" [ref=e144] [cursor=pointer]
+              - button "Share post" [ref=e148] [cursor=pointer]
+              - button "Track" [ref=e152] [cursor=pointer]
+          - article [ref=e157]:
+            - generic [ref=e158]:
+              - generic [ref=e159]:
+                - heading "open waste burning causing the smoke" [level=3] [ref=e160]
+                - generic [ref=e161]:
+                  - generic [ref=e162]: Punjab, LUDHIANA
+                  - generic [ref=e163]: •
+                  - generic [ref=e164]: High Priority
+                  - generic [ref=e165]: Resolved
+              - button "Post actions" [ref=e167] [cursor=pointer]
+            - paragraph [ref=e176]: Dry leaves and plastic waste being burned in the open field opposite the public school, causing severe smoke and breathing difficulties.
+            - generic [ref=e177]:
+              - generic [ref=e178]: Public Resolution Timeline
+              - generic [ref=e179]:
+                - generic [ref=e180]: Reported
+                - generic [ref=e182]: Acknowledged
+                - generic [ref=e184]: In Progress
+                - generic [ref=e186]: Resolved
+              - generic [ref=e187]:
+                - strong [ref=e188]: "Resolution Summary Note:"
+                - paragraph [ref=e189]: Cleaned up the burning site and extinguished all flames.
+                - img "Resolution photographic proof" [ref=e191] [cursor=pointer]
+            - generic [ref=e192]:
+              - button "Upvote" [ref=e193] [cursor=pointer]:
+                - generic [ref=e196]: "28"
+              - button "Downvote" [ref=e197] [cursor=pointer]:
+                - generic [ref=e200]: "1"
+              - button "Verify issue report" [ref=e202] [cursor=pointer]:
+                - generic [ref=e205]: Verify (8)
+              - button "Comments (1)" [ref=e206] [cursor=pointer]
+              - button "Share post" [ref=e210] [cursor=pointer]
+              - button "Track" [ref=e214] [cursor=pointer]
+          - article [ref=e219]:
+            - generic [ref=e220]:
+              - generic [ref=e221]:
+                - heading "Illegal dumping behind residential area" [level=3] [ref=e222]
+                - generic [ref=e223]:
+                  - generic [ref=e224]: Punjab, SAS NAGAR
+                  - generic [ref=e225]: •
+                  - generic [ref=e226]: High Priority
+                  - generic [ref=e227]: Acknowledged
+              - button "Post actions" [ref=e229] [cursor=pointer]
+            - paragraph [ref=e238]: Piles of trash bags and plastic debris accumulating behind the residential block, causing odor and attracting stray animals.
+            - generic [ref=e239]:
+              - button "Upvote" [ref=e240] [cursor=pointer]:
+                - generic [ref=e243]: "42"
+              - button "Downvote" [ref=e244] [cursor=pointer]:
+                - generic [ref=e247]: "3"
+              - button "Verify issue report" [ref=e249] [cursor=pointer]:
+                - generic [ref=e252]: Verify (15)
+              - button "Comments (2)" [ref=e253] [cursor=pointer]
+              - button "Share post" [ref=e257] [cursor=pointer]
+              - button "Track" [ref=e261] [cursor=pointer]
+          - article [ref=e266]:
+            - generic [ref=e267]:
+              - generic [ref=e268]:
+                - heading "Hazardous chemical leakage in industrial park" [level=3] [ref=e269]
+                - generic [ref=e270]:
+                  - generic [ref=e271]: Punjab, LUDHIANA
+                  - generic [ref=e272]: •
+                  - generic [ref=e273]: High Priority
+                  - generic [ref=e274]: Resolved
+              - button "Post actions" [ref=e276] [cursor=pointer]
+            - paragraph [ref=e288]: Chemical containers leaking near the storm drain in sector 4. Corrosive fluid pooling on the ground.
+            - generic [ref=e289]:
+              - generic [ref=e290]: Public Resolution Timeline
+              - generic [ref=e291]:
+                - generic [ref=e292]: Reported
+                - generic [ref=e294]: Acknowledged
+                - generic [ref=e296]: In Progress
+                - generic [ref=e298]: Resolved
+              - generic [ref=e299]:
+                - strong [ref=e300]: "Resolution Summary Note:"
+                - paragraph [ref=e301]: Our chemical containment team successfully sealed the containers and cleaned up the spill using absorbent sand. The storm drain was verified clean.
+                - img "Resolution photographic proof" [ref=e303] [cursor=pointer]
+            - generic [ref=e304]:
+              - button "Upvote" [ref=e305] [cursor=pointer]:
+                - generic [ref=e308]: "65"
+              - button "Downvote" [ref=e309] [cursor=pointer]:
+                - generic [ref=e312]: "2"
+              - button "Verify issue report" [ref=e314] [cursor=pointer]:
+                - generic [ref=e317]: Verify (28)
+              - button "Comments (1)" [ref=e318] [cursor=pointer]
+              - button "Share post" [ref=e322] [cursor=pointer]
+              - button "Track" [ref=e326] [cursor=pointer]

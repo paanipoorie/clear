@@ -1,0 +1,123 @@
+- generic [ref=e28]:
+  - generic [ref=e29]:
+    - banner [ref=e30]:
+      - generic [ref=e31]:
+        - heading "C.L.E.A.R." [level=1] [ref=e32]
+        - generic [ref=e33]: MUNICIPAL OPS • LUDHIANA
+      - textbox "Find reports or districts..." [ref=e36]
+      - button "Switch Role" [ref=e38] [cursor=pointer]
+    - generic [ref=e42]:
+      - complementary [ref=e43]:
+        - generic [ref=e44]:
+          - button "Triage Board" [ref=e45] [cursor=pointer]
+          - button "Resolved Issues" [ref=e48] [cursor=pointer]
+          - button "Manage Notices" [ref=e52] [cursor=pointer]
+        - generic [ref=e57]:
+          - generic [ref=e62]:
+            - generic [ref=e63]: user
+            - generic [ref=e64]: Operations Officer (LUDHIANA)
+          - button "Profile options" [ref=e65] [cursor=pointer]
+      - main [ref=e70]:
+        - generic [ref=e71]:
+          - generic [ref=e72]:
+            - generic [ref=e73]:
+              - generic [ref=e74]: Pending Review
+              - generic [ref=e75]: "0"
+              - generic [ref=e76]: Awaiting triage decision
+            - generic [ref=e77]:
+              - generic [ref=e78]: Acknowledged
+              - generic [ref=e79]: "0"
+              - generic [ref=e80]: Triaged & accepted
+            - generic [ref=e81]:
+              - generic [ref=e82]: In Progress
+              - generic [ref=e83]: "1"
+              - generic [ref=e84]: Active field crew dispatch
+          - generic [ref=e85]:
+            - generic [ref=e87]:
+              - heading "Review Queue" [level=3] [ref=e88]
+              - generic [ref=e89]: "0"
+            - generic [ref=e105]:
+              - heading "Acknowledged" [level=3] [ref=e106]
+              - generic [ref=e107]: "0"
+            - generic [ref=e109]:
+              - generic [ref=e110]:
+                - heading "In Progress" [level=3] [ref=e111]
+                - generic [ref=e112]: "1"
+              - generic [ref=e270] [cursor=pointer]:
+                - heading "open waste burning causing the smoke" [level=4] [ref=e271]
+                - generic [ref=e272]:
+                  - generic [ref=e273]: LUDHIANA
+                  - generic [ref=e274]: • 12 hours ago
+                - generic [ref=e275]:
+                  - generic "Community Verifications" [ref=e276]: 8 verifications
+                  - generic "Upvotes" [ref=e280]: 28 upvotes
+  - generic [ref=e115]:
+    - generic [ref=e116]:
+      - heading "Report Inspection" [level=3] [ref=e117]
+      - button "Close details panel" [ref=e118] [cursor=pointer]: ×
+    - generic [ref=e119]:
+      - generic [ref=e120]:
+        - heading "General" [level=4] [ref=e121]
+        - generic [ref=e122]:
+          - generic [ref=e123]:
+            - generic [ref=e124]: Title
+            - generic [ref=e125]: open waste burning causing the smoke
+          - generic [ref=e126]:
+            - generic [ref=e127]: District
+            - generic [ref=e128]: LUDHIANA
+          - generic [ref=e129]:
+            - generic [ref=e130]: Status
+            - generic [ref=e131]: In Progress
+      - generic [ref=e132]:
+        - heading "Evidence" [level=4] [ref=e133]
+        - generic [ref=e134]:
+          - text: Images
+          - paragraph [ref=e302]: No citizen photos attached.
+        - generic [ref=e138]:
+          - text: Description
+          - paragraph [ref=e139]: Dry leaves and plastic waste being burned in the open field opposite the public school, causing severe smoke and breathing difficulties.
+        - generic [ref=e140]:
+          - text: Map
+          - generic [ref=e141]:
+            - button "Marker" [ref=e303] [cursor=pointer]
+            - generic:
+              - generic [ref=e304]:
+                - button "Zoom in" [ref=e305] [cursor=pointer]: +
+                - button "Zoom out" [ref=e306] [cursor=pointer]: −
+              - generic [ref=e307]:
+                - link "Leaflet" [ref=e308] [cursor=pointer]:
+                  - /url: https://leafletjs.com
+                - text: "| © OpenStreetMap"
+          - generic [ref=e152]: "Approximate Center: LUDHIANA"
+      - generic [ref=e153]:
+        - heading "Community" [level=4] [ref=e154]
+        - generic [ref=e155]:
+          - generic [ref=e156]:
+            - generic [ref=e157]: Verification Count
+            - generic [ref=e158]: "8"
+          - generic [ref=e159]:
+            - generic [ref=e160]: Upvotes
+            - generic [ref=e161]: "28"
+      - generic [ref=e162]:
+        - heading "Municipality" [level=4] [ref=e163]
+        - generic [ref=e164]:
+          - text: Status Actions
+          - generic [ref=e165]:
+            - generic [ref=e313]: Action ongoing. Ready to resolve?
+            - button "Resolve Report" [active] [ref=e314] [cursor=pointer]
+  - generic [ref=e316]:
+    - generic [ref=e317]:
+      - heading "Complete Report Resolution" [level=2] [ref=e318]
+      - button "Close modal" [ref=e319] [cursor=pointer]: ×
+    - generic [ref=e320]:
+      - paragraph [ref=e321]: To resolve this report, you must upload at least one image showing the completed work and provide a brief resolution summary for the community.
+      - generic [ref=e322]:
+        - generic [ref=e323]: Resolution Photo (Required)
+        - generic [ref=e324]: Select Resolution Image
+      - generic [ref=e326]:
+        - generic [ref=e327]: Resolution Summary Note (Required)
+        - textbox "Resolution Summary Note (Required)" [ref=e328]:
+          - /placeholder: Detail the action taken (e.g. 'The garbage was collected by Sector 4 crew and the site was sanitized.')
+      - generic [ref=e330]:
+        - button "Cancel" [ref=e331] [cursor=pointer]
+        - button "Mark Resolved" [ref=e332] [cursor=pointer]

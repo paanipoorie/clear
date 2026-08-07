@@ -1,0 +1,168 @@
+- generic [ref=f1e29]:
+  - banner [ref=f1e30]:
+    - generic [ref=f1e31]:
+      - heading "C.L.E.A.R." [level=1] [ref=f1e32]
+      - generic [ref=f1e33]: CIVIC PORTAL
+    - textbox "Find reports or districts..." [ref=f1e36]
+    - generic [ref=f1e37]:
+      - button "Switch Role" [ref=f1e38] [cursor=pointer]
+      - button "Notifications" [ref=f1e42] [cursor=pointer]
+  - generic [ref=f1e47]:
+    - complementary [ref=f1e48]:
+      - generic [ref=f1e49]:
+        - button "Explore" [ref=f1e50] [cursor=pointer]
+        - button "Following" [ref=f1e54] [cursor=pointer]
+        - button "Notices" [ref=f1e57] [cursor=pointer]
+      - button "Create Report" [ref=f1e62] [cursor=pointer]
+      - generic [ref=f1e64]:
+        - generic [ref=f1e65]: Location Filter
+        - button "Punjab" [ref=f1e66] [cursor=pointer]
+      - generic [ref=f1e74]:
+        - generic [ref=f1e79]:
+          - generic [ref=f1e80]: user
+          - generic [ref=f1e81]: Resident Reporter
+        - button "Profile options" [ref=f1e82] [cursor=pointer]
+    - main [ref=f1e87]:
+      - generic [ref=f1e88]:
+        - heading "Active Local Reports" [level=2] [ref=f1e90]
+        - generic [ref=f1e91]:
+          - article [ref=f1e448]:
+            - generic [ref=f1e449]:
+              - generic [ref=f1e450]:
+                - heading "Unclogged drain overflowing onto main road" [level=3] [ref=f1e451]
+                - generic [ref=f1e452]:
+                  - generic [ref=f1e453]: Punjab, PATIALA
+                  - generic [ref=f1e454]: •
+                  - generic [ref=f1e455]: High Priority
+                  - generic [ref=f1e456]: In Progress
+              - generic [ref=f1e457]:
+                - button "Post actions" [ref=f1e458]
+                - generic [ref=f1e463]:
+                  - button "Follow Post" [ref=f1e464] [cursor=pointer]
+                  - button "Report" [ref=f1e465] [cursor=pointer]
+            - paragraph [ref=f1e471]: Monsoon clogging in the sewer drainage system leading to wastewater overflowing onto the public street, creating a traffic bottleneck and hygiene issue.
+            - generic [ref=f1e472]:
+              - button "Upvote" [ref=f1e473]: "15"
+              - button "Downvote" [ref=f1e476]: "0"
+              - button "Verify issue report" [ref=f1e479]: Verify (3)
+              - button "Comments (0)" [ref=f1e482]
+              - button "Share post" [ref=f1e485]
+              - button "Track" [ref=f1e489]
+            - generic [ref=f1e493]:
+              - paragraph [ref=f1e495]: No comments yet. Start the resolution discussion!
+              - generic [ref=f1e496]:
+                - textbox "Discuss action or request details..." [ref=f1e497]
+                - button "Post" [ref=f1e498]
+          - article [ref=f1e499]:
+            - generic [ref=f1e500]:
+              - generic [ref=f1e501]:
+                - heading "open waste burning causing the smoke" [level=3] [ref=f1e502]
+                - generic [ref=f1e503]:
+                  - generic [ref=f1e504]: Punjab, LUDHIANA
+                  - generic [ref=f1e505]: •
+                  - generic [ref=f1e506]: High Priority
+                  - generic [ref=f1e507]: Resolved
+              - generic [ref=f1e508]:
+                - button "Post actions" [ref=f1e509]
+                - generic [ref=f1e514]:
+                  - button "Follow Post" [ref=f1e515] [cursor=pointer]
+                  - button "Report" [ref=f1e516] [cursor=pointer]
+            - paragraph [ref=f1e521]: Dry leaves and plastic waste being burned in the open field opposite the public school, causing severe smoke and breathing difficulties.
+            - generic [ref=f1e522]:
+              - generic [ref=f1e523]: Public Resolution Timeline
+              - generic [ref=f1e524]:
+                - generic [ref=f1e525]: Reported
+                - generic [ref=f1e527]: Acknowledged
+                - generic [ref=f1e529]: In Progress
+                - generic [ref=f1e531]: Resolved
+              - generic [ref=f1e532]:
+                - strong [ref=f1e533]: "Resolution Summary Note:"
+                - paragraph [ref=f1e534]: Cleaned up the burning site and extinguished all flames.
+                - img "Resolution photographic proof" [ref=f1e536] [cursor=pointer]
+            - generic [ref=f1e537]:
+              - button "Upvote" [ref=f1e538]: "28"
+              - button "Downvote" [ref=f1e541]: "1"
+              - button "Verify issue report" [ref=f1e544]: Verify (8)
+              - button "Comments (1)" [ref=f1e547]
+              - button "Share post" [ref=f1e550]
+              - button "Track" [ref=f1e554]
+            - generic [ref=f1e558]:
+              - generic [ref=f1e560]:
+                - generic [ref=f1e561]: Amrit 3 hours ago
+                - paragraph [ref=f1e562]: This happens every evening around 5 PM. It's a major health hazard.
+              - generic [ref=f1e563]:
+                - textbox "Discuss action or request details..." [ref=f1e564]
+                - button "Post" [ref=f1e565]
+          - article [ref=f1e566]:
+            - generic [ref=f1e567]:
+              - generic [ref=f1e568]:
+                - heading "Illegal dumping behind residential area" [level=3] [ref=f1e569]
+                - generic [ref=f1e570]:
+                  - generic [ref=f1e571]: Punjab, SAS NAGAR
+                  - generic [ref=f1e572]: •
+                  - generic [ref=f1e573]: High Priority
+                  - generic [ref=f1e574]: Acknowledged
+              - generic [ref=f1e575]:
+                - button "Post actions" [ref=f1e576]
+                - generic [ref=f1e581]:
+                  - button "Follow Post" [ref=f1e582] [cursor=pointer]
+                  - button "Report" [ref=f1e583] [cursor=pointer]
+            - paragraph [ref=f1e588]: Piles of trash bags and plastic debris accumulating behind the residential block, causing odor and attracting stray animals.
+            - generic [ref=f1e589]:
+              - button "Upvote" [ref=f1e590]: "42"
+              - button "Downvote" [ref=f1e593]: "3"
+              - button "Verify issue report" [ref=f1e596]: Verify (15)
+              - button "Comments (2)" [ref=f1e599]
+              - button "Share post" [ref=f1e602]
+              - button "Track" [ref=f1e606]
+            - generic [ref=f1e610]:
+              - generic [ref=f1e611]:
+                - generic [ref=f1e612]:
+                  - generic [ref=f1e613]: Karan 2 hours ago
+                  - paragraph [ref=f1e614]: This has been building up for two weeks. Needs immediate collection.
+                - generic [ref=f1e615]:
+                  - generic [ref=f1e616]: Simran 1 hour ago
+                  - paragraph [ref=f1e617]: Contacted local council last Tuesday but no action taken yet.
+              - generic [ref=f1e618]:
+                - textbox "Discuss action or request details..." [ref=f1e619]
+                - button "Post" [ref=f1e620]
+          - article [ref=f1e621]:
+            - generic [ref=f1e622]:
+              - generic [ref=f1e623]:
+                - heading "Hazardous chemical leakage in industrial park" [level=3] [ref=f1e624]
+                - generic [ref=f1e625]:
+                  - generic [ref=f1e626]: Punjab, LUDHIANA
+                  - generic [ref=f1e627]: •
+                  - generic [ref=f1e628]: High Priority
+                  - generic [ref=f1e629]: Resolved
+              - generic [ref=f1e630]:
+                - button "Post actions" [ref=f1e631]
+                - generic [ref=f1e636]:
+                  - button "Unfollow Post" [ref=f1e637] [cursor=pointer]
+                  - button "Report" [ref=f1e638] [cursor=pointer]
+            - paragraph [ref=f1e646]: Chemical containers leaking near the storm drain in sector 4. Corrosive fluid pooling on the ground.
+            - generic [ref=f1e647]:
+              - generic [ref=f1e648]: Public Resolution Timeline
+              - generic [ref=f1e649]:
+                - generic [ref=f1e650]: Reported
+                - generic [ref=f1e652]: Acknowledged
+                - generic [ref=f1e654]: In Progress
+                - generic [ref=f1e656]: Resolved
+              - generic [ref=f1e657]:
+                - strong [ref=f1e658]: "Resolution Summary Note:"
+                - paragraph [ref=f1e659]: Our chemical containment team successfully sealed the containers and cleaned up the spill using absorbent sand. The storm drain was verified clean.
+                - img "Resolution photographic proof" [ref=f1e661] [cursor=pointer]
+            - generic [ref=f1e662]:
+              - button "Upvote" [ref=f1e663]: "65"
+              - button "Downvote" [ref=f1e666]: "2"
+              - button "Verify issue report" [ref=f1e669]: Verify (28)
+              - button "Comments (1)" [ref=f1e672]
+              - button "Share post" [ref=f1e675]
+              - button "Track" [ref=f1e679]
+            - generic [ref=f1e683]:
+              - generic [ref=f1e685]:
+                - generic [ref=f1e686]: Rajesh 1 day ago
+                - paragraph [ref=f1e687]: Reported this to safety officer yesterday.
+              - generic [ref=f1e688]:
+                - textbox "Discuss action or request details..." [ref=f1e689]
+                - button "Post" [ref=f1e690]

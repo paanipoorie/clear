@@ -1,0 +1,40 @@
+- generic [ref=f10e29]:
+  - banner [ref=f10e30]:
+    - generic [ref=f10e31]:
+      - heading "C.L.E.A.R." [level=1] [ref=f10e32]
+      - generic [ref=f10e33]: CIVIC PORTAL
+    - textbox "Find reports or districts..." [ref=f10e36]
+    - generic [ref=f10e37]:
+      - button "Switch Role" [ref=f10e38] [cursor=pointer]
+      - button "Notifications" [ref=f10e42] [cursor=pointer]
+  - generic [ref=f10e47]:
+    - complementary [ref=f10e48]:
+      - generic [ref=f10e49]:
+        - button "Explore" [ref=f10e50] [cursor=pointer]
+        - button "Following" [active] [ref=f10e54] [cursor=pointer]
+        - button "Notices" [ref=f10e57] [cursor=pointer]
+      - button "Create Report" [ref=f10e62] [cursor=pointer]
+      - generic [ref=f10e64]:
+        - generic [ref=f10e65]: Location Filter
+        - button "Punjab" [ref=f10e66] [cursor=pointer]
+      - generic [ref=f10e74]:
+        - generic [ref=f10e79]:
+          - generic [ref=f10e80]: user
+          - generic [ref=f10e81]: Resident Reporter
+        - button "Profile options" [ref=f10e82] [cursor=pointer]
+    - main [ref=f10e87]:
+      - article [ref=f10e174] [cursor=pointer]:
+        - heading "Hazardous chemical leakage in industrial park" [level=3] [ref=f10e175]
+        - generic [ref=f10e176]: LUDHIANA
+        - img "Report photo" [ref=f10e179]
+        - paragraph [ref=f10e180]: Chemical containers leaking near the storm drain in sector 4. Corrosive fluid pooling on the ground.
+        - generic [ref=f10e181]:
+          - button "Upvote" [ref=f10e182]:
+            - generic [ref=f10e185]: "65"
+            - generic [ref=f10e186]: Upvotes
+          - button "Comments" [ref=f10e187]:
+            - generic [ref=f10e190]: "1"
+          - button "Follow report" [ref=f10e192]:
+            - generic [ref=f10e196]: Follow
+          - button "Share post" [ref=f10e197]:
+            - generic [ref=f10e201]: Share

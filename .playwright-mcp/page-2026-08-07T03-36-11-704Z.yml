@@ -1,0 +1,116 @@
+- generic [active] [ref=f1e28]:
+  - generic [ref=f1e29]:
+    - banner [ref=f1e30]:
+      - generic [ref=f1e31]:
+        - heading "C.L.E.A.R." [level=1] [ref=f1e32]
+        - generic [ref=f1e33]: CIVIC PORTAL
+      - textbox "Find reports or districts..." [ref=f1e36]
+      - generic [ref=f1e37]:
+        - button "Switch Role" [ref=f1e38] [cursor=pointer]
+        - button "Notifications" [ref=f1e42] [cursor=pointer]
+    - generic [ref=f1e47]:
+      - complementary [ref=f1e48]:
+        - generic [ref=f1e49]:
+          - button "Explore" [ref=f1e50] [cursor=pointer]
+          - button "Following" [ref=f1e54] [cursor=pointer]
+          - button "Notices" [ref=f1e57] [cursor=pointer]
+        - button "Create Report" [ref=f1e62] [cursor=pointer]
+        - generic [ref=f1e64]:
+          - generic [ref=f1e65]: Location Filter
+          - button "Punjab" [ref=f1e66] [cursor=pointer]
+        - generic [ref=f1e74]:
+          - generic [ref=f1e79]:
+            - generic [ref=f1e80]: user
+            - generic [ref=f1e81]: Resident Reporter
+          - button "Profile options" [ref=f1e82] [cursor=pointer]
+      - main [ref=f1e87]:
+        - article [ref=f1e174] [cursor=pointer]:
+          - heading "Hazardous chemical leakage in industrial park" [level=3] [ref=f1e175]
+          - generic [ref=f1e176]: LUDHIANA
+          - img "Report photo" [ref=f1e179]
+          - paragraph [ref=f1e180]: Chemical containers leaking near the storm drain in sector 4. Corrosive fluid pooling on the ground.
+          - generic [ref=f1e181]:
+            - button "Upvote" [ref=f1e182]:
+              - generic [ref=f1e185]: "65"
+              - generic [ref=f1e186]: Upvotes
+            - button "Comments" [ref=f1e187]:
+              - generic [ref=f1e190]: "1"
+            - button "Follow report" [ref=f1e192]:
+              - generic [ref=f1e196]: Follow
+            - button "Share post" [ref=f1e197]:
+              - generic [ref=f1e201]: Share
+  - generic [ref=f1e203]:
+    - generic [ref=f1e204]:
+      - heading "Report Inspection" [level=3] [ref=f1e205]
+      - button "Close details panel" [ref=f1e206] [cursor=pointer]: ×
+    - generic [ref=f1e207]:
+      - generic [ref=f1e208]:
+        - heading "General" [level=4] [ref=f1e209]
+        - generic [ref=f1e210]:
+          - generic [ref=f1e211]:
+            - generic [ref=f1e212]: Title
+            - generic [ref=f1e213]: Hazardous chemical leakage in industrial park
+          - generic [ref=f1e214]:
+            - generic [ref=f1e215]: District
+            - generic [ref=f1e216]: LUDHIANA
+          - generic [ref=f1e217]:
+            - generic [ref=f1e218]: Status
+            - generic [ref=f1e219]: Resolved
+      - generic [ref=f1e220]:
+        - heading "Evidence" [level=4] [ref=f1e221]
+        - generic [ref=f1e222]:
+          - text: Images
+          - img "Details photo" [ref=f1e224] [cursor=pointer]
+        - generic [ref=f1e225]:
+          - text: Description
+          - paragraph [ref=f1e226]: Chemical containers leaking near the storm drain in sector 4. Corrosive fluid pooling on the ground.
+        - generic [ref=f1e227]:
+          - text: Map
+          - generic [ref=f1e228]:
+            - button "Marker" [ref=f1e229] [cursor=pointer]
+            - generic:
+              - generic [ref=f1e230]:
+                - button "Zoom in" [ref=f1e231] [cursor=pointer]: +
+                - button "Zoom out" [ref=f1e232] [cursor=pointer]: −
+              - generic [ref=f1e233]:
+                - link "Leaflet" [ref=f1e234] [cursor=pointer]:
+                  - /url: https://leafletjs.com
+                - text: "| © OpenStreetMap"
+          - generic [ref=f1e239]: "Approximate Center: LUDHIANA"
+      - generic [ref=f1e240]:
+        - heading "Municipality" [level=4] [ref=f1e241]
+        - generic [ref=f1e242]:
+          - text: Resolution Summary & Photos
+          - generic [ref=f1e243]:
+            - img "Resolved proof" [ref=f1e245] [cursor=pointer]
+            - paragraph [ref=f1e246]:
+              - strong [ref=f1e248]: "Resolution Summary Note:"
+              - paragraph [ref=f1e249]: Our chemical containment team successfully sealed the containers and cleaned up the spill using absorbent sand. The storm drain was verified clean.
+              - generic [ref=f1e250]:
+                - text: "Resolved on:"
+                - strong [ref=f1e251]: 8/6/2026
+        - generic [ref=f1e253]:
+          - generic [ref=f1e254]: Public Resolution Timeline
+          - generic [ref=f1e255]:
+            - generic [ref=f1e256]:
+              - generic [ref=f1e257]: Reported
+              - generic [ref=f1e258]: 8/5/2026 04:37 AM
+            - generic [ref=f1e260]:
+              - generic [ref=f1e261]: Acknowledged
+              - generic [ref=f1e262]: 8/5/2026 06:37 AM
+            - generic [ref=f1e264]:
+              - generic [ref=f1e265]: In Progress
+              - generic [ref=f1e266]: 8/5/2026 12:37 PM
+            - generic [ref=f1e268]:
+              - generic [ref=f1e269]: Resolved
+              - generic [ref=f1e270]: 8/6/2026 04:37 AM
+      - generic [ref=f1e271]:
+        - heading "Comments" [level=4] [ref=f1e272]
+        - generic [ref=f1e274]:
+          - generic [ref=f1e275]:
+            - generic [ref=f1e276]: Rajesh
+            - generic [ref=f1e277]: 1 day ago
+          - paragraph [ref=f1e278]: Reported this to safety officer yesterday.
+        - generic [ref=f1e279]:
+          - textbox "Write a comment..." [ref=f1e280]
+          - button "Post" [ref=f1e281] [cursor=pointer]
