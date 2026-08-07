@@ -977,6 +977,7 @@ function setupEventListeners() {
     } catch (err) {
       console.error(err);
     }
+    switchPortal('landing');
   });
 
   // Editor helper functions for location, photos, and links
