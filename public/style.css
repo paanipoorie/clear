@@ -9,6 +9,7 @@
   --color-bg: #FAFBF9;
   --color-card-bg: #FFFFFF;
   --color-app-bg: var(--color-bg);
+  --color-kanban-bg: #F3F5F2;
   
   --color-primary: #4F8B3B;          /* Forest Green - primary action */
   --color-primary-hover: #335A29;    /* Dark Forest Green - hover state */
@@ -83,6 +84,7 @@
   --color-bg: #121410;
   --color-card-bg: #1B1E19;
   --color-app-bg: linear-gradient(180deg, #141712 0%, #0d0f0c 100%);
+  --color-kanban-bg: linear-gradient(180deg, #22261f 0%, #161814 100%);
   
   --color-primary: #6bb352;
   --color-primary-hover: #8ac873;
@@ -2628,7 +2630,7 @@ textarea {
 
 /* Independent scrolling for each Kanban column */
 .kanban-col {
-  background-color: #F3F5F2 !important;
+  background: var(--color-kanban-bg) !important;
   border: var(--border-width) solid var(--color-border) !important;
   border-radius: var(--radius-lg) !important;
   display: flex;
