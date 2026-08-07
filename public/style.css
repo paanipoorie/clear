@@ -8,6 +8,7 @@
   /* Main Palette */
   --color-bg: #FAFBF9;
   --color-card-bg: #FFFFFF;
+  --color-app-bg: var(--color-bg);
   
   --color-primary: #4F8B3B;          /* Forest Green - primary action */
   --color-primary-hover: #335A29;    /* Dark Forest Green - hover state */
@@ -81,6 +82,7 @@
 #mainAppLayout[data-theme="dark"] {
   --color-bg: #121410;
   --color-card-bg: #1B1E19;
+  --color-app-bg: linear-gradient(180deg, #141712 0%, #0d0f0c 100%);
   
   --color-primary: #6bb352;
   --color-primary-hover: #8ac873;
@@ -854,6 +856,7 @@ textarea {
   flex-direction: column;
   min-height: 100vh;
   width: 100%;
+  background: var(--color-app-bg);
 }
 
 .app-layout {

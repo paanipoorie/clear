@@ -1665,11 +1665,10 @@ function initTheme() {
     }
   };
 
-  // Check saved theme or system preference
-  const savedTheme = localStorage.getItem('clear_theme');
-  const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  // Default to light theme if no theme has been saved yet
+  const savedTheme = localStorage.getItem('clear_theme') || 'light';
   
-  if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+  if (savedTheme === 'dark') {
     setTheme('dark');
   } else {
     setTheme('light');
