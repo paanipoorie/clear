@@ -255,6 +255,30 @@ let issues = [
     ],
     authorId: "user-amrit",
     authorName: "Amrit Singh"
+  },
+  {
+    id: 10,
+    title: "Pothole leakage causing muddy street in Sector 68",
+    location: "Punjab",
+    subLocation: "SAS NAGAR",
+    description: "A broken waterline under the main Sector 68 street is bubbling up water, creating a large muddy pothole. It is dangerous for two-wheelers and ruins road quality.",
+    images: ["/media/issues/water.jpeg"],
+    imageType: "water",
+    upvotes: 14,
+    downvotes: 0,
+    followed: true,
+    reported: false,
+    comments: [],
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(), // 5 hours ago
+    status: "Review Queue",
+    internalNotes: "",
+    resolutionImages: [],
+    resolutionNote: "",
+    timeline: [
+      { status: "Review Queue", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString() }
+    ],
+    authorId: "user-nishant",
+    authorName: "Nishant Kumar"
   }
 ];
 
