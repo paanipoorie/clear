@@ -729,16 +729,12 @@ function getOrInitializeUsers() {
   
   // Base default users including new requested mocks
   const defaultUsers = [
-    { id: 'user', username: 'user', email: 'user@clear.gov', password: 'password', role: 'citizen' },
-    { id: 'officer', username: 'officer', email: 'officer@clear.gov', password: 'password', role: 'municipal', district: 'LUDHIANA' },
-    { id: 'user-nishant', username: 'Nishant Kumar', email: 'user1@email.com', password: 'password', role: 'citizen' },
-    { id: 'user-abhyudaya', username: 'Abhyudaya Sengar', email: 'user2@email.com', password: 'password', role: 'citizen' },
-    { id: 'municipal', username: 'municipal', email: 'officr1@email.com', password: 'HX291Z', authKey: 'HX291Z', role: 'municipal', district: 'SAS NAGAR' },
-    { id: 'user-amrit', username: 'Amrit Singh', email: 'user3@email.com', password: 'password', role: 'citizen' },
-    { id: 'user-karan', username: 'Karan Malhotra', email: 'user4@email.com', password: 'password', role: 'citizen' },
-    { id: 'user-simran', username: 'Simran Kaur', email: 'user5@email.com', password: 'password', role: 'citizen' },
-    { id: 'officer-sas', username: 'SAS Nagar Admin', email: 'officer2@clear.gov', password: 'password', role: 'municipal', district: 'SAS NAGAR' },
-    { id: 'officer-amritsar', username: 'Amritsar Officer', email: 'officr2@email.com', password: 'password', authKey: 'AMR98X', role: 'municipal', district: 'AMRITSAR' }
+    { id: 'user1', username: 'Nishant', email: 'user1@clear.com', password: 'password', role: 'citizen' },
+    { id: 'user2', username: 'Abhyudaya', email: 'user2@clear.com', password: 'password', role: 'citizen' },
+    { id: 'user3', username: 'Naman', email: 'user3@clear.com', password: 'password', role: 'citizen' },
+    { id: 'user4', username: 'Aashmi', email: 'user4@clear.com', password: 'password', role: 'citizen' },
+    { id: 'municipal1', username: 'municipal1', email: 'municipal1@clear.gov', password: 'password', authKey: 'HX291Z', role: 'municipal', district: 'SAS NAGAR' },
+    { id: 'municipal2', username: 'municipal2', email: 'municipal2@clear.gov', password: 'password', authKey: 'HX291A', role: 'municipal', district: 'LUDHIANA' }
   ];
 
   let modified = false;
@@ -746,8 +742,8 @@ function getOrInitializeUsers() {
   // Ensure all existing stored users have IDs
   users.forEach(u => {
     if (!u.id) {
-      if (u.username === 'Nishant Kumar') u.id = 'user-nishant';
-      else if (u.username === 'Abhyudaya Sengar') u.id = 'user-abhyudaya';
+      if (u.username === 'Nishant') u.id = 'user1';
+      else if (u.username === 'Abhyudaya') u.id = 'user2';
       else u.id = 'user-' + u.username.toLowerCase().replace(/[^a-z0-9]/g, '-');
       modified = true;
     }

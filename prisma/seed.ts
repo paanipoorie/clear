@@ -30,18 +30,27 @@ const adapter = new PrismaPg(pool)
 const prisma = new PrismaClient({ adapter })
 
 const defaultUsers = [
-  { id: 'user', username: 'user', email: 'user@clear.gov', password: 'password', role: 'citizen' },
-  { id: 'officer', username: 'officer', email: 'officer@clear.gov', password: 'password', role: 'municipal', district: 'LUDHIANA' },
-  { id: 'user-nishant', username: 'Nishant Kumar', email: 'user1@email.com', password: 'password', role: 'citizen' },
-  { id: 'user-abhyudaya', username: 'Abhyudaya Sengar', email: 'user2@email.com', password: 'password', role: 'citizen' },
-  { id: 'municipal', username: 'municipal', email: 'officr1@email.com', password: 'HX291Z', authKey: 'HX291Z', role: 'municipal', district: 'SAS NAGAR' },
-  { id: 'user-amrit', username: 'Amrit Singh', email: 'user3@email.com', password: 'password', role: 'citizen' },
-  { id: 'user-karan', username: 'Karan Malhotra', email: 'user4@email.com', password: 'password', role: 'citizen' },
-  { id: 'user-simran', username: 'Simran Kaur', email: 'user5@email.com', password: 'password', role: 'citizen' },
-  { id: 'officer-sas', username: 'SAS Nagar Admin', email: 'officer2@clear.gov', password: 'password', role: 'municipal', district: 'SAS NAGAR' },
-  { id: 'officer-amritsar', username: 'Amritsar Officer', email: 'officr2@email.com', password: 'password', authKey: 'AMR98X', role: 'municipal', district: 'AMRITSAR' },
-  { id: 'user-rajesh', username: 'Rajesh', email: 'rajesh@clear.gov', password: 'password', role: 'citizen' }
+  { id: 'user1', username: 'Nishant', email: 'user1@clear.com', password: 'password', role: 'citizen' },
+  { id: 'user2', username: 'Abhyudaya', email: 'user2@clear.com', password: 'password', role: 'citizen' },
+  { id: 'user3', username: 'Naman', email: 'user3@clear.com', password: 'password', role: 'citizen' },
+  { id: 'user4', username: 'Aashmi', email: 'user4@clear.com', password: 'password', role: 'citizen' },
+  { id: 'municipal1', username: 'municipal1', email: 'municipal1@clear.gov', password: 'password', authKey: 'HX291Z', role: 'municipal', district: 'SAS NAGAR' },
+  { id: 'municipal2', username: 'municipal2', email: 'municipal2@clear.gov', password: 'password', authKey: 'HX291A', role: 'municipal', district: 'LUDHIANA' }
 ];
+
+const authorIdMapping: { [key: string]: string } = {
+  'user': 'user1',
+  'user-nishant': 'user1',
+  'user-abhyudaya': 'user2',
+  'user-amrit': 'user3',
+  'user-rajesh': 'user3',
+  'user-karan': 'user4',
+  'user-simran': 'user4',
+  'officer': 'municipal2',
+  'municipal': 'municipal1',
+  'officer-sas': 'municipal1',
+  'officer-amritsar': 'municipal2'
+};
 
 async function main() {
   console.log("Starting seeding...")
@@ -314,7 +323,7 @@ async function main() {
   ]
 
   for (const issue of issuesData) {
-    const authorId = userMap.get(issue.authorId)
+    const authorId = userMap.get(authorIdMapping[issue.authorId] || issue.authorId)
     if (!authorId) {
       console.warn(`No author mapping for ${issue.authorId}`)
       continue
@@ -360,7 +369,7 @@ async function main() {
 
     // Seed comments
     for (const c of issue.comments) {
-      const commenterId = userMap.get(c.authorId)
+      const commenterId = userMap.get(authorIdMapping[c.authorId] || c.authorId)
       if (commenterId) {
         await prisma.comment.create({
           data: {
@@ -399,7 +408,7 @@ async function main() {
   ]
 
   for (const n of noticesData) {
-    const authorId = userMap.get(n.authorId)
+    const authorId = userMap.get(authorIdMapping[n.authorId] || n.authorId)
     if (authorId) {
       await prisma.notice.create({
         data: {
@@ -418,7 +427,7 @@ async function main() {
   console.log(`Seeded notices.`)
 
   // 4. Seed some follows and upvotes for user
-  const mainUser = userMap.get('user')
+  const mainUser = userMap.get('user1')
   if (mainUser) {
     // Follow Issue 4, 6, 7, 9, 10
     const followedIssues = [4, 6, 7, 9, 10]
