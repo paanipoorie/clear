@@ -2292,6 +2292,257 @@ textarea {
 }
 
 /* ==========================================================================
+   Redesigned Operations Dashboard Styles
+   ========================================================================== */
+
+/* Layout & Container expansion for municipal viewports */
+.main-content.municipality-portal {
+  max-width: 100% !important;
+  align-items: stretch !important;
+}
+
+.main-content.municipality-portal.tab-triage,
+.main-content.municipality-portal.tab-notices {
+  overflow-y: hidden !important;
+}
+
+#municipalTriageViewport,
+#municipalNoticesViewport {
+  max-width: 100% !important;
+  width: 100% !important;
+}
+
+#municipalTriageViewport {
+  height: calc(100vh - var(--header-height) - 64px);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Kanban board grid layout */
+.kanban-board-wrapper {
+  flex-grow: 1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px !important; /* 24px between columns */
+  width: 100%;
+  min-height: 0; /* allows independent scrolling of columns without collapsing */
+  margin-top: 16px;
+}
+
+/* Independent scrolling for each Kanban column */
+.kanban-col {
+  background-color: var(--color-card-bg) !important;
+  border: var(--border-width) solid var(--color-text-main) !important;
+  border-radius: var(--radius-lg) !important;
+  display: flex;
+  flex-direction: column;
+  height: 100% !important;
+  min-height: 0 !important;
+  padding: 16px !important;
+  box-shadow: var(--shadow-flat-md) !important;
+  overflow: hidden;
+}
+
+/* Fixed Header */
+.kanban-col-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 12px;
+  border-bottom: var(--border-width) solid var(--color-text-main) !important;
+  margin-bottom: 16px;
+  flex-shrink: 0;
+}
+
+.kanban-col-header h3 {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text-main);
+  margin: 0;
+}
+
+.kanban-col-header .count-badge {
+  background-color: var(--color-bg);
+  color: var(--color-text-main);
+  border: var(--border-width) solid var(--color-text-main);
+  border-radius: var(--radius-full);
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* Independent scrolling cards container */
+.kanban-col-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 16px !important; /* 16px card spacing */
+  flex-grow: 1;
+  overflow-y: auto;
+  min-height: 0;
+  padding: 2px;
+}
+
+/* Styled issue card */
+.ops-issue-card {
+  background-color: var(--color-card-bg) !important;
+  border: var(--border-width) solid var(--color-text-main) !important;
+  border-radius: var(--radius-md) !important;
+  padding: 16px !important; /* 16px card padding */
+  cursor: pointer;
+  box-shadow: var(--shadow-flat-sm) !important;
+  transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease, border-color var(--transition-speed) ease;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ops-issue-card:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 2px 2px 0 0 var(--color-text-main);
+  border-color: var(--color-border-hover);
+}
+
+.ops-card-title {
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  color: var(--color-text-main);
+  line-height: 1.35;
+  margin: 0;
+}
+
+.ops-card-district {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+}
+
+.ops-card-desc-preview {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  line-height: 1.45;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ops-card-meta-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 4px;
+  padding-top: 8px;
+  border-top: var(--border-width) dashed var(--color-border);
+  font-size: 11px;
+  color: var(--color-text-subtle);
+}
+
+.ops-card-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ops-card-time {
+  font-style: italic;
+  color: var(--color-text-muted);
+}
+
+/* Drawer actions & labels */
+.municipality-action-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.panel-action-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--color-text-subtle);
+  letter-spacing: 0.05em;
+  display: block;
+}
+
+.panel-action-subtitle {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  margin-bottom: 4px;
+}
+
+.triage-btn-group {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.btn-ops-triage-secondary {
+  background-color: var(--color-card-bg) !important;
+  color: var(--color-text-main) !important;
+}
+.btn-ops-triage-secondary:hover {
+  background-color: var(--color-bg) !important;
+}
+
+/* Notices Viewport vertical stretch & 35 / 65 split */
+#municipalNoticesViewport {
+  height: calc(100vh - var(--header-height) - 64px);
+  display: flex;
+  flex-direction: column;
+}
+
+.ops-notices-workspace {
+  display: grid;
+  grid-template-columns: 35% 65% !important; /* 35 / 65 split */
+  gap: 24px !important;
+  width: 100%;
+  flex-grow: 1 !important;
+  min-height: 0;
+}
+
+.notice-creator-panel,
+.published-list-panel {
+  background-color: var(--color-card-bg) !important;
+  border: var(--border-width) solid var(--color-text-main) !important;
+  border-radius: var(--radius-lg) !important;
+  padding: 24px !important;
+  box-shadow: var(--shadow-flat-md) !important;
+  display: flex;
+  flex-direction: column;
+  height: 100% !important;
+  min-height: 0 !important;
+}
+
+.published-feed {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+  gap: 24px !important; /* More breathing room */
+  flex-grow: 1 !important;
+  overflow-y: auto !important;
+  min-height: 0 !important;
+  align-content: start !important;
+}
+
+.published-feed .ops-notice-card-item {
+  background-color: var(--color-card-bg) !important;
+  border: var(--border-width) solid var(--color-text-main) !important;
+  border-radius: var(--radius-md) !important;
+  padding: 20px !important; /* More breathing room */
+  box-shadow: var(--shadow-flat-sm) !important;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: auto !important;
+  gap: 12px;
+}
+
+/* ==========================================================================
    Mobile Responsive Styles
    ========================================================================== */
 @media (max-width: 860px) {

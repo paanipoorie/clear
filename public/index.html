@@ -326,39 +326,8 @@
           
           <div class="ops-notices-workspace">
             <!-- Left: Publish Notice Form -->
-            <div class="notice-creator-panel">
+            <div class="notice-creator-panel" id="noticeCreatorPanel">
               <h3>Publish Official Notice</h3>
-              <form id="noticePublishForm" class="ops-notice-form">
-                <div class="form-group">
-                  <label for="noticeTitle">Notice Title</label>
-                  <input type="text" id="noticeTitle" placeholder="e.g. Scheduled Sewer Cleaning" required maxlength="100">
-                </div>
-                
-                <div class="form-group">
-                  <label for="noticeDescription">Description / Message</label>
-                  <textarea id="noticeDescription" rows="4" placeholder="Detail warnings, schedules, or impact area information..." required maxlength="500"></textarea>
-                </div>
-
-                <div class="form-row">
-                  <input type="hidden" id="noticeDistrict" value="LUDHIANA">
-                  <div class="form-group" style="width: 100%;">
-                    <label for="noticeType">Notice Type</label>
-                    <select id="noticeType" required>
-                      <option value="Advisory">Advisory</option>
-                      <option value="Warning">Warning</option>
-                      <option value="Public Notice">Public Notice</option>
-                      <option value="Drive / Campaign">Drive / Campaign</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div class="form-group">
-                  <label for="noticeExpiry">Optional Expiry Date</label>
-                  <input type="date" id="noticeExpiry">
-                </div>
-
-                <button type="submit" class="btn btn-primary btn-block" id="btnPublishNotice" style="margin-top: 12px; width: 100%;">Publish Bulletin</button>
-              </form>
             </div>
 
             <!-- Right: Published Bulletins Feed -->
@@ -588,9 +557,7 @@
         <div class="panel-group" id="opsDetailMunicipalityGroup">
           <h4 class="panel-group-title">Municipality</h4>
           
-          <!-- Status Actions -->
           <div class="panel-field" id="opsDetailStatusActionsField">
-            <label>Status Actions</label>
             <div class="action-triage-ribbon" id="triageActionRibbon"></div>
           </div>
 

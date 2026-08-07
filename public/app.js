@@ -96,6 +96,14 @@ function initApp() {
   fetchUser();
   setupEventListeners();
   switchPortal('landing');
+
+  // Render NoticeForm
+  const noticeCreator = document.getElementById('noticeCreatorPanel');
+  if (noticeCreator) {
+    const existingForm = noticeCreator.querySelector('form');
+    if (existingForm) existingForm.remove();
+    noticeCreator.appendChild(NoticeForm());
+  }
 }
 
 // Switch between Role selector landing vs app portals
@@ -105,6 +113,15 @@ function switchPortal(portalName) {
   // Close details overlay if open
   document.getElementById('opsSidePanel').classList.remove('open');
   cleanupOpsDetailMap();
+
+  const mainContent = document.querySelector('.main-content');
+  if (mainContent) {
+    if (portalName === 'municipality') {
+      mainContent.classList.add('municipality-portal');
+    } else {
+      mainContent.classList.remove('municipality-portal');
+    }
+  }
   
   if (portalName === 'landing') {
     landingPortal.style.display = 'flex';
@@ -157,6 +174,12 @@ function switchPortal(portalName) {
 // Switch Municipal Sub-tabs
 function switchOpsTab(tabName) {
   state.activeOpsTab = tabName;
+
+  const mainContent = document.querySelector('.main-content');
+  if (mainContent) {
+    mainContent.classList.remove('tab-triage', 'tab-resolved', 'tab-notices');
+    mainContent.classList.add(`tab-${tabName}`);
+  }
   
   if (tabName === 'triage') {
     updateSidebarActiveBtn(opsTriageTabBtn);
@@ -549,6 +572,243 @@ function bindCardEvents(card, issue) {
       showToast(`Link: ${postUrl}`);
     });
   });
+}
+
+// Helper for formatting time relative to now
+function timeAgo(dateString) {
+  const date = new Date(dateString);
+  const now = new Date();
+  const seconds = Math.floor((now - date) / 1000);
+  
+  if (seconds < 60) return 'just now';
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 30) return `${days}d ago`;
+  return date.toLocaleDateString();
+}
+
+// Component: KanbanColumn
+function KanbanColumn(title, countId, cardsContainerId) {
+  const col = document.createElement('div');
+  col.className = 'kanban-col';
+  col.id = `col-${cardsContainerId}`;
+  col.innerHTML = `
+    <div class="kanban-col-header">
+      <h3>${escapeHTML(title)}</h3>
+      <span class="count-badge" id="${countId}">0</span>
+    </div>
+    <div class="kanban-col-cards" id="${cardsContainerId}"></div>
+  `;
+  return col;
+}
+
+// Component: KanbanIssueCard
+function KanbanIssueCard(issue) {
+  const card = document.createElement('div');
+  card.className = 'ops-issue-card';
+  card.id = `ops-card-${issue.id}`;
+  
+  const verificationCount = issue.verificationCount || Math.max(0, Math.floor(issue.upvotes / 4));
+  const timeStr = timeAgo(issue.createdAt);
+  const desc = issue.description || 'No description supplied.';
+
+  card.innerHTML = `
+    <h4 class="ops-card-title">${escapeHTML(issue.title)}</h4>
+    <div class="ops-card-district">${escapeHTML(issue.subLocation)}</div>
+    <p class="ops-card-desc-preview">${escapeHTML(desc)}</p>
+    <div class="ops-card-meta-info">
+      <span class="ops-card-stat-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-xs" style="width:12px; height:12px;">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+          <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+        <span>${verificationCount} verifications</span>
+      </span>
+      <span class="ops-card-stat-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="icon-xs" style="width:12px; height:12px;">
+          <polyline points="18 15 12 9 6 15"></polyline>
+        </svg>
+        <span>${issue.upvotes} upvotes</span>
+      </span>
+      <span class="ops-card-time">${timeStr}</span>
+    </div>
+  `;
+
+  card.addEventListener('click', (e) => {
+    openOpsDetailPanel(issue);
+  });
+
+  return card;
+}
+
+// Component: MunicipalityActionPanel
+function MunicipalityActionPanel(issue) {
+  const container = document.createElement('div');
+  container.className = 'municipality-action-panel';
+  
+  let contentHTML = `
+    <span class="panel-action-title">Municipality Actions</span>
+  `;
+
+  if (issue.status === 'Review Queue') {
+    contentHTML += `
+      <div class="panel-action-subtitle">Awaiting triage decision</div>
+      <div class="triage-btn-group">
+        <button class="btn btn-ops-triage btn-ops-triage-primary" id="drawerAckBtn">Acknowledge</button>
+        <button class="btn btn-ops-triage btn-ops-triage-danger" id="drawerRejBtn">Reject</button>
+        <button class="btn btn-ops-triage btn-ops-triage-secondary" id="drawerDupBtn">Mark Duplicate</button>
+      </div>
+    `;
+  } else if (issue.status === 'Acknowledged') {
+    contentHTML += `
+      <div class="panel-action-subtitle">Ready to launch field crews:</div>
+      <div class="triage-btn-group">
+        <button class="btn btn-ops-triage btn-ops-triage-warning" id="drawerStartBtn">Start Work</button>
+      </div>
+    `;
+  } else if (issue.status === 'In Progress') {
+    contentHTML += `
+      <div class="panel-action-subtitle">Action ongoing. Ready to resolve?</div>
+      <div class="triage-btn-group">
+        <button class="btn btn-ops-triage btn-ops-triage-success" id="drawerResolveBtn">Resolve Report</button>
+      </div>
+    `;
+  } else if (issue.status === 'Resolved') {
+    contentHTML += `
+      <div class="panel-action-subtitle status-resolved-label">Issue successfully resolved.</div>
+    `;
+  } else if (issue.status === 'Rejected') {
+    contentHTML += `
+      <div class="panel-action-subtitle status-rejected-label">Rejection decision completed.</div>
+    `;
+  }
+
+  container.innerHTML = contentHTML;
+
+  // Bind events
+  const ack = container.querySelector('#drawerAckBtn');
+  if (ack) ack.addEventListener('click', () => updateIssueStatus(issue.id, 'Acknowledged'));
+
+  const rej = container.querySelector('#drawerRejBtn');
+  if (rej) rej.addEventListener('click', () => {
+    const reason = prompt('Specify rejection reason:');
+    if (reason === null) return;
+    updateIssueStatus(issue.id, 'Rejected', null, null, reason || 'Rejected by staff review');
+  });
+
+  const dup = container.querySelector('#drawerDupBtn');
+  if (dup) dup.addEventListener('click', () => {
+    showToast('Duplicate flag marked (Triage placeholder)');
+  });
+
+  const start = container.querySelector('#drawerStartBtn');
+  if (start) start.addEventListener('click', () => updateIssueStatus(issue.id, 'In Progress'));
+
+  const resolve = container.querySelector('#drawerResolveBtn');
+  if (resolve) resolve.addEventListener('click', () => {
+    document.getElementById('resolutionModal').classList.add('open');
+  });
+
+  return container;
+}
+
+// Component: NoticeCard
+function NoticeCard(notice) {
+  const item = document.createElement('div');
+  item.className = 'ops-notice-card-item';
+  
+  let typeClass = 'type-advisory';
+  if (notice.type === 'Warning') typeClass = 'type-warning';
+  else if (notice.type === 'Public Notice') typeClass = 'type-public';
+  else if (notice.type === 'Drive / Campaign') typeClass = 'type-drive-campaign';
+
+  item.innerHTML = `
+    <div class="ops-notice-card-header">
+      <h4 class="ops-notice-card-title">${escapeHTML(notice.title)}</h4>
+      <span class="badge ${typeClass}">${escapeHTML(notice.type)}</span>
+    </div>
+    <p class="ops-notice-desc">${escapeHTML(notice.description)}</p>
+    <div class="ops-notice-meta">
+      <span>District: <strong>${escapeHTML(notice.subLocation)}</strong></span>
+      <span>Published: ${new Date(notice.createdAt).toLocaleDateString()}</span>
+    </div>
+  `;
+  return item;
+}
+
+// Component: NoticeForm
+function NoticeForm() {
+  const form = document.createElement('form');
+  form.id = 'noticePublishForm';
+  form.className = 'ops-notice-form';
+  form.innerHTML = `
+    <div class="form-group">
+      <label for="noticeTitle">Notice Title</label>
+      <input type="text" id="noticeTitle" placeholder="e.g. Scheduled Sewer Cleaning" required maxlength="100">
+    </div>
+    
+    <div class="form-group" style="flex-grow: 1; display: flex; flex-direction: column;">
+      <label for="noticeDescription">Description / Message</label>
+      <textarea id="noticeDescription" placeholder="Detail warnings, schedules, or impact area information..." required maxlength="500" style="flex-grow: 1; resize: none; min-height: 120px;"></textarea>
+    </div>
+
+    <div class="form-row">
+      <input type="hidden" id="noticeDistrict" value="${MOCK_MUNICIPALITY_DISTRICT}">
+      <div class="form-group" style="width: 100%;">
+        <label for="noticeType">Notice Type</label>
+        <select id="noticeType" required>
+          <option value="Advisory">Advisory</option>
+          <option value="Warning">Warning</option>
+          <option value="Public Notice">Public Notice</option>
+          <option value="Drive / Campaign">Drive / Campaign</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="noticeExpiry">Optional Expiry Date</label>
+      <input type="date" id="noticeExpiry">
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-block" id="btnPublishNotice" style="margin-top: 12px; width: 100%;">Publish Bulletin</button>
+  `;
+
+  // Bind submit event within the component
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const title = form.querySelector('#noticeTitle').value.trim();
+    const description = form.querySelector('#noticeDescription').value.trim();
+    const subLocation = form.querySelector('#noticeDistrict').value;
+    const type = form.querySelector('#noticeType').value;
+    const expiryDate = form.querySelector('#noticeExpiry').value;
+
+    if (!title || !description || !subLocation || !type) {
+      showToast('Please fill in all required notice fields');
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/notices', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, description, subLocation, type, expiryDate })
+      });
+      if (res.ok) {
+        showToast(`Official ${type} notice published successfully`);
+        form.reset();
+        fetchOpsData(); // Reload ops bulletins
+      } else {
+        showToast('Failed to publish bulletin');
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  });
+
+  return form;
 }
 
 // Setup Event Listeners
@@ -1114,38 +1374,6 @@ function setupEventListeners() {
 
 
 
-  // Ops Notices form submit handler
-  document.getElementById('noticePublishForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const title = document.getElementById('noticeTitle').value.trim();
-    const description = document.getElementById('noticeDescription').value.trim();
-    const subLocation = document.getElementById('noticeDistrict').value;
-    const type = document.getElementById('noticeType').value;
-    const expiryDate = document.getElementById('noticeExpiry').value;
-
-    if (!title || !description || !subLocation || !type) {
-      showToast('Please fill in all required notice fields');
-      return;
-    }
-
-    try {
-      const res = await fetch('/api/notices', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, description, subLocation, type, expiryDate })
-      });
-      if (res.ok) {
-        showToast(`Official ${type} notice published successfully`);
-        document.getElementById('noticePublishForm').reset();
-        fetchOpsData(); // Reload ops bulletins
-      } else {
-        showToast('Failed to publish bulletin');
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  });
-
   // Resolution modal closing
   const resModal = document.getElementById('resolutionModal');
   document.getElementById('closeResolutionModalBtn').addEventListener('click', () => {
@@ -1421,43 +1649,26 @@ function renderOpsDashboardSummaries(issues) {
 // Render notices in Ops Notices Management Tab
 function renderOpsNoticesFeed(notices) {
   const feed = document.getElementById('opsNoticesFeed');
+  if (!feed) return;
   
   // Filter notices list by the municipality's assigned district
-  notices = notices.filter(n => n.subLocation.toUpperCase() === MOCK_MUNICIPALITY_DISTRICT);
+  const districtNotices = notices.filter(n => n.subLocation.toUpperCase() === MOCK_MUNICIPALITY_DISTRICT.toUpperCase());
 
-  if (notices.length === 0) {
+  if (districtNotices.length === 0) {
     feed.innerHTML = '<p class="empty-notices-msg">No notices published yet.</p>';
     return;
   }
 
   feed.innerHTML = '';
-  notices.forEach(n => {
-    const item = document.createElement('div');
-    item.className = 'ops-notice-card-item';
-    
-    let typeClass = 'type-advisory';
-    if (n.type === 'Warning') typeClass = 'type-warning';
-    else if (n.type === 'Public Notice') typeClass = 'type-public-notice';
-    else if (n.type === 'Drive / Campaign') typeClass = 'type-drive-campaign';
-
-    item.innerHTML = `
-      <div class="ops-notice-card-header">
-        <h4 class="ops-notice-card-title">${escapeHTML(n.title)}</h4>
-        <span class="ops-notice-badge ${typeClass}">${escapeHTML(n.type)}</span>
-      </div>
-      <p class="ops-notice-desc" style="margin-top:0;">${escapeHTML(n.description)}</p>
-      <div class="ops-notice-meta">
-        <span>District: <strong>${escapeHTML(n.subLocation)}</strong></span>
-        <span>Published: ${new Date(n.createdAt).toLocaleDateString()}</span>
-      </div>
-    `;
-    feed.appendChild(item);
+  districtNotices.forEach(n => {
+    feed.appendChild(NoticeCard(n));
   });
 }
 
 // Render Resolved reports in Resolved Issues tab
 function renderResolvedIssuesFeed(issues) {
   const feed = document.getElementById('opsResolvedFeed');
+  if (!feed) return;
   
   // Filter for resolved issues
   let resolvedIssues = issues.filter(i => i.status === 'Resolved');
@@ -1476,67 +1687,26 @@ function renderResolvedIssuesFeed(issues) {
 
   feed.innerHTML = '';
   resolvedIssues.forEach(issue => {
-    const card = document.createElement('div');
-    card.className = 'ops-resolved-card-item';
-    
-    // Check if custom resolution images exist, fallback to placeholder
-    const resImgs = (issue.resolutionImages && issue.resolutionImages.length > 0)
-      ? issue.resolutionImages
-      : ["https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=800&auto=format&fit=crop&q=60"];
-
-    const resolutionPhotosHTML = `
-      <div class="ops-resolved-card-photos">
-        ${resImgs.map(img => `<img src="${img}" alt="Resolution proof" onclick="window.open('${img}')">`).join('')}
-      </div>
-    `;
-    
-    // Get citizen images, fallback to placeholder
-    const citizenImages = getIssueImages(issue);
-    const citizenPhotosHTML = `
-      <div class="ops-resolved-card-photos" style="margin-bottom: 8px;">
-        <span style="font-size: 11px; color: var(--color-muted-text); display: block; width: 100%;">Citizen Proof:</span>
-        ${citizenImages.map(img => `<img src="${img}" alt="Citizen report photo" onclick="window.open('${img}')" style="height: 60px;">`).join('')}
-      </div>
-    `;
-
-    const resolvedDate = issue.timeline 
-      ? new Date(issue.timeline.filter(t => t.status === 'Resolved')[0]?.timestamp || issue.createdAt).toLocaleDateString()
-      : new Date(issue.createdAt).toLocaleDateString();
-
-    card.innerHTML = `
-      <div class="ops-resolved-card-header">
-        <h4 class="ops-resolved-card-title">${escapeHTML(issue.title)}</h4>
-        <div class="ops-resolved-card-meta">
-          <span>District: <strong>${escapeHTML(issue.subLocation)}</strong></span>
-          <span>&bull;</span>
-          <span>Resolved Date: <strong>${resolvedDate}</strong></span>
-        </div>
-      </div>
-      <p class="ops-resolved-card-desc">${escapeHTML(issue.description || 'No description supplied.')}</p>
-      ${citizenPhotosHTML}
-      <div class="ops-resolved-card-resolution">
-        <strong>Resolution Action:</strong>
-        <p>${escapeHTML(issue.resolutionNote || 'No resolution note provided.')}</p>
-        ${resolutionPhotosHTML}
-      </div>
-    `;
-    
-    feed.appendChild(card);
+    // Reuse the exact same ReportPost component used by the public Explore feed
+    feed.appendChild(ReportPost(issue));
   });
 }
 
 // Render Kanban Column Boards (excluding Resolved column)
 function renderKanbanBoard(issues) {
+  const wrapper = document.querySelector('.kanban-board-wrapper');
+  if (!wrapper) return;
+  wrapper.innerHTML = '';
+  
+  wrapper.appendChild(KanbanColumn('Review Queue', 'countColPending', 'cardsReviewQueue'));
+  wrapper.appendChild(KanbanColumn('Acknowledged', 'countColAcknowledged', 'cardsAcknowledged'));
+  wrapper.appendChild(KanbanColumn('In Progress', 'countColInProgress', 'cardsInProgress'));
+
   const cols = {
     'Review Queue': document.getElementById('cardsReviewQueue'),
     'Acknowledged': document.getElementById('cardsAcknowledged'),
     'In Progress': document.getElementById('cardsInProgress')
   };
-
-  // Reset columns
-  Object.values(cols).forEach(col => {
-    if (col) col.innerHTML = '';
-  });
 
   // Counts
   const counts = {
@@ -1566,54 +1736,8 @@ function renderKanbanBoard(issues) {
     const colContainer = cols[issue.status];
     if (!colContainer) return;
 
-    const card = document.createElement('div');
-    card.className = 'ops-issue-card';
-    card.id = `ops-card-${issue.id}`;
-
-    // Build Review Queue button triage ribbon
-    let actionsHTML = '';
-    if (issue.status === 'Review Queue') {
-      actionsHTML = `
-        <div class="ops-card-actions">
-          <button class="btn-ops-action btn-ops-ack" data-action="ack" title="Move report to Acknowledged">Acknowledge</button>
-          <button class="btn-ops-action btn-ops-rej" data-action="rej" title="Reject this report">Reject</button>
-          <button class="btn-ops-action btn-ops-dup" data-action="dup" title="Flag report as a duplicate citation">Mark Duplicate</button>
-        </div>
-      `;
-    }
-
-    card.innerHTML = `
-      <h4 class="ops-card-title">${escapeHTML(issue.title)}</h4>
-      <div class="ops-card-meta">
-        <span class="ops-card-district">${escapeHTML(issue.subLocation)}</span>
-      </div>
-      ${actionsHTML}
-    `;
-
-    card.addEventListener('click', (e) => {
-      if (e.target.closest('.ops-card-actions')) return;
-      openOpsDetailPanel(issue);
-    });
-
-    if (issue.status === 'Review Queue') {
-      card.querySelector('.btn-ops-ack').addEventListener('click', async (e) => {
-        e.stopPropagation();
-        await updateIssueStatus(issue.id, 'Acknowledged');
-      });
-
-      card.querySelector('.btn-ops-rej').addEventListener('click', async (e) => {
-        e.stopPropagation();
-        const reason = prompt('Please specify a rejection reason:');
-        if (reason === null) return;
-        await updateIssueStatus(issue.id, 'Rejected', null, null, reason || 'Rejected by staff review');
-      });
-
-      card.querySelector('.btn-ops-dup').addEventListener('click', (e) => {
-        e.stopPropagation();
-        showToast('Duplicate flag marked (Triage placeholder)');
-      });
-    }
-
+    // Use Reusable Component: KanbanIssueCard
+    const card = KanbanIssueCard(issue);
     colContainer.appendChild(card);
   });
 
@@ -1770,24 +1894,47 @@ function renderOpsDetailPanel(issue) {
   const resPhotos = document.getElementById('opsDetailResolutionPhotos');
   const resNote = document.getElementById('opsDetailResolutionNote');
 
-  if (issue.status === 'Resolved' && issue.resolutionNote) {
+  if (issue.status === 'Resolved') {
     resContainer.style.display = 'block';
     
     // Extract resolved date
     const resolvedStep = issue.timeline ? issue.timeline.find(t => t.status === 'Resolved') : null;
     const resolvedDate = resolvedStep ? new Date(resolvedStep.timestamp).toLocaleDateString() : new Date(issue.createdAt).toLocaleDateString();
     
-    resNote.innerHTML = `
-      <div><strong>Resolution Summary Note:</strong></div>
-      <p style="margin-top: 4px; line-height: 1.45;">${escapeHTML(issue.resolutionNote)}</p>
-      <div style="font-size: 11px; color: var(--color-text-muted); margin-top: 8px;">Resolved on: <strong>${resolvedDate}</strong></div>
-    `;
-    
-    let resImgs = issue.resolutionImages;
-    if (!resImgs || resImgs.length === 0) {
-      resImgs = ["https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=800&auto=format&fit=crop&q=60"];
+    // Before image (mandatory, fallback to placeholder)
+    const beforeImg = getIssueImages(issue)[0] || "https://images.unsplash.com/photo-1530587191325-3db32d826c18?w=800&auto=format&fit=crop&q=60";
+    // After image (resolution, fallback to placeholder)
+    let afterImg = issue.resolutionImages && issue.resolutionImages[0];
+    if (!afterImg) {
+      afterImg = "https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=800&auto=format&fit=crop&q=60";
     }
-    resPhotos.innerHTML = resImgs.map(img => `<img src="${img}" alt="Resolved proof" onclick="window.open('${img}')" style="max-height:120px; border-radius:4px; object-fit:cover; cursor:pointer;">`).join('');
+
+    resPhotos.innerHTML = `
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+        <div>
+          <span style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--color-text-subtle); display: block; margin-bottom: 4px;">Before (Reported)</span>
+          <img src="${beforeImg}" alt="Report before photo" onclick="window.open('${beforeImg}')" style="width: 100%; height: 120px; border-radius: 4px; object-fit: cover; cursor: pointer; border: 1px solid var(--color-border);" />
+        </div>
+        <div>
+          <span style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--color-text-subtle); display: block; margin-bottom: 4px;">After (Resolved)</span>
+          <img src="${afterImg}" alt="Report after photo" onclick="window.open('${afterImg}')" style="width: 100%; height: 120px; border-radius: 4px; object-fit: cover; cursor: pointer; border: 1px solid var(--color-border);" />
+        </div>
+      </div>
+    `;
+
+    resNote.innerHTML = `
+      <div style="margin-bottom: 8px;">
+        <span style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--color-text-subtle); display: block;">Resolution Note</span>
+        <p style="margin-top: 2px; font-size: 13px; line-height: 1.45; color: var(--color-text-main);">${escapeHTML(issue.resolutionNote || 'No resolution note provided.')}</p>
+      </div>
+      <div style="margin-bottom: 8px;">
+        <span style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--color-text-subtle); display: block;">Municipality Completion Note</span>
+        <p style="margin-top: 2px; font-size: 13px; line-height: 1.45; color: var(--color-text-main);">${escapeHTML(issue.internalNotes || 'No completion notes provided.')}</p>
+      </div>
+      <div style="font-size: 11px; color: var(--color-text-muted); margin-top: 12px; padding-top: 8px; border-top: 1px dashed var(--color-border);">
+        Completion Date: <strong>${resolvedDate}</strong>
+      </div>
+    `;
   } else {
     resContainer.style.display = 'none';
   }
@@ -1856,61 +2003,9 @@ function renderOpsDetailPanel(issue) {
 // Build action triage ribbon based on status flow
 function renderTriageActionRibbon(issue) {
   const ribbon = document.getElementById('triageActionRibbon');
+  if (!ribbon) return;
   ribbon.innerHTML = '';
-
-  const label = document.createElement('span');
-  label.style.fontWeight = '500';
-  label.style.fontSize = '12px';
-  label.style.color = 'var(--color-secondary-text)';
-  label.style.marginRight = 'auto';
-  label.style.alignSelf = 'center';
-  
-  if (issue.status === 'Review Queue') {
-    label.textContent = 'Awaiting triage decision:';
-    ribbon.appendChild(label);
-
-    const ackBtn = document.createElement('button');
-    ackBtn.className = 'btn btn-ops-triage btn-ops-triage-primary';
-    ackBtn.textContent = 'Acknowledge';
-    ackBtn.addEventListener('click', () => updateIssueStatus(issue.id, 'Acknowledged'));
-    ribbon.appendChild(ackBtn);
-
-    const rejBtn = document.createElement('button');
-    rejBtn.className = 'btn btn-ops-triage btn-ops-triage-danger';
-    rejBtn.textContent = 'Reject';
-    rejBtn.addEventListener('click', () => {
-      const reason = prompt('Specify rejection reason:');
-      if (reason === null) return;
-      updateIssueStatus(issue.id, 'Rejected', null, null, reason || 'Rejected by staff review');
-    });
-    ribbon.appendChild(rejBtn);
-  } else if (issue.status === 'Acknowledged') {
-    label.textContent = 'Ready to launch field crews:';
-    ribbon.appendChild(label);
-
-    const startBtn = document.createElement('button');
-    startBtn.className = 'btn btn-ops-triage btn-ops-triage-warning';
-    startBtn.textContent = 'Start Work';
-    startBtn.addEventListener('click', () => updateIssueStatus(issue.id, 'In Progress'));
-    ribbon.appendChild(startBtn);
-  } else if (issue.status === 'In Progress') {
-    label.textContent = 'Action ongoing. Ready to resolve?';
-    ribbon.appendChild(label);
-
-    const resolveBtn = document.createElement('button');
-    resolveBtn.className = 'btn btn-ops-triage btn-ops-triage-success';
-    resolveBtn.textContent = 'Resolve Report';
-    resolveBtn.addEventListener('click', () => {
-      document.getElementById('resolutionModal').classList.add('open');
-    });
-    ribbon.appendChild(resolveBtn);
-  } else if (issue.status === 'Resolved') {
-    label.textContent = 'Issue successfully resolved.';
-    ribbon.appendChild(label);
-  } else if (issue.status === 'Rejected') {
-    label.textContent = 'Rejection decision completed.';
-    ribbon.appendChild(label);
-  }
+  ribbon.appendChild(MunicipalityActionPanel(issue));
 }
 
 // Helper to escape HTML to prevent XSS
