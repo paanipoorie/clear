@@ -67,19 +67,49 @@
             <h2>Welcome back</h2>
             <p>Access your C.L.E.A.R. account to continue.</p>
           </div>
+
+          <div class="auth-role-selector">
+            <label class="role-selector-label">I am signing in as</label>
+            <div class="role-selector-options">
+              <button type="button" class="role-option-btn active" data-role="civil" id="loginRoleCivil">
+                <span class="role-title">Civil</span>
+                <span class="role-desc">Resident Reporter</span>
+              </button>
+              <button type="button" class="role-option-btn" data-role="municipal" id="loginRoleMunicipal">
+                <span class="role-title">Municipal</span>
+                <span class="role-desc">Operations Officer</span>
+              </button>
+            </div>
+          </div>
           
           <form id="loginForm" class="auth-form">
-            <div class="form-group">
-              <label for="loginUsername">Username</label>
-              <input type="text" id="loginUsername" placeholder="Enter your username" required autocomplete="username">
+            <!-- Civil Login Fields -->
+            <div id="loginCivilFields" class="form-role-fields">
+              <div class="form-group">
+                <label for="loginCivilEmail">Email Address</label>
+                <input type="text" id="loginCivilEmail" placeholder="you@example.com" required autocomplete="email">
+              </div>
+              
+              <div class="form-group">
+                <label for="loginCivilPassword">Password</label>
+                <input type="password" id="loginCivilPassword" placeholder="••••••••" required autocomplete="current-password">
+              </div>
+            </div>
+
+            <!-- Municipal Login Fields -->
+            <div id="loginMunicipalFields" class="form-role-fields" style="display: none;">
+              <div class="form-group">
+                <label for="loginMunicipalEmail">Email Address</label>
+                <input type="text" id="loginMunicipalEmail" placeholder="officer@example.com" autocomplete="email">
+              </div>
+              
+              <div class="form-group">
+                <label for="loginMunicipalAuthKey">Auth Key</label>
+                <input type="password" id="loginMunicipalAuthKey" placeholder="••••••••" autocomplete="current-password">
+              </div>
             </div>
             
-            <div class="form-group">
-              <label for="loginPassword">Password</label>
-              <input type="password" id="loginPassword" placeholder="••••••••" required autocomplete="current-password">
-            </div>
-            
-            <button type="submit" class="btn btn-primary btn-block btn-lg">Sign In</button>
+            <button type="submit" class="btn btn-primary btn-block btn-lg" id="loginSubmitBtn">Sign In</button>
           </form>
           
           <div class="auth-card-footer">
@@ -103,29 +133,101 @@
             <h2>Create your account</h2>
             <p>Join the collective effort to keep our environment clean.</p>
           </div>
+
+          <div class="auth-role-selector">
+            <label class="role-selector-label">I want to register as</label>
+            <div class="role-selector-options">
+              <button type="button" class="role-option-btn active" data-role="civil" id="registerRoleCivil">
+                <span class="role-title">Civil</span>
+                <span class="role-desc">Resident Reporter</span>
+              </button>
+              <button type="button" class="role-option-btn" data-role="municipal" id="registerRoleMunicipal">
+                <span class="role-title">Municipal</span>
+                <span class="role-desc">Operations Officer</span>
+              </button>
+            </div>
+          </div>
           
           <form id="registerForm" class="auth-form">
-            <div class="form-group">
-              <label for="registerUsername">Username</label>
-              <input type="text" id="registerUsername" placeholder="Choose a username" required autocomplete="username">
+            <!-- Civil Register Fields -->
+            <div id="registerCivilFields" class="form-role-fields">
+              <div class="form-group">
+                <label for="registerCivilEmail">Email Address</label>
+                <input type="email" id="registerCivilEmail" placeholder="you@example.com" required autocomplete="email">
+              </div>
+
+              <div class="form-group">
+                <label for="registerCivilName">Name</label>
+                <input type="text" id="registerCivilName" placeholder="Enter your full name" required autocomplete="name">
+              </div>
+              
+              <div class="form-group">
+                <label for="registerCivilPassword">Password</label>
+                <input type="password" id="registerCivilPassword" placeholder="••••••••" required autocomplete="new-password">
+              </div>
+              
+              <div class="form-group">
+                <label for="registerCivilConfirmPassword">Confirm Password</label>
+                <input type="password" id="registerCivilConfirmPassword" placeholder="••••••••" required autocomplete="new-password">
+              </div>
+            </div>
+
+            <!-- Municipal Register Fields -->
+            <div id="registerMunicipalFields" class="form-role-fields" style="display: none;">
+              <div class="form-group">
+                <label for="registerMunicipalEmail">Email Address</label>
+                <input type="email" id="registerMunicipalEmail" placeholder="officer@example.com" autocomplete="email">
+              </div>
+
+              <div class="form-group">
+                <label for="registerMunicipalUsername">Username</label>
+                <input type="text" id="registerMunicipalUsername" placeholder="Choose a username" autocomplete="username">
+              </div>
+
+              <div class="form-group">
+                <label for="registerMunicipalState">State</label>
+                <select id="registerMunicipalState" readonly disabled style="background-color: var(--color-status-review-bg); cursor: not-allowed;">
+                  <option value="Punjab" selected>Punjab</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="registerMunicipalDistrict">District</label>
+                <select id="registerMunicipalDistrict">
+                  <option value="" disabled selected>Select District</option>
+                  <option value="AMRITSAR">AMRITSAR</option>
+                  <option value="BARNALA">BARNALA</option>
+                  <option value="BATHINDA">BATHINDA</option>
+                  <option value="FARIDKOT">FARIDKOT</option>
+                  <option value="FATEHGARH SAHIB">FATEHGARH SAHIB</option>
+                  <option value="FAZILKA">FAZILKA</option>
+                  <option value="FIROZPUR">FIROZPUR</option>
+                  <option value="GURDASPUR">GURDASPUR</option>
+                  <option value="HOSHIARPUR">HOSHIARPUR</option>
+                  <option value="JALANDHAR">JALANDHAR</option>
+                  <option value="KAPURTHALA">KAPURTHALA</option>
+                  <option value="LUDHIANA">LUDHIANA</option>
+                  <option value="MALERKOTLA">MALERKOTLA</option>
+                  <option value="MANSA">MANSA</option>
+                  <option value="MOGA">MOGA</option>
+                  <option value="PATHANKOT">PATHANKOT</option>
+                  <option value="PATIALA">PATIALA</option>
+                  <option value="RUPNAGAR">RUPNAGAR</option>
+                  <option value="SAS NAGAR">SAS NAGAR</option>
+                  <option value="SANGRUR">SANGRUR</option>
+                  <option value="SBS NAGAR">SBS NAGAR</option>
+                  <option value="SRI MUKTSAR SAHIB">SRI MUKTSAR SAHIB</option>
+                  <option value="TARN TARAN">TARN TARAN</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="registerMunicipalAuthKey">Auth Key</label>
+                <input type="password" id="registerMunicipalAuthKey" placeholder="••••••••" autocomplete="new-password">
+              </div>
             </div>
             
-            <div class="form-group">
-              <label for="registerEmail">Email Address</label>
-              <input type="email" id="registerEmail" placeholder="you@example.com" required autocomplete="email">
-            </div>
-            
-            <div class="form-group">
-              <label for="registerPassword">Password</label>
-              <input type="password" id="registerPassword" placeholder="••••••••" required autocomplete="new-password">
-            </div>
-            
-            <div class="form-group">
-              <label for="registerConfirmPassword">Confirm Password</label>
-              <input type="password" id="registerConfirmPassword" placeholder="••••••••" required autocomplete="new-password">
-            </div>
-            
-            <button type="submit" class="btn btn-primary btn-block btn-lg">Create Account</button>
+            <button type="submit" class="btn btn-primary btn-block btn-lg" id="registerSubmitBtn">Create Account</button>
           </form>
           
           <div class="auth-card-footer">

@@ -3042,3 +3042,99 @@ brand-logo {
     gap: 6px;
   }
 }
+
+/* ==========================================================================
+   Revamped Auth Role Selector Styles
+   ========================================================================== */
+.auth-role-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.role-selector-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.role-selector-options {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.role-option-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 12px 14px;
+  background-color: var(--color-card-bg);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-speed) ease;
+  text-align: left;
+}
+
+.role-option-btn:hover {
+  border-color: var(--color-primary);
+  background-color: var(--color-status-review-bg);
+}
+
+.role-option-btn.active {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-soft);
+}
+
+.role-option-btn .role-title {
+  font-family: var(--font-heading);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text-main);
+  margin-bottom: 2px;
+}
+
+.role-option-btn .role-desc {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  line-height: 1.3;
+}
+
+.role-option-btn.active .role-title {
+  color: var(--color-primary-hover);
+}
+
+.role-option-btn.active .role-desc {
+  color: var(--color-primary-hover);
+  opacity: 0.85;
+}
+
+.form-role-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group select {
+  width: 100%;
+  padding: 12px 14px;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 14.5px;
+  font-family: var(--font-body);
+  background-color: var(--color-card-bg);
+  color: var(--color-text-main);
+  transition: border-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+}
+
+.form-group select:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(79, 139, 59, 0.1);
+  outline: none;
+}
