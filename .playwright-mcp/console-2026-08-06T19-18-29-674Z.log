@@ -1,4 +1,0 @@
-[      49ms] TypeError: Cannot read properties of null (reading 'addEventListener')
-    at setupEventListeners (http://localhost:3000/app.js:735:43)
-    at initApp (http://localhost:3000/app.js:86:3)
-    at HTMLDocument.<anonymous> (http://localhost:3000/app.js:81:3)
