@@ -1949,7 +1949,31 @@ function setupEventListeners() {
     const isOpen = sublocationList.classList.toggle('open');
     locationBoxBtn.classList.toggle('open', isOpen);
     locationBoxBtn.setAttribute('aria-expanded', isOpen);
+
+    const searchContainer = document.getElementById('districtSearchContainer');
+    if (searchContainer) {
+      searchContainer.style.display = isOpen ? 'block' : 'none';
+      if (isOpen) {
+        const input = document.getElementById('districtSearchInput');
+        if (input) {
+          input.value = '';
+          input.focus();
+        }
+        filterDistricts('');
+      }
+    }
   });
+
+  // District filter search
+  const districtSearchInput = document.getElementById('districtSearchInput');
+  if (districtSearchInput) {
+    districtSearchInput.addEventListener('input', (e) => {
+      filterDistricts(e.target.value);
+    });
+    districtSearchInput.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+  }
 
   // Explore button clicked
   exploreBtn.addEventListener('click', () => {
@@ -2030,6 +2054,9 @@ function setupEventListeners() {
       sublocationList.classList.remove('open');
       locationBoxBtn.classList.remove('open');
       locationBoxBtn.setAttribute('aria-expanded', 'false');
+
+      const searchContainer = document.getElementById('districtSearchContainer');
+      if (searchContainer) searchContainer.style.display = 'none';
 
       if (state.activePortal === 'public') {
         // Reset citizen visual active button to Explore unless viewing notices
@@ -2472,10 +2499,12 @@ function setupEventListeners() {
         d.classList.remove('open');
       });
     }
-    if (sublocationList && !sublocationList.contains(e.target) && !locationBoxBtn.contains(e.target)) {
+    const searchContainer = document.getElementById('districtSearchContainer');
+    if (sublocationList && !sublocationList.contains(e.target) && !locationBoxBtn.contains(e.target) && (!searchContainer || !searchContainer.contains(e.target))) {
       sublocationList.classList.remove('open');
       locationBoxBtn.classList.remove('open');
       locationBoxBtn.setAttribute('aria-expanded', 'false');
+      if (searchContainer) searchContainer.style.display = 'none';
     }
     if (trackModal && e.target === trackModal) {
       trackModal.classList.remove('open');
@@ -3446,4 +3475,21 @@ function escapeHTML(str) {
       '"': '&quot;'
     }[tag] || tag)
   );
+}
+
+// Helper to filter districts in the sidebar dropdown list
+function filterDistricts(query) {
+  const q = query.toLowerCase().trim();
+  const buttons = document.querySelectorAll('#sublocationList .sublocation-btn');
+  buttons.forEach(btn => {
+    const text = btn.textContent.toLowerCase();
+    const li = btn.parentElement;
+    if (li) {
+      if (text.includes(q) || btn.dataset.sub === '') {
+        li.style.display = 'block';
+      } else {
+        li.style.display = 'none';
+      }
+    }
+  });
 }

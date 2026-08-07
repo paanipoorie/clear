@@ -376,16 +376,40 @@
               <polyline points="6 9 12 15 18 9"></polyline>
             </svg>
           </button>
+          <!-- District Search Input (with search icon) -->
+          <div class="district-search-container" id="districtSearchContainer" style="display: none; margin-top: 8px; margin-bottom: 8px; position: relative;">
+            <input type="text" id="districtSearchInput" placeholder="Search district..." style="width: 100%; height: 32px; padding: 0 10px 0 32px; border-radius: var(--radius-sm); border: var(--border-width) solid var(--color-border); font-size: 12.5px; background: var(--color-card-bg); color: var(--color-text-main); font-family: var(--font-body);">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 10px; top: 9px; width: 14px; height: 14px; color: var(--color-text-subtle);">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </div>
+
           <ul class="sublocation-list" id="sublocationList">
             <li><button class="sublocation-btn active" data-sub="">All Punjab</button></li>
+            <li><button class="sublocation-btn" data-sub="AMRITSAR">AMRITSAR</button></li>
+            <li><button class="sublocation-btn" data-sub="BARNALA">BARNALA</button></li>
+            <li><button class="sublocation-btn" data-sub="BATHINDA">BATHINDA</button></li>
+            <li><button class="sublocation-btn" data-sub="FARIDKOT">FARIDKOT</button></li>
+            <li><button class="sublocation-btn" data-sub="FATEHGARH SAHIB">FATEHGARH SAHIB</button></li>
+            <li><button class="sublocation-btn" data-sub="FAZILKA">FAZILKA</button></li>
+            <li><button class="sublocation-btn" data-sub="FIROZPUR">FIROZPUR</button></li>
+            <li><button class="sublocation-btn" data-sub="GURDASPUR">GURDASPUR</button></li>
+            <li><button class="sublocation-btn" data-sub="HOSHIARPUR">HOSHIARPUR</button></li>
+            <li><button class="sublocation-btn" data-sub="JALANDHAR">JALANDHAR</button></li>
+            <li><button class="sublocation-btn" data-sub="KAPURTHALA">KAPURTHALA</button></li>
+            <li><button class="sublocation-btn" data-sub="LUDHIANA">LUDHIANA</button></li>
+            <li><button class="sublocation-btn" data-sub="MALERKOTLA">MALERKOTLA</button></li>
+            <li><button class="sublocation-btn" data-sub="MANSA">MANSA</button></li>
+            <li><button class="sublocation-btn" data-sub="MOGA">MOGA</button></li>
+            <li><button class="sublocation-btn" data-sub="PATHANKOT">PATHANKOT</button></li>
+            <li><button class="sublocation-btn" data-sub="PATIALA">PATIALA</button></li>
+            <li><button class="sublocation-btn" data-sub="RUPNAGAR">RUPNAGAR</button></li>
             <li><button class="sublocation-btn" data-sub="SAS NAGAR">SAS NAGAR</button></li>
             <li><button class="sublocation-btn" data-sub="SANGRUR">SANGRUR</button></li>
-            <li><button class="sublocation-btn" data-sub="PATIALA">PATIALA</button></li>
-            <li><button class="sublocation-btn" data-sub="PATHANKOT">PATHANKOT</button></li>
-            <li><button class="sublocation-btn" data-sub="MANSA">MANSA</button></li>
-            <li><button class="sublocation-btn" data-sub="LUDHIANA">LUDHIANA</button></li>
-            <li><button class="sublocation-btn" data-sub="KAPURTHALA">KAPURTHALA</button></li>
-            <li><button class="sublocation-btn" data-sub="FIROZPUR">FIROZPUR</button></li>
+            <li><button class="sublocation-btn" data-sub="SBS NAGAR">SBS NAGAR</button></li>
+            <li><button class="sublocation-btn" data-sub="SRI MUKTSAR SAHIB">SRI MUKTSAR SAHIB</button></li>
+            <li><button class="sublocation-btn" data-sub="TARN TARAN">TARN TARAN</button></li>
           </ul>
         </div>
 
