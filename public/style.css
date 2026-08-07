@@ -1287,7 +1287,9 @@ textarea {
   margin: 0;
   word-break: break-word;
   display: -webkit-box;
+  /* stylelint-disable-next-line property-no-vendor-prefix */
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -2661,7 +2663,9 @@ textarea {
   line-height: 1.45;
   margin: 0;
   display: -webkit-box;
+  /* stylelint-disable-next-line property-no-vendor-prefix */
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
