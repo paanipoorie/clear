@@ -290,7 +290,7 @@ textarea {
   width: 100vw;
   height: 100vh;
   z-index: 9999;
-  background-image: url('hero_background.jpg');
+  background-image: url('hero_background.png');
   background-size: cover;
   background-position: center bottom;
   background-repeat: no-repeat;
