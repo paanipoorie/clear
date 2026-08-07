@@ -78,7 +78,7 @@
 }
 
 /* Dark Theme Tokens */
-[data-theme="dark"] {
+#mainAppLayout[data-theme="dark"] {
   --color-bg: #121410;
   --color-card-bg: #1B1E19;
   
@@ -126,10 +126,10 @@
   --shadow-button-hover: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-[data-theme="dark"] .leaflet-tile-container {
+#mainAppLayout[data-theme="dark"] .leaflet-tile-container {
   filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
 }
-[data-theme="dark"] .leaflet-container {
+#mainAppLayout[data-theme="dark"] .leaflet-container {
   background: #121410;
 }
 

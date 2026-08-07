@@ -1651,13 +1651,14 @@ function initTheme() {
   const moonIcon = themeToggleBtn.querySelector('.moon-icon');
   
   const setTheme = (theme) => {
+    const mainAppLayout = document.getElementById('mainAppLayout');
     if (theme === 'dark') {
-      document.documentElement.setAttribute('data-theme', 'dark');
+      if (mainAppLayout) mainAppLayout.setAttribute('data-theme', 'dark');
       if (sunIcon) sunIcon.style.display = 'block';
       if (moonIcon) moonIcon.style.display = 'none';
       localStorage.setItem('clear_theme', 'dark');
     } else {
-      document.documentElement.removeAttribute('data-theme');
+      if (mainAppLayout) mainAppLayout.removeAttribute('data-theme');
       if (sunIcon) sunIcon.style.display = 'none';
       if (moonIcon) moonIcon.style.display = 'block';
       localStorage.setItem('clear_theme', 'light');
@@ -1676,7 +1677,8 @@ function initTheme() {
 
   // Add click listener
   themeToggleBtn.addEventListener('click', () => {
-    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const mainAppLayout = document.getElementById('mainAppLayout');
+    const currentTheme = mainAppLayout ? mainAppLayout.getAttribute('data-theme') : null;
     if (currentTheme === 'dark') {
       setTheme('light');
     } else {
