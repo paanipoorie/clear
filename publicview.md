@@ -12,13 +12,18 @@ The C.L.E.A.R. platform is built as a single-page application (SPA) using Vanill
 The app features an authentication layer that governs access to the user portals.
 - **Local User DB**: User accounts are initialized and stored client-side in the browser's `localStorage` under `clear_users`.
 - **Predefined Credentials**:
-  - **Resident Reporters (Civil)**:
-    - `user@clear.gov` (Password: `password`)
+  - **Resident Reporters (Civil / Citizen)**:
+    - `user@clear.gov` (Password: `password` / Name: `user`)
     - `user1@email.com` (Password: `password` / Name: `Nishant Kumar`)
     - `user2@email.com` (Password: `password` / Name: `Abhyudaya Sengar`)
+    - `user3@email.com` (Password: `password` / Name: `Amrit Singh`)
+    - `user4@email.com` (Password: `password` / Name: `Karan Malhotra`)
+    - `user5@email.com` (Password: `password` / Name: `Simran Kaur`)
   - **Operations Officers (Municipal)**:
     - `officer@clear.gov` (Password: `password` / District: `LUDHIANA`)
-    - `officr1@email.com` (Auth Key: `HX291Z` / District: `SAS NAGAR`)
+    - `officr1@email.com` (Auth Key / Password: `HX291Z` / District: `SAS NAGAR` / Name: `municipal`)
+    - `officer2@clear.gov` (Password: `password` / District: `SAS NAGAR` / Name: `SAS Nagar Admin`)
+    - `officr2@email.com` (Auth Key / Password: `AMR98X` / District: `AMRITSAR` / Name: `Amritsar Officer`)
 - **Login Session Persistence**: Logged-in state is tracked in `localStorage` (`clear_user_authenticated` and `clear_username`).
 - **Routing**: Popstate history listeners map client requests dynamically to `/citizen/dashboard` or `/municipal/dashboard` based on authentication status and user roles.
 

@@ -5,6 +5,7 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json({ limit: '10mb' })); // support larger base64 uploads
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/media', express.static(path.join(__dirname, 'media')));
 
 // In-memory Database
 let issues = [
@@ -14,9 +15,10 @@ let issues = [
     location: "Punjab",
     subLocation: "SAS NAGAR",
     description: "Piles of trash bags and plastic debris accumulating behind the residential block, causing odor and attracting stray animals.",
+    images: ["/media/issues/garbage.jpeg"],
     imageType: "dumping",
     upvotes: 42,
-    downvotes: 3,
+    downvotes: 0,
     followed: false,
     reported: false,
     comments: [
@@ -43,7 +45,7 @@ let issues = [
     description: "Dry leaves and plastic waste being burned in the open field opposite the public school, causing severe smoke and breathing difficulties.",
     imageType: "burning",
     upvotes: 28,
-    downvotes: 1,
+    downvotes: 0,
     followed: false,
     reported: false,
     comments: [
@@ -93,7 +95,7 @@ let issues = [
     description: "Chemical containers leaking near the storm drain in sector 4. Corrosive fluid pooling on the ground.",
     imageType: "default",
     upvotes: 65,
-    downvotes: 2,
+    downvotes: 0,
     followed: true,
     reported: false,
     comments: [
@@ -112,6 +114,147 @@ let issues = [
     ],
     authorId: "officer",
     authorName: "officer"
+  },
+  {
+    id: 5,
+    title: "Massive pile of garbage dumped next to Sector 70 park",
+    location: "Punjab",
+    subLocation: "SAS NAGAR",
+    description: "Someone has dumped a huge pile of domestic waste and plastic packages right at the entrance of Sector 70 public park. It is attracting stray dogs and flies, creating an extremely unhygienic environment for children.",
+    images: ["/media/issues/garbage%20dumping.jpeg"],
+    imageType: "dumping",
+    upvotes: 18,
+    downvotes: 0,
+    followed: false,
+    reported: false,
+    comments: [
+      { id: 1, user: "Simran Kaur", text: "This is horrible, we need this cleared before the weekend.", timestamp: "10 hours ago" },
+      { id: 2, user: "Karan Malhotra", text: "I saw a commercial mini-truck dumping this last night. We need CCTV cameras here.", timestamp: "8 hours ago" }
+    ],
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 18).toISOString(),
+    status: "Review Queue",
+    internalNotes: "",
+    resolutionImages: [],
+    resolutionNote: "",
+    timeline: [
+      { status: "Review Queue", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 18).toISOString() }
+    ],
+    authorId: "user-amrit",
+    authorName: "Amrit Singh"
+  },
+  {
+    id: 6,
+    title: "Unauthorised mass cutting of trees along Phase 7 boundary wall",
+    location: "Punjab",
+    subLocation: "SAS NAGAR",
+    description: "Several healthy neem and eucalyptus trees are being cut down along the boundary wall of Phase 7 without any municipal authorization or notices. Please investigate immediately.",
+    images: ["/media/issues/tree%20mass%20cut.jpeg"],
+    imageType: "default",
+    upvotes: 35,
+    downvotes: 0,
+    followed: true,
+    reported: false,
+    comments: [
+      { id: 1, user: "Abhyudaya Sengar", text: "This is illegal! Thank you for raising this.", timestamp: "3 hours ago" },
+      { id: 2, user: "Nishant Kumar", text: "Forestry dept needs to check this.", timestamp: "2 hours ago" }
+    ],
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 4).toISOString(),
+    status: "In Progress",
+    internalNotes: "Forestry officer dispatched. Work has been temporarily halted pending permit verification.",
+    resolutionImages: [],
+    resolutionNote: "",
+    timeline: [
+      { status: "Review Queue", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 4).toISOString() },
+      { status: "Acknowledged", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 3).toISOString() },
+      { status: "In Progress", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString() }
+    ],
+    authorId: "user-karan",
+    authorName: "Karan Malhotra"
+  },
+  {
+    id: 7,
+    title: "Blocked storm drain causing water accumulation in Sector 62",
+    location: "Punjab",
+    subLocation: "SAS NAGAR",
+    description: "A storm drain is completely clogged with plastic bottles and dry leaves near Sector 62 main junction. Rainwater has accumulated, forming a large pool that blocks traffic.",
+    images: ["/media/issues/water.jpeg"],
+    imageType: "water",
+    upvotes: 45,
+    downvotes: 0,
+    followed: true,
+    reported: false,
+    comments: [
+      { id: 1, user: "Karan Malhotra", text: "Water is slowly entering the ground floor shops.", timestamp: "1 day ago" }
+    ],
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
+    status: "Resolved",
+    internalNotes: "Drainage team cleared the blockage using suction machines. Verified clean.",
+    resolutionImages: ["/media/issues/water2.jpeg"],
+    resolutionNote: "Our maintenance team unclogged the municipal storm drain and drained all accumulated water. Flow is now fully restored.",
+    timeline: [
+      { status: "Review Queue", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString() },
+      { status: "Acknowledged", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 46).toISOString() },
+      { status: "In Progress", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 40).toISOString() },
+      { status: "Resolved", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString() }
+    ],
+    authorId: "user-simran",
+    authorName: "Simran Kaur"
+  },
+  {
+    id: 8,
+    title: "Tree branches hanging dangerously low over Sector 71 road",
+    location: "Punjab",
+    subLocation: "SAS NAGAR",
+    description: "A large branch of a mango tree is hanging low over the Sector 71 secondary road, posing a hazard for high trucks.",
+    images: ["/media/issues/tress%20cut.jpeg"],
+    imageType: "default",
+    upvotes: 5,
+    downvotes: 0,
+    followed: false,
+    reported: false,
+    comments: [],
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 20).toISOString(),
+    status: "Rejected",
+    rejectionReason: "The tree is located inside private property, not on municipal land. The owner has been notified to trim the branches.",
+    rejectedAt: new Date(Date.now() - 1000 * 60 * 60 * 10).toISOString(),
+    resolutionImages: [],
+    resolutionNote: "",
+    timeline: [
+      { status: "Review Queue", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 20).toISOString() },
+      { status: "Rejected", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 10).toISOString() }
+    ],
+    authorId: "user-abhyudaya",
+    authorName: "Abhyudaya Sengar"
+  },
+  {
+    id: 9,
+    title: "Commercial waste dumping behind Sector 55 market",
+    location: "Punjab",
+    subLocation: "SAS NAGAR",
+    description: "Large wooden crates and packaging plastic from retail shops are dumped behind Sector 55 market daily, blocking the fire escape.",
+    images: ["/media/issues/garbage%20dumping.jpeg"],
+    imageType: "dumping",
+    upvotes: 12,
+    downvotes: 0,
+    followed: true,
+    reported: false,
+    comments: [],
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
+    status: "Pending Review",
+    rejectionReason: "Considered minor littering. Advised local merchants association.",
+    rejectedAt: new Date(Date.now() - 1000 * 60 * 60 * 36).toISOString(),
+    appealMessage: "This is NOT minor littering! It completely blocks the fire exit of three major shops. This is a critical safety hazard. Please check the photos again.",
+    additionalImages: ["/media/issues/garbage.jpeg"],
+    appealedAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
+    resolutionImages: [],
+    resolutionNote: "",
+    timeline: [
+      { status: "Review Queue", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString() },
+      { status: "Rejected", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 36).toISOString() },
+      { status: "Pending Review", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString() }
+    ],
+    authorId: "user-amrit",
+    authorName: "Amrit Singh"
   }
 ];
 
@@ -259,14 +402,14 @@ app.post('/api/issues/:id/follow', (req, res) => {
 // Update Status (Municipality Triage)
 app.patch('/api/issues/:id/status', (req, res) => {
   const id = parseInt(req.params.id);
-  const { status, resolutionImages, resolutionNote, rejectReason } = req.body;
+  const { status, resolutionImages, resolutionNote, rejectionReason, rejectReason } = req.body;
   
   const issue = issues.find(i => i.id === id);
   if (!issue) {
     return res.status(404).json({ error: "Issue not found" });
   }
 
-  const validStatuses = ["Review Queue", "Acknowledged", "In Progress", "Resolved", "Rejected"];
+  const validStatuses = ["Review Queue", "Acknowledged", "In Progress", "Resolved", "Rejected", "Pending Review"];
   if (status && !validStatuses.includes(status)) {
     return res.status(400).json({ error: "Invalid status" });
   }
@@ -283,7 +426,12 @@ app.patch('/api/issues/:id/status', (req, res) => {
   }
 
   if (status === "Rejected") {
-    issue.rejectReason = rejectReason || "Rejected by Municipal Review Officer";
+    const actualRejectionReason = rejectionReason || rejectReason;
+    if (!actualRejectionReason || actualRejectionReason.trim() === "") {
+      return res.status(400).json({ error: "Rejection reason is required" });
+    }
+    issue.rejectionReason = actualRejectionReason;
+    issue.rejectedAt = new Date().toISOString();
   }
 
   if (status) {
@@ -304,6 +452,43 @@ app.patch('/api/issues/:id/status', (req, res) => {
       });
     }
   }
+
+  res.json(issue);
+});
+
+// Appeal / Submit Additional Evidence
+app.post('/api/issues/:id/appeal', (req, res) => {
+  const id = parseInt(req.params.id);
+  const { appealMessage, additionalImages } = req.body;
+
+  const issue = issues.find(i => i.id === id);
+  if (!issue) {
+    return res.status(404).json({ error: "Issue not found" });
+  }
+
+  if (issue.status !== "Rejected") {
+    return res.status(400).json({ error: "Only rejected reports can be appealed" });
+  }
+
+  if (!additionalImages || additionalImages.length === 0) {
+    return res.status(400).json({ error: "At least one additional photo is required" });
+  }
+
+  issue.status = "Pending Review";
+  
+  if (issue.appealMessage) {
+    issue.appealMessage = issue.appealMessage + "\n\n" + (appealMessage || "");
+  } else {
+    issue.appealMessage = appealMessage || "";
+  }
+  
+  issue.additionalImages = [...(issue.additionalImages || []), ...(additionalImages || [])];
+  issue.appealedAt = new Date().toISOString();
+  
+  issue.timeline.push({
+    status: "Pending Review",
+    timestamp: issue.appealedAt
+  });
 
   res.json(issue);
 });

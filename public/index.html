@@ -673,7 +673,7 @@
       <div class="side-panel-content">
         <!-- General Group -->
         <div class="panel-group">
-          <h4 class="panel-group-title">General</h4>
+          <h4 class="panel-group-title" id="opsDetailGeneralTitle">General</h4>
           <div class="panel-grid">
             <div class="grid-item full-width">
               <label>Title</label>
@@ -693,15 +693,15 @@
 
         <!-- Evidence Group -->
         <div class="panel-group">
-          <h4 class="panel-group-title">Evidence</h4>
+          <h4 class="panel-group-title" id="opsDetailEvidenceTitle">Evidence</h4>
           
           <div class="panel-field">
-            <label>Images</label>
+            <label id="opsDetailImagesLabel">Images</label>
             <div class="ops-photo-gallery" id="opsDetailPhotos"></div>
           </div>
 
           <div class="panel-field">
-            <label>Description</label>
+            <label id="opsDetailDescLabel">Description</label>
             <p class="ops-desc-text" id="opsDetailDesc">Description text here...</p>
           </div>
 
@@ -737,6 +737,34 @@
           
           <!-- Hidden timeline container so that JS doesn't break -->
           <div id="opsDetailTimeline" style="display: none;"></div>
+        </div>
+
+        <!-- Rejection Group -->
+        <div class="panel-group" id="opsDetailRejectionGroup" style="display: none;">
+          <h4 class="panel-group-title" style="color: #dc2626;">Rejection Details</h4>
+          <div class="panel-field">
+            <label style="color: #dc2626;">Status</label>
+            <div style="font-weight: 700; color: #dc2626; font-size: 14px;">Rejected</div>
+          </div>
+          <div class="panel-field" style="margin-top: 10px;">
+            <label>Reason for Rejection</label>
+            <p id="opsDetailRejectionReason" style="font-size: 13px; line-height: 1.45; color: var(--color-text-main); margin-top: 4px; padding: 10px; background-color: rgba(220, 38, 38, 0.05); border-left: 3px solid #dc2626; border-radius: 4px;"></p>
+          </div>
+          <div class="panel-field" id="opsDetailAppealActionContainer" style="margin-top: 12px; display: none;">
+            <button type="button" class="btn btn-primary" id="opsDetailAppealBtn" style="width: 100%;">Submit Additional Evidence</button>
+          </div>
+        </div>
+
+        <!-- Appeal Group -->
+        <div class="panel-group" id="opsDetailAppealGroup" style="display: none; border-top: 2px dashed var(--color-border); padding-top: 16px; margin-top: 16px;">
+          <h4 class="panel-group-title" style="color: var(--color-primary);">Additional Evidence</h4>
+          <div class="panel-field" id="opsDetailAppealImagesContainer" style="margin-top: 10px;">
+            <div class="ops-photo-gallery" id="opsDetailAppealPhotos"></div>
+          </div>
+          <div class="panel-field" id="opsDetailAppealExplanationContainer" style="margin-top: 12px;">
+            <label style="font-weight: 600; color: var(--color-text-main);">Citizen Appeal</label>
+            <p id="opsDetailAppealExplanation" style="font-size: 13px; line-height: 1.45; color: var(--color-text-main); margin-top: 4px; padding: 10px; background-color: var(--color-bg); border-radius: 4px; border: 1px solid var(--color-border);"></p>
+          </div>
         </div>
 
         <!-- Comments Group -->
@@ -786,6 +814,85 @@
           <div class="footer-right-actions" style="margin-left: auto;">
             <button type="button" class="btn btn-secondary" id="cancelResolutionModalBtn">Cancel</button>
             <button type="submit" class="btn btn-primary" id="btnConfirmResolution">Mark Resolved</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Reject Report Modal -->
+  <div class="modal-overlay" id="rejectModal">
+    <div class="modal-container" style="max-width: 500px; z-index: 1200;">
+      <div class="modal-header">
+        <h2>Reject Report</h2>
+        <button class="modal-close" id="closeRejectModalBtn" aria-label="Close modal">&times;</button>
+      </div>
+      <form id="rejectSubmitForm" class="modal-form">
+        <p class="modal-instruction" style="font-size: 13px; color: var(--color-secondary-text); margin-bottom: 16px;">
+          Please specify why this report is being rejected.
+        </p>
+        
+        <div class="form-group">
+          <label for="rejectReasonDropdown">Reason for Rejection</label>
+          <select id="rejectReasonDropdown" required style="width: 100%;">
+            <option value="" disabled selected>Select a reason...</option>
+            <option value="Need more evidence">Need more evidence</option>
+            <option value="Image is unclear">Image is unclear</option>
+            <option value="Incorrect location">Incorrect location</option>
+            <option value="Insufficient information">Insufficient information</option>
+            <option value="Issue could not be verified">Issue could not be verified</option>
+            <option value="Duplicate of another report">Duplicate of another report</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <div class="form-group" id="rejectCustomReasonGroup" style="display: none;">
+          <label for="rejectCustomReasonInput">Custom Explanation (Required)</label>
+          <textarea id="rejectCustomReasonInput" rows="3" placeholder="Enter custom rejection reason..." maxlength="300"></textarea>
+        </div>
+
+        <div class="modal-footer reddit-style">
+          <div class="footer-right-actions" style="margin-left: auto; display: flex; gap: 8px;">
+            <button type="button" class="btn btn-secondary" id="cancelRejectModalBtn">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="btnConfirmRejection" style="background-color: #dc2626; border-color: #dc2626;">Confirm Reject</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Appeal Modal -->
+  <div class="modal-overlay" id="appealModal">
+    <div class="modal-container" style="max-width: 500px; z-index: 1200;">
+      <div class="modal-header">
+        <h2>Submit Additional Evidence</h2>
+        <button class="modal-close" id="closeAppealModalBtn" aria-label="Close modal">&times;</button>
+      </div>
+      <form id="appealSubmitForm" class="modal-form">
+        <p class="modal-instruction" style="font-size: 13px; color: var(--color-secondary-text); margin-bottom: 16px;">
+          Please provide additional evidence for this report. The original description, title, and location cannot be modified.
+        </p>
+
+        <div class="form-group">
+          <label>Additional Photos (Required - Select one or more)</label>
+          <div class="file-drop-area" style="border: 2px dashed var(--color-border); padding: 20px; text-align: center; border-radius: var(--radius-md); background-color: var(--color-bg); margin-bottom: 12px;">
+            <label for="appealPhotosInput" class="btn btn-secondary btn-sm" style="cursor: pointer; display: inline-block; margin-bottom: 8px;">Select Appeal Images</label>
+            <input type="file" id="appealPhotosInput" accept="image/*" multiple style="display: none;" required>
+            <div id="appealPhotoPreview" style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;">
+              <!-- Previews will show here -->
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="appealExplanationInput">Additional Explanation (Optional)</label>
+          <textarea id="appealExplanationInput" rows="3" placeholder="Provide more context or explanation..." maxlength="500"></textarea>
+        </div>
+
+        <div class="modal-footer reddit-style">
+          <div class="footer-right-actions" style="margin-left: auto; display: flex; gap: 8px;">
+            <button type="button" class="btn btn-secondary" id="cancelAppealModalBtn">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="btnConfirmAppeal">Submit Appeal</button>
           </div>
         </div>
       </form>

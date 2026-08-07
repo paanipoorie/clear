@@ -26,6 +26,7 @@ let mapMarker = null;
 let selectedCoordinates = null;
 let attachedImages = [];
 let attachedLinks = [];
+let appealImagesBase64 = [];
 
 // Punjab districts center coordinates
 const districtCoords = {
@@ -160,7 +161,12 @@ function getOrInitializeUsers() {
     { id: 'officer', username: 'officer', email: 'officer@clear.gov', password: 'password', role: 'municipal', district: 'LUDHIANA' },
     { id: 'user-nishant', username: 'Nishant Kumar', email: 'user1@email.com', password: 'password', role: 'citizen' },
     { id: 'user-abhyudaya', username: 'Abhyudaya Sengar', email: 'user2@email.com', password: 'password', role: 'citizen' },
-    { id: 'municipal', username: 'municipal', email: 'officr1@email.com', password: 'HX291Z', authKey: 'HX291Z', role: 'municipal', district: 'SAS NAGAR' }
+    { id: 'municipal', username: 'municipal', email: 'officr1@email.com', password: 'HX291Z', authKey: 'HX291Z', role: 'municipal', district: 'SAS NAGAR' },
+    { id: 'user-amrit', username: 'Amrit Singh', email: 'user3@email.com', password: 'password', role: 'citizen' },
+    { id: 'user-karan', username: 'Karan Malhotra', email: 'user4@email.com', password: 'password', role: 'citizen' },
+    { id: 'user-simran', username: 'Simran Kaur', email: 'user5@email.com', password: 'password', role: 'citizen' },
+    { id: 'officer-sas', username: 'SAS Nagar Admin', email: 'officer2@clear.gov', password: 'password', role: 'municipal', district: 'SAS NAGAR' },
+    { id: 'officer-amritsar', username: 'Amritsar Officer', email: 'officr2@email.com', password: 'password', authKey: 'AMR98X', role: 'municipal', district: 'AMRITSAR' }
   ];
 
   let modified = false;
@@ -580,8 +586,8 @@ function renderIssues(issues) {
   
   // Filter issues for citizen portal view
   const filteredIssues = issues.filter(issue => {
-    // Filter out rejected issues
-    if (issue.status === 'Rejected') return false;
+    // Filter out rejected issues unless showMyIssues is true
+    if (issue.status === 'Rejected' && !state.showMyIssues) return false;
     // Explorer (active feed) should NEVER display resolved reports
     if (!state.showFollowedOnly && !state.showMyIssues && issue.status === 'Resolved') return false;
     return true;
@@ -683,9 +689,21 @@ function ReportPost(issue) {
   // Image (mandatory)
   // Description preview
   // Action bar
+  let statusClass = '';
+  if (issue.status === 'Review Queue' || issue.status === 'Pending Review') statusClass = 'status-review-queue';
+  else if (issue.status === 'Acknowledged') statusClass = 'status-acknowledged';
+  else if (issue.status === 'In Progress') statusClass = 'status-in-progress';
+  else if (issue.status === 'Resolved') statusClass = 'status-resolved';
+  else if (issue.status === 'Rejected') statusClass = 'status-rejected';
+
+  const statusBadge = `<span class="status-badge-inline ${statusClass}">${escapeHTML(issue.status)}</span>`;
+
   card.innerHTML = `
-    <h3 class="post-card-title">${escapeHTML(issue.title)}</h3>
-    <div class="post-card-meta" style="font-weight: 400; color: var(--color-text-muted); font-size: 12.5px; margin-top: -4px;">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; width: 100%;">
+      <h3 class="post-card-title" style="margin: 0; flex-grow: 1;">${escapeHTML(issue.title)}</h3>
+      ${statusBadge}
+    </div>
+    <div class="post-card-meta" style="font-weight: 400; color: var(--color-text-muted); font-size: 12.5px; margin-top: 4px;">
       Posted by ${escapeHTML(authorName)} &bull; ${escapeHTML(issue.subLocation)} &bull; ${timeAgo(issue.createdAt)}
     </div>
     ${imageHTML}
@@ -889,7 +907,7 @@ function MunicipalityActionPanel(issue) {
     <span class="panel-action-title">Municipality Actions</span>
   `;
 
-  if (issue.status === 'Review Queue') {
+  if (issue.status === 'Review Queue' || issue.status === 'Pending Review') {
     contentHTML += `
       <div class="panel-action-subtitle">Awaiting triage decision</div>
       <div class="triage-btn-group">
@@ -930,9 +948,13 @@ function MunicipalityActionPanel(issue) {
 
   const rej = container.querySelector('#drawerRejBtn');
   if (rej) rej.addEventListener('click', () => {
-    const reason = prompt('Specify rejection reason:');
-    if (reason === null) return;
-    updateIssueStatus(issue.id, 'Rejected', null, null, reason || 'Rejected by staff review');
+    const modal = document.getElementById('rejectModal');
+    if (modal) {
+      modal.classList.add('open');
+      document.getElementById('rejectSubmitForm').reset();
+      document.getElementById('rejectCustomReasonGroup').style.display = 'none';
+      document.getElementById('rejectCustomReasonInput').required = false;
+    }
   });
 
   const dup = container.querySelector('#drawerDupBtn');
@@ -1950,6 +1972,194 @@ function setupEventListeners() {
     }
   });
 
+  // Reject Modal dropdown handler
+  const rejectReasonDropdown = document.getElementById('rejectReasonDropdown');
+  const rejectCustomReasonGroup = document.getElementById('rejectCustomReasonGroup');
+  const rejectCustomReasonInput = document.getElementById('rejectCustomReasonInput');
+  if (rejectReasonDropdown) {
+    rejectReasonDropdown.addEventListener('change', () => {
+      if (rejectReasonDropdown.value === 'Other') {
+        rejectCustomReasonGroup.style.display = 'block';
+        rejectCustomReasonInput.required = true;
+      } else {
+        rejectCustomReasonGroup.style.display = 'none';
+        rejectCustomReasonInput.required = false;
+      }
+    });
+  }
+
+  // Reject Modal close/cancel buttons
+  const rejectModal = document.getElementById('rejectModal');
+  const closeRejectBtn = document.getElementById('closeRejectModalBtn');
+  const cancelRejectBtn = document.getElementById('cancelRejectModalBtn');
+  if (closeRejectBtn) {
+    closeRejectBtn.addEventListener('click', () => {
+      rejectModal.classList.remove('open');
+    });
+  }
+  if (cancelRejectBtn) {
+    cancelRejectBtn.addEventListener('click', () => {
+      rejectModal.classList.remove('open');
+    });
+  }
+
+  // Confirm Reject form submit
+  const rejectSubmitForm = document.getElementById('rejectSubmitForm');
+  if (rejectSubmitForm) {
+    rejectSubmitForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const issue = state.selectedIssueForOps;
+      if (!issue) return;
+
+      let reason = rejectReasonDropdown.value;
+      if (reason === 'Other') {
+        reason = rejectCustomReasonInput.value.trim();
+      }
+
+      if (!reason) {
+        showToast('Rejection reason is required');
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/issues/${issue.id}/status`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            status: 'Rejected',
+            rejectionReason: reason
+          })
+        });
+
+        if (res.ok) {
+          rejectModal.classList.remove('open');
+          showToast('Report rejected successfully');
+          const updated = await res.json();
+          state.selectedIssueForOps = updated;
+          renderOpsDetailPanel(updated);
+          fetchOpsData();
+        } else {
+          showToast('Error rejecting report');
+        }
+      } catch (err) {
+        console.error(err);
+        showToast('Network error rejecting report');
+      }
+    });
+  }
+
+  // Appeal Modal file conversion and previews
+  const appealPhotosInput = document.getElementById('appealPhotosInput');
+  const appealPhotoPreview = document.getElementById('appealPhotoPreview');
+  if (appealPhotosInput) {
+    appealPhotosInput.addEventListener('change', (e) => {
+      appealPhotoPreview.innerHTML = '';
+      appealImagesBase64 = [];
+      const files = Array.from(e.target.files);
+      
+      files.forEach(file => {
+        if (!file.type.startsWith('image/')) return;
+        
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const dataUrl = event.target.result;
+          
+          if (appealImagesBase64.includes(dataUrl)) return;
+          appealImagesBase64.push(dataUrl);
+          
+          const previewItem = document.createElement('div');
+          previewItem.className = 'photo-preview-item';
+          previewItem.innerHTML = `
+            <img src="${dataUrl}" alt="Appeal preview">
+            <button type="button" class="photo-preview-remove" aria-label="Remove photo">&times;</button>
+          `;
+          
+          previewItem.querySelector('.photo-preview-remove').addEventListener('click', () => {
+            const idx = appealImagesBase64.indexOf(dataUrl);
+            if (idx > -1) appealImagesBase64.splice(idx, 1);
+            previewItem.remove();
+            if (appealImagesBase64.length === 0) {
+              appealPhotosInput.value = '';
+            }
+          });
+          
+          appealPhotoPreview.appendChild(previewItem);
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+  }
+
+  // Appeal Modal close/cancel buttons
+  const appealModal = document.getElementById('appealModal');
+  const closeAppealBtn = document.getElementById('closeAppealModalBtn');
+  const cancelAppealBtn = document.getElementById('cancelAppealModalBtn');
+  if (closeAppealBtn) {
+    closeAppealBtn.addEventListener('click', () => {
+      appealModal.classList.remove('open');
+    });
+  }
+  if (cancelAppealBtn) {
+    cancelAppealBtn.addEventListener('click', () => {
+      appealModal.classList.remove('open');
+    });
+  }
+
+  // Appeal Button click handler (opens modal)
+  const opsDetailAppealBtn = document.getElementById('opsDetailAppealBtn');
+  if (opsDetailAppealBtn) {
+    opsDetailAppealBtn.addEventListener('click', () => {
+      if (appealModal) {
+        appealModal.classList.add('open');
+        document.getElementById('appealSubmitForm').reset();
+        appealPhotoPreview.innerHTML = '';
+        appealImagesBase64 = [];
+      }
+    });
+  }
+
+  // Confirm Appeal form submit
+  const appealSubmitForm = document.getElementById('appealSubmitForm');
+  if (appealSubmitForm) {
+    appealSubmitForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const issue = state.selectedIssueForOps;
+      if (!issue) return;
+
+      if (appealImagesBase64.length === 0) {
+        showToast('At least one additional photo is required');
+        return;
+      }
+
+      const explanation = document.getElementById('appealExplanationInput').value.trim();
+
+      try {
+        const res = await fetch(`/api/issues/${issue.id}/appeal`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            appealMessage: explanation,
+            additionalImages: appealImagesBase64
+          })
+        });
+
+        if (res.ok) {
+          appealModal.classList.remove('open');
+          showToast('Additional evidence submitted. Report is now Pending Review.');
+          const updated = await res.json();
+          state.selectedIssueForOps = updated;
+          renderOpsDetailPanel(updated);
+          fetchIssues();
+        } else {
+          showToast('Error submitting appeal');
+        }
+      } catch (err) {
+        console.error(err);
+        showToast('Network error submitting appeal');
+      }
+    });
+  }
+
   // Sidebar Drawer Comment Submission Form
   const detailCommentForm = document.getElementById('opsDetailCommentForm');
   if (detailCommentForm) {
@@ -2122,7 +2332,7 @@ async function fetchOpsData() {
 
 // Display three dashboard summary metrics cards (excluding Resolved Today)
 function renderOpsDashboardSummaries(issues) {
-  const pending = issues.filter(i => i.status === 'Review Queue').length;
+  const pending = issues.filter(i => i.status === 'Review Queue' || i.status === 'Pending Review').length;
   const acknowledged = issues.filter(i => i.status === 'Acknowledged').length;
   const inProgress = issues.filter(i => i.status === 'In Progress').length;
 
@@ -2200,9 +2410,9 @@ function renderKanbanBoard(issues) {
     'In Progress': 0
   };
 
-  // Sort Review Queue issues by score descending
+  // Sort Review Queue / Pending Review issues by score descending
   const reviewQueueIssues = issues
-    .filter(i => i.status === 'Review Queue')
+    .filter(i => i.status === 'Review Queue' || i.status === 'Pending Review')
     .sort((a, b) => calculatePriorityScore(b) - calculatePriorityScore(a));
   
   const acknowledgedIssues = issues.filter(i => i.status === 'Acknowledged');
@@ -2217,8 +2427,9 @@ function renderKanbanBoard(issues) {
   renderList.forEach(issue => {
     if (issue.status === 'Rejected' || issue.status === 'Resolved') return;
 
-    counts[issue.status] += 1;
-    const colContainer = cols[issue.status];
+    const key = issue.status === 'Pending Review' ? 'Review Queue' : issue.status;
+    counts[key] += 1;
+    const colContainer = cols[key];
     if (!colContainer) return;
 
     // Use Reusable Component: KanbanIssueCard
@@ -2237,7 +2448,10 @@ async function updateIssueStatus(id, newStatus, resolutionImages = null, resolut
     const body = { status: newStatus };
     if (resolutionImages) body.resolutionImages = resolutionImages;
     if (resolutionNote) body.resolutionNote = resolutionNote;
-    if (rejectReason) body.rejectReason = rejectReason;
+    if (rejectReason) {
+      body.rejectReason = rejectReason;
+      body.rejectionReason = rejectReason;
+    }
 
     const res = await fetch(`/api/issues/${id}/status`, {
       method: 'PATCH',
@@ -2351,6 +2565,27 @@ function renderPublicTimelineHTML(issue) {
 function renderOpsDetailPanel(issue) {
   document.getElementById('opsDetailTitle').textContent = issue.title;
   
+  // Set labels dynamically for appealed reports
+  const generalTitleEl = document.getElementById('opsDetailGeneralTitle');
+  const evidenceTitleEl = document.getElementById('opsDetailEvidenceTitle');
+  const imagesLabelEl = document.getElementById('opsDetailImagesLabel');
+  const descLabelEl = document.getElementById('opsDetailDescLabel');
+
+  const hasAppeal = !!(issue.appealMessage || (issue.additionalImages && issue.additionalImages.length > 0));
+
+  if (generalTitleEl) {
+    generalTitleEl.textContent = hasAppeal ? "Original Report" : "General";
+  }
+  if (evidenceTitleEl) {
+    evidenceTitleEl.textContent = hasAppeal ? "Original Evidence" : "Evidence";
+  }
+  if (imagesLabelEl) {
+    imagesLabelEl.textContent = hasAppeal ? "Original Images" : "Images";
+  }
+  if (descLabelEl) {
+    descLabelEl.textContent = hasAppeal ? "Original Description" : "Description";
+  }
+  
   // Get author name
   let authorName = issue.authorName;
   if (issue.isAnonymous) {
@@ -2379,7 +2614,20 @@ function renderOpsDetailPanel(issue) {
   
   const statusEl = document.getElementById('opsDetailStatus');
   statusEl.textContent = issue.status;
-  statusEl.className = 'val-text';
+  let statusClass = '';
+  if (issue.status === 'Review Queue' || issue.status === 'Pending Review') statusClass = 'status-review-queue';
+  else if (issue.status === 'Acknowledged') statusClass = 'status-acknowledged';
+  else if (issue.status === 'In Progress') statusClass = 'status-in-progress';
+  else if (issue.status === 'Resolved') statusClass = 'status-resolved';
+  else if (issue.status === 'Rejected') statusClass = 'status-rejected';
+  statusEl.className = `status-badge-inline ${statusClass}`;
+  statusEl.style.textTransform = 'uppercase';
+  statusEl.style.fontSize = '10px';
+  statusEl.style.fontWeight = '700';
+  statusEl.style.padding = '2px 8px';
+  statusEl.style.borderRadius = '12px';
+  statusEl.style.border = '1px solid';
+  statusEl.style.display = 'inline-block';
 
   document.getElementById('opsDetailDesc').textContent = issue.description || 'No description supplied.';
 
@@ -2478,6 +2726,59 @@ function renderOpsDetailPanel(issue) {
       municipalityGroup.style.display = 'block';
     } else {
       municipalityGroup.style.display = 'none';
+    }
+  }
+
+  // Rejection details display toggle
+  const rejectionGroup = document.getElementById('opsDetailRejectionGroup');
+  if (rejectionGroup) {
+    if (issue.status === 'Rejected') {
+      rejectionGroup.style.display = 'block';
+      const reasonEl = document.getElementById('opsDetailRejectionReason');
+      if (reasonEl) {
+        reasonEl.textContent = issue.rejectionReason || 'No reason specified.';
+      }
+      
+      const appealActionContainer = document.getElementById('opsDetailAppealActionContainer');
+      if (appealActionContainer) {
+        if (state.activePortal === 'public' && issue.authorId === state.currentUser.id) {
+          appealActionContainer.style.display = 'block';
+        } else {
+          appealActionContainer.style.display = 'none';
+        }
+      }
+    } else {
+      rejectionGroup.style.display = 'none';
+    }
+  }
+
+  // Appeal details display toggle
+  const appealGroup = document.getElementById('opsDetailAppealGroup');
+  if (appealGroup) {
+    if (issue.appealMessage || (issue.additionalImages && issue.additionalImages.length > 0)) {
+      appealGroup.style.display = 'block';
+      
+      const explanationContainer = document.getElementById('opsDetailAppealExplanationContainer');
+      const explanationEl = document.getElementById('opsDetailAppealExplanation');
+      if (issue.appealMessage) {
+        explanationContainer.style.display = 'block';
+        explanationEl.textContent = issue.appealMessage;
+      } else {
+        explanationContainer.style.display = 'none';
+      }
+
+      const imagesContainer = document.getElementById('opsDetailAppealImagesContainer');
+      const photosEl = document.getElementById('opsDetailAppealPhotos');
+      if (issue.additionalImages && issue.additionalImages.length > 0) {
+        imagesContainer.style.display = 'block';
+        photosEl.innerHTML = issue.additionalImages.map(img => 
+          `<img src="${img}" class="ops-detail-photo" alt="Appeal details photo" onclick="window.open('${img}')">`
+        ).join('');
+      } else {
+        imagesContainer.style.display = 'none';
+      }
+    } else {
+      appealGroup.style.display = 'none';
     }
   }
 
