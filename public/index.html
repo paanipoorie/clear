@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png" />
   <meta name="apple-mobile-web-app-title" content="CLEAR" />
   <link rel="manifest" href="/favicon/site.webmanifest" />
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="/style.css">
   <!-- Import Outfit and Inter Google Fonts for clean, confident civic typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -25,13 +25,7 @@
 
   <!-- Landing Portal / Auth / Workspace Selection Wrapper -->
   <div id="landingPortal" class="auth-portal-wrapper">
-    <!-- Minimal Header for Choose Workspace and optionally auth pages -->
-    <header class="auth-header" id="authHeader" style="display: none;">
-      <div class="auth-header-logo">
-        <brand-logo text="clear"></brand-logo>
-      </div>
-      <button class="btn btn-secondary btn-sm" id="authHeaderLogoutBtn">Logout</button>
-    </header>
+
 
     <div class="auth-container">
       
@@ -236,19 +230,7 @@
         </div>
       </div>
 
-      <!-- 4. CHOOSE WORKSPACE SCREEN -->
-      <div id="authWorkspaceScreen" class="auth-screen" style="display: none;">
-        <div class="workspace-selection-container">
-          <div class="workspace-header">
-            <h2>Choose Your Workspace</h2>
-            <p>Select the environment you want to continue into.</p>
-          </div>
-          
-          <div class="workspace-cards-grid" id="workspaceCardsContainer">
-            <!-- Dynamic workspace cards will be injected here -->
-          </div>
-        </div>
-      </div>
+
 
     </div>
   </div>
@@ -414,15 +396,7 @@
                 </svg>
                 My Issues
               </button>
-              <button class="dropdown-item" id="changeWorkspaceBtn">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-sm">
-                  <rect x="3" y="3" width="7" height="7"></rect>
-                  <rect x="14" y="3" width="7" height="7"></rect>
-                  <rect x="14" y="14" width="7" height="7"></rect>
-                  <rect x="3" y="14" width="7" height="7"></rect>
-                </svg>
-                Change Workspace
-              </button>
+
               <button class="dropdown-item danger" id="logoutBtn">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-sm">
                   <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
@@ -695,6 +669,7 @@
             <div class="grid-item full-width">
               <label>Title</label>
               <div class="val-text title-val" id="opsDetailTitle">Illegal dumping behind residential area</div>
+              <div class="ops-detail-author" id="opsDetailAuthor" style="font-size: 13px; color: var(--color-text-muted); font-weight: 400; margin-top: 4px;"></div>
             </div>
             <div class="grid-item">
               <label>District</label>
@@ -811,7 +786,7 @@
   <!-- Toast Notification Container -->
   <div class="toast-container" id="toastContainer"></div>
 
-  <script src="brand-logo.js"></script>
-  <script src="app.js"></script>
+  <script src="/brand-logo.js"></script>
+  <script src="/app.js"></script>
 </body>
 </html>

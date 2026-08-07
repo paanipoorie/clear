@@ -1,34 +1,4 @@
-// Workspace configuration list (Bonus: easy extension for other workspaces)
-const WORKSPACES = [
-  {
-    id: 'public',
-    title: 'Citizen Portal',
-    description: 'Report environmental issues, participate in community verification, follow local resolutions and stay informed about environmental updates.',
-    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-             <circle cx="9" cy="7" r="4"></circle>
-             <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-             <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-           </svg>`,
-    buttonText: 'Continue'
-  },
-  {
-    id: 'municipality',
-    title: 'Municipal Operations',
-    description: 'Review incoming reports, manage triage queues, assign field work, publish official notices and close environmental cases.',
-    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-             <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
-             <line x1="9" y1="22" x2="9" y2="16"></line>
-             <line x1="15" y1="22" x2="15" y2="16"></line>
-             <line x1="9" y1="16" x2="15" y2="16"></line>
-             <path d="M8 6h2"></path>
-             <path d="M14 6h2"></path>
-             <path d="M8 10h2"></path>
-             <path d="M14 10h2"></path>
-           </svg>`,
-    buttonText: 'Continue'
-  }
-];
+// Workspace configuration completely removed.
 
 // Application State
 const state = {
@@ -39,6 +9,7 @@ const state = {
   showNoticesOnly: false,
   searchQuery: '',
   currentUser: {
+    id: 'user',
     username: 'user',
     role: 'Resident Reporter'
   },
@@ -46,7 +17,7 @@ const state = {
   selectedIssueForOps: null
 };
 
-const MOCK_MUNICIPALITY_DISTRICT = 'LUDHIANA';
+let MOCK_MUNICIPALITY_DISTRICT = 'LUDHIANA';
 const MOCK_MUNICIPALITY_STATE = 'Punjab';
 
 // Map and attachments editor state
@@ -126,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Authentication UX Helper Functions
 function showAuthScreen(screenId) {
-  const screens = ['authLandingScreen', 'authLoginScreen', 'authRegisterScreen', 'authWorkspaceScreen'];
+  const screens = ['authLandingScreen', 'authLoginScreen', 'authRegisterScreen'];
   
   // Find current active screen element
   let currentScreen = null;
@@ -140,10 +111,9 @@ function showAuthScreen(screenId) {
   const targetScreen = document.getElementById(screenId);
   if (!targetScreen) return;
 
-  // Toggle minimal navigation header (only on Choose Workspace screen)
   const authHeader = document.getElementById('authHeader');
   if (authHeader) {
-    authHeader.style.display = (screenId === 'authWorkspaceScreen') ? 'flex' : 'none';
+    authHeader.style.display = 'none';
   }
 
   if (currentScreen && currentScreen.id !== screenId) {
@@ -154,8 +124,8 @@ function showAuthScreen(screenId) {
     setTimeout(() => {
       currentScreen.style.display = 'none';
       
-      // Prepare and display target screen
-      targetScreen.style.display = (screenId === 'authLandingScreen' || screenId === 'authWorkspaceScreen') ? 'flex' : 'block';
+      // Prepare and display target screen (always flex to center cards)
+      targetScreen.style.display = 'flex';
       // Trigger browser reflow
       targetScreen.offsetHeight;
       
@@ -174,76 +144,129 @@ function showAuthScreen(screenId) {
       }
     });
 
-    targetScreen.style.display = (screenId === 'authLandingScreen' || screenId === 'authWorkspaceScreen') ? 'flex' : 'block';
+    targetScreen.style.display = 'flex';
     targetScreen.offsetHeight;
     targetScreen.style.opacity = '1';
     targetScreen.classList.add('active');
   }
 }
 
-function renderChooseWorkspaceView() {
-  const container = document.getElementById('workspaceCardsContainer');
-  if (!container) return;
-
-  container.innerHTML = '';
-
-  WORKSPACES.forEach(ws => {
-    const card = document.createElement('div');
-    card.className = 'workspace-card';
-    card.setAttribute('data-id', ws.id);
-
-    card.innerHTML = `
-      <div class="workspace-card-icon">
-        ${ws.icon}
-      </div>
-      <h3 class="workspace-card-title">${ws.title}</h3>
-      <p class="workspace-card-description">${ws.description}</p>
-      <button class="workspace-card-btn">${ws.buttonText}</button>
-    `;
-
-    // Click handler for entire workspace card
-    card.addEventListener('click', () => {
-      localStorage.setItem('clear_last_workspace', ws.id);
-      switchPortal(ws.id);
-    });
-
-    container.appendChild(card);
-  });
-}
-
-function authenticateUser(username, password) {
+function getOrInitializeUsers() {
   let users = JSON.parse(localStorage.getItem('clear_users') || '[]');
-  if (users.length === 0) {
-    users = [
-      { username: 'user', password: 'password' },
-      { username: 'officer', password: 'password' }
-    ];
+  
+  // Base default users including new requested mocks
+  const defaultUsers = [
+    { id: 'user', username: 'user', email: 'user@clear.gov', password: 'password', role: 'citizen' },
+    { id: 'officer', username: 'officer', email: 'officer@clear.gov', password: 'password', role: 'municipal', district: 'LUDHIANA' },
+    { id: 'user-nishant', username: 'Nishant Kumar', email: 'user1@email.com', password: 'password', role: 'citizen' },
+    { id: 'user-abhyudaya', username: 'Abhyudaya Sengar', email: 'user2@email.com', password: 'password', role: 'citizen' },
+    { id: 'municipal', username: 'municipal', email: 'officr1@email.com', password: 'HX291Z', authKey: 'HX291Z', role: 'municipal', district: 'SAS NAGAR' }
+  ];
+
+  let modified = false;
+  
+  // Ensure all existing stored users have IDs
+  users.forEach(u => {
+    if (!u.id) {
+      if (u.username === 'Nishant Kumar') u.id = 'user-nishant';
+      else if (u.username === 'Abhyudaya Sengar') u.id = 'user-abhyudaya';
+      else u.id = 'user-' + u.username.toLowerCase().replace(/[^a-z0-9]/g, '-');
+      modified = true;
+    }
+  });
+
+  defaultUsers.forEach(du => {
+    if (!users.some(u => u.username.toLowerCase() === du.username.toLowerCase() || (du.email && u.email && u.email.toLowerCase() === du.email.toLowerCase()))) {
+      users.push(du);
+      modified = true;
+    }
+  });
+
+  if (modified || localStorage.getItem('clear_users') === null) {
     localStorage.setItem('clear_users', JSON.stringify(users));
   }
-  return users.find(u => u.username.toLowerCase() === username.toLowerCase() && u.password === password);
+  return users;
 }
 
-function registerNewUser(username, email, password) {
-  let users = JSON.parse(localStorage.getItem('clear_users') || '[]');
-  if (users.length === 0) {
-    users = [
-      { username: 'user', password: 'password' },
-      { username: 'officer', password: 'password' }
-    ];
+function authenticateUser(emailOrUsername, password) {
+  let users = getOrInitializeUsers();
+  const user = users.find(u => 
+    (u.username.toLowerCase() === emailOrUsername.toLowerCase() || (u.email && u.email.toLowerCase() === emailOrUsername.toLowerCase())) && 
+    (u.password === password || u.authKey === password)
+  );
+  if (user) {
+    user.role = (user.role === 'civil' || user.role === 'citizen') ? 'citizen' : 'municipal';
   }
+  return user;
+}
+
+function registerNewUser(username, email, password, role = 'citizen', district = '') {
+  let users = getOrInitializeUsers();
   if (users.some(u => u.username.toLowerCase() === username.toLowerCase())) {
     return { success: false, error: 'Username already exists' };
   }
-  users.push({ username, email, password });
+  if (users.some(u => u.email && u.email.toLowerCase() === email.toLowerCase())) {
+    return { success: false, error: 'Email already registered' };
+  }
+  const targetRole = (role === 'civil' || role === 'citizen') ? 'citizen' : 'municipal';
+  const id = 'user-' + username.toLowerCase().replace(/[^a-z0-9]/g, '-');
+  const newUser = { id, username, email, password, role: targetRole, district };
+  users.push(newUser);
   localStorage.setItem('clear_users', JSON.stringify(users));
-  return { success: true };
+  return { success: true, user: newUser };
 }
 
-function initApp() {
-  fetchUser();
+function handleRouting() {
+  const isAuthenticated = localStorage.getItem('clear_user_authenticated') === 'true';
+  const path = window.location.pathname;
+
+  if (isAuthenticated) {
+    // Get the user's role synchronously
+    const storedUsername = localStorage.getItem('clear_username');
+    let userRole = 'citizen';
+    if (storedUsername) {
+      const users = JSON.parse(localStorage.getItem('clear_users') || '[]');
+      const found = users.find(u => u.username.toLowerCase() === storedUsername.toLowerCase());
+      if (found) {
+        userRole = (found.role === 'civil' || found.role === 'citizen') ? 'citizen' : 'municipal';
+      }
+    }
+    
+    if (path === '/citizen/dashboard') {
+      if (userRole === 'citizen') {
+        switchPortal('public');
+      } else {
+        window.history.replaceState(null, '', '/municipal/dashboard');
+        switchPortal('municipality');
+      }
+    } else if (path === '/municipal/dashboard') {
+      if (userRole === 'municipal') {
+        switchPortal('municipality');
+      } else {
+        window.history.replaceState(null, '', '/citizen/dashboard');
+        switchPortal('public');
+      }
+    } else {
+      if (userRole === 'municipal') {
+        window.history.replaceState(null, '', '/municipal/dashboard');
+        switchPortal('municipality');
+      } else {
+        window.history.replaceState(null, '', '/citizen/dashboard');
+        switchPortal('public');
+      }
+    }
+  } else {
+    if (path !== '/' && path !== '/index.html') {
+      window.history.replaceState(null, '', '/');
+    }
+    switchPortal('landing');
+  }
+}
+
+async function initApp() {
+  await fetchUser();
   setupEventListeners();
-  renderChooseWorkspaceView(); // pre-render workspace list based on configuration
-  switchPortal('landing');
+  handleRouting();
 
   // Render NoticeForm
   const noticeCreator = document.getElementById('noticeCreatorPanel');
@@ -272,21 +295,14 @@ function switchPortal(portalName) {
   }
   
   if (portalName === 'landing') {
-    landingPortal.style.display = 'flex';
-    mainAppLayout.style.display = 'none';
-    
-    // Determine screen based on login status and workspace selection history
     const isAuthenticated = localStorage.getItem('clear_user_authenticated') === 'true';
     if (isAuthenticated) {
-      const lastWorkspace = localStorage.getItem('clear_last_workspace');
-      if (lastWorkspace && WORKSPACES.some(ws => ws.id === lastWorkspace)) {
-        switchPortal(lastWorkspace);
-      } else {
-        showAuthScreen('authWorkspaceScreen');
-      }
-    } else {
-      showAuthScreen('authLandingScreen');
+      handleRouting();
+      return;
     }
+    landingPortal.style.display = 'flex';
+    mainAppLayout.style.display = 'none';
+    showAuthScreen('authLandingScreen');
   } else {
     landingPortal.style.display = 'none';
     mainAppLayout.style.display = 'flex';
@@ -380,6 +396,19 @@ async function fetchUser() {
       const storedUsername = localStorage.getItem('clear_username');
       if (storedUsername) {
         user.username = storedUsername;
+        // Retrieve role & district from local clear_users DB
+        const users = getOrInitializeUsers();
+        const found = users.find(u => u.username.toLowerCase() === storedUsername.toLowerCase());
+        if (found) {
+          user.id = found.id || found.username;
+          user.role = (found.role === 'civil' || found.role === 'citizen') ? 'citizen' : 'municipal';
+          user.district = found.district || 'LUDHIANA';
+          MOCK_MUNICIPALITY_DISTRICT = user.district;
+        } else {
+          user.id = storedUsername;
+        }
+      } else {
+        user.id = 'user';
       }
       state.currentUser = user;
       document.getElementById('usernameLabel').textContent = user.username;
@@ -443,7 +472,12 @@ async function fetchIssues() {
   // Build query params
   const params = new URLSearchParams();
   if (state.currentSubLocation) params.append('subLocation', state.currentSubLocation);
-  if (state.showMyIssues) params.append('myIssues', 'true');
+  if (state.showMyIssues) {
+    params.append('myIssues', 'true');
+    if (state.currentUser && state.currentUser.id) {
+      params.append('userId', state.currentUser.id);
+    }
+  }
   if (state.showFollowedOnly) params.append('followedOnly', 'true');
   if (state.searchQuery) params.append('search', state.searchQuery);
 
@@ -549,21 +583,41 @@ function renderIssues(issues) {
     // Filter out rejected issues
     if (issue.status === 'Rejected') return false;
     // Explorer (active feed) should NEVER display resolved reports
-    if (!state.showFollowedOnly && issue.status === 'Resolved') return false;
+    if (!state.showFollowedOnly && !state.showMyIssues && issue.status === 'Resolved') return false;
     return true;
   });
 
   if (filteredIssues.length === 0) {
-    feedContainer.innerHTML = `
-      <div class="empty-state">
-        <svg class="icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"></circle>
-          <line x1="8" y1="12" x2="16" y2="12"></line>
-        </svg>
-        <h3>No environmental reports found</h3>
-        <p>Try resetting filters, clearing your search, or submit a new environmental issue report.</p>
-      </div>
-    `;
+    if (state.showMyIssues) {
+      feedContainer.innerHTML = `
+        <div class="empty-state">
+          <svg class="icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-muted-text); margin-bottom: 16px;">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="8" y1="12" x2="16" y2="12"></line>
+          </svg>
+          <h3 style="font-size: 18px; font-weight: 700; color: var(--color-primary-text); margin-bottom: 8px;">No reports yet</h3>
+          <p style="font-size: 14px; color: var(--color-secondary-text); margin-bottom: 20px;">You haven't submitted any environmental reports.</p>
+          <button class="btn btn-primary" onclick="document.getElementById('createIssueBtn').click()">
+            <svg class="icon stroke-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Create Report
+          </button>
+        </div>
+      `;
+    } else {
+      feedContainer.innerHTML = `
+        <div class="empty-state">
+          <svg class="icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="8" y1="12" x2="16" y2="12"></line>
+          </svg>
+          <h3>No environmental reports found</h3>
+          <p>Try resetting filters, clearing your search, or submit a new environmental issue report.</p>
+        </div>
+      `;
+    }
     return;
   }
 
@@ -604,16 +658,31 @@ function ReportPost(issue) {
     </div>
   `;
 
+  // Get author name
+  let authorName = issue.authorName;
+  if (!authorName && issue.authorId) {
+    const users = JSON.parse(localStorage.getItem('clear_users') || '[]');
+    const found = users.find(u => u.id === issue.authorId || u.username.toLowerCase() === issue.authorId.toLowerCase());
+    if (found) {
+      authorName = found.username;
+    } else {
+      authorName = issue.authorId;
+    }
+  }
+  if (!authorName) {
+    authorName = "Anonymous";
+  }
+
   // Order:
   // Title
-  // District (No Status badge)
+  // Author & District & Time elapsed
   // Image (mandatory)
   // Description preview
   // Action bar
   card.innerHTML = `
     <h3 class="post-card-title">${escapeHTML(issue.title)}</h3>
-    <div class="post-card-meta">
-      <span class="post-card-district">${escapeHTML(issue.subLocation)}</span>
+    <div class="post-card-meta" style="font-weight: 400; color: var(--color-text-muted); font-size: 12.5px; margin-top: -4px;">
+      Posted by ${escapeHTML(authorName)} &bull; ${escapeHTML(issue.subLocation)} &bull; ${timeAgo(issue.createdAt)}
     </div>
     ${imageHTML}
     ${issue.description ? `<p class="post-card-desc-preview">${escapeHTML(issue.description)}</p>` : ''}
@@ -976,6 +1045,80 @@ function NoticeForm() {
 
 // Setup Event Listeners
 function setupEventListeners() {
+  // Role selector toggles for Login screen
+  const loginRoleCivilBtn = document.getElementById('loginRoleCivil');
+  const loginRoleMunicipalBtn = document.getElementById('loginRoleMunicipal');
+  const loginCivilFields = document.getElementById('loginCivilFields');
+  const loginMunicipalFields = document.getElementById('loginMunicipalFields');
+
+  if (loginRoleCivilBtn && loginRoleMunicipalBtn) {
+    loginRoleCivilBtn.addEventListener('click', () => {
+      loginRoleCivilBtn.classList.add('active');
+      loginRoleMunicipalBtn.classList.remove('active');
+      if (loginCivilFields) loginCivilFields.style.display = 'block';
+      if (loginMunicipalFields) loginMunicipalFields.style.display = 'none';
+      
+      document.getElementById('loginCivilEmail').setAttribute('required', 'true');
+      document.getElementById('loginCivilPassword').setAttribute('required', 'true');
+      document.getElementById('loginMunicipalEmail').removeAttribute('required');
+      document.getElementById('loginMunicipalAuthKey').removeAttribute('required');
+    });
+
+    loginRoleMunicipalBtn.addEventListener('click', () => {
+      loginRoleMunicipalBtn.classList.add('active');
+      loginRoleCivilBtn.classList.remove('active');
+      if (loginCivilFields) loginCivilFields.style.display = 'none';
+      if (loginMunicipalFields) loginMunicipalFields.style.display = 'block';
+      
+      document.getElementById('loginCivilEmail').removeAttribute('required');
+      document.getElementById('loginCivilPassword').removeAttribute('required');
+      document.getElementById('loginMunicipalEmail').setAttribute('required', 'true');
+      document.getElementById('loginMunicipalAuthKey').setAttribute('required', 'true');
+    });
+  }
+
+  // Role selector toggles for Register screen
+  const registerRoleCivilBtn = document.getElementById('registerRoleCivil');
+  const registerRoleMunicipalBtn = document.getElementById('registerRoleMunicipal');
+  const registerCivilFields = document.getElementById('registerCivilFields');
+  const registerMunicipalFields = document.getElementById('registerMunicipalFields');
+
+  if (registerRoleCivilBtn && registerRoleMunicipalBtn) {
+    registerRoleCivilBtn.addEventListener('click', () => {
+      registerRoleCivilBtn.classList.add('active');
+      registerRoleMunicipalBtn.classList.remove('active');
+      if (registerCivilFields) registerCivilFields.style.display = 'block';
+      if (registerMunicipalFields) registerMunicipalFields.style.display = 'none';
+      
+      document.getElementById('registerCivilEmail').setAttribute('required', 'true');
+      document.getElementById('registerCivilName').setAttribute('required', 'true');
+      document.getElementById('registerCivilPassword').setAttribute('required', 'true');
+      document.getElementById('registerCivilConfirmPassword').setAttribute('required', 'true');
+      
+      document.getElementById('registerMunicipalEmail').removeAttribute('required');
+      document.getElementById('registerMunicipalUsername').removeAttribute('required');
+      document.getElementById('registerMunicipalDistrict').removeAttribute('required');
+      document.getElementById('registerMunicipalAuthKey').removeAttribute('required');
+    });
+
+    registerRoleMunicipalBtn.addEventListener('click', () => {
+      registerRoleMunicipalBtn.classList.add('active');
+      registerRoleCivilBtn.classList.remove('active');
+      if (registerCivilFields) registerCivilFields.style.display = 'none';
+      if (registerMunicipalFields) registerMunicipalFields.style.display = 'block';
+      
+      document.getElementById('registerCivilEmail').removeAttribute('required');
+      document.getElementById('registerCivilName').removeAttribute('required');
+      document.getElementById('registerCivilPassword').removeAttribute('required');
+      document.getElementById('registerCivilConfirmPassword').removeAttribute('required');
+      
+      document.getElementById('registerMunicipalEmail').setAttribute('required', 'true');
+      document.getElementById('registerMunicipalUsername').setAttribute('required', 'true');
+      document.getElementById('registerMunicipalDistrict').setAttribute('required', 'true');
+      document.getElementById('registerMunicipalAuthKey').setAttribute('required', 'true');
+    });
+  }
+
   // New Auth flow triggers
   const goToLoginBtn = document.getElementById('goToLoginBtn');
   if (goToLoginBtn) {
@@ -1018,13 +1161,20 @@ function setupEventListeners() {
   if (loginForm) {
     loginForm.addEventListener('submit', (e) => {
       e.preventDefault();
-      const usernameInput = document.getElementById('loginUsername');
-      const passwordInput = document.getElementById('loginPassword');
       
-      const username = usernameInput.value.trim();
-      const password = passwordInput.value;
+      const isCivil = loginRoleCivilBtn ? loginRoleCivilBtn.classList.contains('active') : true;
+      let emailOrUsername = '';
+      let password = '';
       
-      const user = authenticateUser(username, password);
+      if (isCivil) {
+        emailOrUsername = document.getElementById('loginCivilEmail').value.trim();
+        password = document.getElementById('loginCivilPassword').value;
+      } else {
+        emailOrUsername = document.getElementById('loginMunicipalEmail').value.trim();
+        password = document.getElementById('loginMunicipalAuthKey').value;
+      }
+      
+      const user = authenticateUser(emailOrUsername, password);
       if (user) {
         // Authenticate successfully
         localStorage.setItem('clear_user_authenticated', 'true');
@@ -1032,9 +1182,17 @@ function setupEventListeners() {
         
         // Update user state
         state.currentUser = {
+          id: user.id || user.username,
           username: user.username,
-          avatar: '/images/avatar.png'
+          avatar: '/images/avatar.png',
+          role: user.role,
+          district: user.district || 'LUDHIANA'
         };
+        
+        if (user.district) {
+          MOCK_MUNICIPALITY_DISTRICT = user.district;
+        }
+        
         const usernameLabel = document.getElementById('usernameLabel');
         if (usernameLabel) usernameLabel.textContent = user.username;
         
@@ -1043,15 +1201,16 @@ function setupEventListeners() {
         // Clear input values
         loginForm.reset();
         
-        // Check if there is role memory
-        const lastWorkspace = localStorage.getItem('clear_last_workspace');
-        if (lastWorkspace && WORKSPACES.some(ws => ws.id === lastWorkspace)) {
-          switchPortal(lastWorkspace);
+        // Redirect directly based on role
+        if (state.currentUser.role === 'municipal') {
+          window.history.pushState(null, '', '/municipal/dashboard');
+          switchPortal('municipality');
         } else {
-          showAuthScreen('authWorkspaceScreen');
+          window.history.pushState(null, '', '/citizen/dashboard');
+          switchPortal('public');
         }
       } else {
-        showToast('Invalid username or password.');
+        showToast('Invalid email, username or password/auth key.');
       }
     });
   }
@@ -1061,31 +1220,51 @@ function setupEventListeners() {
   if (registerForm) {
     registerForm.addEventListener('submit', (e) => {
       e.preventDefault();
-      const usernameInput = document.getElementById('registerUsername');
-      const emailInput = document.getElementById('registerEmail');
-      const passwordInput = document.getElementById('registerPassword');
-      const confirmPasswordInput = document.getElementById('registerConfirmPassword');
       
-      const username = usernameInput.value.trim();
-      const email = emailInput.value.trim();
-      const password = passwordInput.value;
-      const confirmPassword = confirmPasswordInput.value;
+      const isCivil = registerRoleCivilBtn ? registerRoleCivilBtn.classList.contains('active') : true;
+      let email = '';
+      let username = '';
+      let password = '';
+      let confirmPassword = '';
+      let district = '';
+      
+      if (isCivil) {
+        email = document.getElementById('registerCivilEmail').value.trim();
+        const name = document.getElementById('registerCivilName').value.trim();
+        password = document.getElementById('registerCivilPassword').value;
+        confirmPassword = document.getElementById('registerCivilConfirmPassword').value;
+        username = name || email.split('@')[0];
+      } else {
+        email = document.getElementById('registerMunicipalEmail').value.trim();
+        username = document.getElementById('registerMunicipalUsername').value.trim();
+        district = document.getElementById('registerMunicipalDistrict').value;
+        password = document.getElementById('registerMunicipalAuthKey').value;
+        confirmPassword = password;
+      }
       
       if (password !== confirmPassword) {
         showToast('Passwords do not match.');
         return;
       }
       
-      const reg = registerNewUser(username, email, password);
+      const reg = registerNewUser(username, email, password, isCivil ? 'citizen' : 'municipal', district);
       if (reg.success) {
         // Register and log in successfully
         localStorage.setItem('clear_user_authenticated', 'true');
         localStorage.setItem('clear_username', username);
         
         state.currentUser = {
+          id: reg.user.id || username,
           username: username,
-          avatar: '/images/avatar.png'
+          avatar: '/images/avatar.png',
+          role: isCivil ? 'citizen' : 'municipal',
+          district: district || 'LUDHIANA'
         };
+        
+        if (district) {
+          MOCK_MUNICIPALITY_DISTRICT = district;
+        }
+        
         const usernameLabel = document.getElementById('usernameLabel');
         if (usernameLabel) usernameLabel.textContent = username;
         
@@ -1093,38 +1272,24 @@ function setupEventListeners() {
         
         registerForm.reset();
         
-        // New account has no workspace history, show Choose Workspace screen
-        showAuthScreen('authWorkspaceScreen');
+        // Redirect directly based on role
+        if (state.currentUser.role === 'municipal') {
+          window.history.pushState(null, '', '/municipal/dashboard');
+          switchPortal('municipality');
+        } else {
+          window.history.pushState(null, '', '/citizen/dashboard');
+          switchPortal('public');
+        }
       } else {
         showToast(reg.error || 'Failed to register.');
       }
     });
   }
 
-  // Auth Header Logout Button (Choose Workspace Screen)
-  const authHeaderLogoutBtn = document.getElementById('authHeaderLogoutBtn');
-  if (authHeaderLogoutBtn) {
-    authHeaderLogoutBtn.addEventListener('click', async () => {
-      localStorage.removeItem('clear_user_authenticated');
-      try {
-        await fetch('/api/user/logout', { method: 'POST' });
-      } catch (err) {
-        console.error(err);
-      }
-      showToast('Logged out successfully');
-      switchPortal('landing');
-    });
-  }
-
-  // Change Workspace Button (Dashboard profile menu)
-  const changeWorkspaceBtn = document.getElementById('changeWorkspaceBtn');
-  if (changeWorkspaceBtn) {
-    changeWorkspaceBtn.addEventListener('click', () => {
-      profileDropdown.classList.remove('open');
-      localStorage.removeItem('clear_last_workspace');
-      switchPortal('landing');
-    });
-  }
+  // Handle browser navigation (back/forward buttons)
+  window.addEventListener('popstate', () => {
+    handleRouting();
+  });
 
   // Ops Tab Buttons Click Handling (Sidebar)
   opsTriageTabBtn.addEventListener('click', () => switchOpsTab('triage'));
@@ -1269,6 +1434,7 @@ function setupEventListeners() {
   logoutBtn.addEventListener('click', async () => {
     profileDropdown.classList.remove('open');
     localStorage.removeItem('clear_user_authenticated');
+    localStorage.removeItem('clear_username');
     try {
       const res = await fetch('/api/user/logout', { method: 'POST' });
       if (res.ok) {
@@ -1277,6 +1443,7 @@ function setupEventListeners() {
     } catch (err) {
       console.error(err);
     }
+    window.history.pushState(null, '', '/');
     switchPortal('landing');
   });
 
@@ -1605,7 +1772,9 @@ function setupEventListeners() {
           description,
           coordinates: selectedCoordinates,
           images: attachedImages,
-          links: attachedLinks
+          links: attachedLinks,
+          authorId: state.currentUser ? state.currentUser.id : 'user',
+          authorName: state.currentUser ? state.currentUser.username : 'user'
         })
       });
 
@@ -2171,6 +2340,27 @@ function renderPublicTimelineHTML(issue) {
 
 function renderOpsDetailPanel(issue) {
   document.getElementById('opsDetailTitle').textContent = issue.title;
+  
+  // Get author name
+  let authorName = issue.authorName;
+  if (!authorName && issue.authorId) {
+    const users = JSON.parse(localStorage.getItem('clear_users') || '[]');
+    const found = users.find(u => u.id === issue.authorId || u.username.toLowerCase() === issue.authorId.toLowerCase());
+    if (found) {
+      authorName = found.username;
+    } else {
+      authorName = issue.authorId;
+    }
+  }
+  if (!authorName) {
+    authorName = "Anonymous";
+  }
+
+  const authorEl = document.getElementById('opsDetailAuthor');
+  if (authorEl) {
+    authorEl.innerHTML = `Posted by ${escapeHTML(authorName)} &bull; ${escapeHTML(issue.subLocation)} &bull; ${timeAgo(issue.createdAt)}`;
+  }
+
   document.getElementById('opsDetailDistrict').textContent = issue.subLocation;
   
   const statusEl = document.getElementById('opsDetailStatus');

@@ -4,60 +4,72 @@ This document describes the current frontend client architecture, visual structu
 
 ---
 
-## 1. Architecture Overview
+## 1. Architecture Overview & Authentication Flow
 
-The Citizen Portal is built as a highly responsive, single-page application (SPA) using Vanilla JavaScript, HTML5 semantic elements, and a modular CSS design system. It interacts with an Express-based mock backend server (`server.js`) via asynchronous REST API calls.
+The C.L.E.A.R. platform is built as a single-page application (SPA) using Vanilla JavaScript, HTML5 semantic elements, and custom CSS classes. It interacts with an Express-based mock backend server (`server.js`) via asynchronous REST API calls.
 
-State is managed client-side via a single `state` object inside [`app.js`](file:///home/nish4nt/dev/clear/public/app.js) containing configurations such as:
-- `activePortal` ("public" | "municipality" | "landing")
-- `currentSubLocation` (district filter value)
-- `showFollowedOnly` (active tab filter state)
-- `selectedIssueForOps` (details panel target issue context)
+### 1.1 Authentication & Workspace Selector (Peerly-inspired Flow)
+The app features an authentication layer that governs access to the user portals.
+- **Local User DB**: User accounts are initialized and stored client-side in the browser's `localStorage` under `clear_users`.
+- **Predefined Credentials**:
+  - **Resident Reporters (Civil)**:
+    - `user@clear.gov` (Password: `password`)
+    - `user1@email.com` (Password: `password` / Name: `Nishant Kumar`)
+    - `user2@email.com` (Password: `password` / Name: `Abhyudaya Sengar`)
+  - **Operations Officers (Municipal)**:
+    - `officer@clear.gov` (Password: `password` / District: `LUDHIANA`)
+    - `officr1@email.com` (Auth Key: `HX291Z` / District: `SAS NAGAR`)
+- **Login Session Persistence**: Logged-in state is tracked in `localStorage` (`clear_user_authenticated` and `clear_username`).
+- **Routing**: Popstate history listeners map client requests dynamically to `/citizen/dashboard` or `/municipal/dashboard` based on authentication status and user roles.
 
 ---
 
 ## 2. Visual Structure & Layout
 
-The user interface follows modern, Reddit-inspired visual hierarchy, typography, and spacing to deliver a clean, clutter-free reading experience:
+The user interface implements polished aesthetics, script typography, and flexible workspaces:
 
 - **Sidebar Navigation**: Left-aligned sticky panel containing menu options:
-  - **Explore**: Displays the general active local reports. *Note: Resolved reports are automatically filtered out from the main Explore feed view on the client-side.*
-  - **Following**: Reuses the core feed card layout, displaying followed reports only.
+  - **Explore**: Displays active local reports. *Note: Resolved reports are automatically filtered out from the main Explore feed view on the client-side.*
+  - **Following**: Displays followed reports only.
   - **Notices**: Shows municipal notices.
   - **District Location Filter**: Dropdown to narrow the feed to specific sub-locations.
-- **Feed Stream**: Centered content column with a maximum width of `720px` to optimize text readability. Large page titles above the feed are removed; context is defined dynamically by the selected sidebar tab state.
+- **Feed Stream**: Centered content column with a maximum width of `720px` to optimize text readability.
+- **Brand Logo Wordmark**: Embedded via a custom `<brand-logo>` component displaying a stylized Vibur/Damion cursive text logotype.
 - **Details Drawer (`#opsSidePanel`)**: Sticky side panel that slides in from the right when any post is clicked, providing detail navigation without disrupting feed positioning.
+- **Expanded Operations Board Layout**: In the municipal portal view, the viewport container expands to 100% width, accommodating statistics summary cards, a 3-column Kanban board flow, and a split-screen (350px / fluid) notices manager.
 
 ---
 
-## 3. Post Card Component (`ReportPost`)
+## 3. Modular Frontend Components
 
-Each report post in the feed stream is generated dynamically via the `ReportPost(issue)` component factory function. It produces a structured HTML `<article>` container containing exactly:
+The frontend client utilizes clean, reusable component templates constructed in JavaScript:
 
-1. **Title**: Structured heading with bold typography.
-2. **Meta Row**: Consists of the `District` name only (the status badge has been removed from the meta section for a cleaner public look).
-3. **Cover Image**: Rendered inside `.post-card-image-wrapper`. To ensure visual consistency and prevent empty boxes, an image is **mandatory**; if no custom uploaded report image is present, the app automatically displays a high-quality category-specific fallback placeholder from Unsplash based on the issue type (dumping, burning, water, default).
-4. **Description Preview**: Clean, truncated text preview.
-5. **Action Bar**: Compact, horizontal pill bar (`.post-card-actions`) containing icons paired with descriptive text labels:
-   - **Upvote Button**: Up arrow icon with upvotes count + "Upvotes" label text.
-   - **Comments Button**: Speech bubble icon with comment counts + "Comments" label text. Clicking this opens the side drawer and focuses the comment input.
-   - **Follow Button (📍)**: Icon + "Follow" label text. Toggles followed state; highlighted with active green accent when followed.
-   - **Share Button**: Icon + "Share" label text. Copies the post link directly to the clipboard.
-   - *Note: Downvoting is completely removed from the feed action bar.*
+- **`ReportPost(issue)`**: Generates post cards for the main feed stream containing:
+  - **Title** and **Meta Row** (Posted by author name • District • Time elapsed).
+  - **Cover Image**: Rendered inside `.post-card-image-wrapper`. To ensure visual consistency, an image is **mandatory**; if no custom uploaded report image is present, the app automatically displays a high-quality category-specific fallback placeholder from Unsplash based on the issue type (dumping, burning, water, default).
+  - **Description Preview**: Clean, truncated text preview.
+  - **Action Bar**: Compact, horizontal pill bar containing paired icons and text labels (Upvotes, Comments, Follow, Share). Downvoting is completely removed.
+- **`KanbanColumn(title, countId, cardsContainerId)`**: Generates structured column wrappers for Review Queue, Acknowledged, and In Progress columns.
+- **`KanbanIssueCard(issue)`**: Renders compact cards inside columns displaying verification and upvote counts.
+- **`MunicipalityActionPanel(issue)`**: Renders status workflow triggers (Acknowledge, Reject, Start Work, Resolve) dynamically based on the issue status.
+- **`NoticeCard(notice)`**: Renders bulletin card elements.
+- **`NoticeForm()`**: Renders the notices creation panel and hooks submit event handlers.
 
 ---
 
 ## 4. Interactive Logic & Flow
 
 ### 4.1 Card Click Details Navigation
-Clicking anywhere on a post card (excluding elements inside the `.post-card-actions` container) calls `openOpsDetailPanel(issue)` to slide open the side drawer. Accordions and collapsed feeds are avoided to maintain standard page structure.
+Clicking anywhere on a post card calls `openOpsDetailPanel(issue)` to slide open the side drawer.
 
 ### 4.2 Details Panel Conditional Rendering (`renderOpsDetailPanel`)
 When a report is opened, the drawer dynamically adjusts the fields shown depending on the user portal view and status:
 - **Comments Group**: Displays a persistent scrolling comments stream and comment box in both portal roles.
-- **Municipality Status Actions**: The status transitions (Acknowledge, Start Work, Resolve) are hidden from public portal users.
-- **Municipality Group Box**: The wrapper container is completely hidden from public users unless the issue status is `'Resolved'`. When resolved, it displays the resolution summary note, completion proof photos (falling back to a nature placeholder if no completion image was uploaded), and the resolution date.
-- **Public Resolution Timeline**: Appended at the bottom of the Municipality group for resolved issues, visualizing the timestamps of all transition steps (Reported, Acknowledged, In Progress, Resolved).
+- **Municipality Status Actions**: The status transition ribbon is hidden from public portal users.
+- **Municipality Group Box**: Hidden from public users unless the issue status is `'Resolved'`.
+  - **Before / After Grid**: When resolved, displays a two-column grid showing the reported "Before" photo side-by-side with the resolved "After" photo (with mandatory image placeholders).
+  - **Resolution Summaries**: Displays the "Resolution Note" alongside the "Municipality Completion Note" (internal notes) and completion date.
+  - **Public Resolution Timeline**: Visualizes the timestamps of all transition steps (Reported, Acknowledged, In Progress, Resolved).
 - *Note: The general Community panel group (showing total upvote metric) and the Citizen Actions panel group (abuse report buttons) have been completely removed from the details drawer layout.*
 
 ### 4.3 Priority Scoring (No Verification Dependency)
@@ -75,7 +87,8 @@ Issues are labeled as:
 
 All interactions communicate directly with the backend API:
 
-- **GET `/api/issues`**: Retrieves list of reports (and updates feed counts).
+- **GET `/api/issues`**: Retrieves list of reports. Mapped to support filtering by `userId` to load user's own registered issues.
+- **POST `/api/issues`**: Submits a new issue report, auto-attaching `authorId` and `authorName` from the current active session.
 - **POST `/api/issues/:id/vote`**: Submits upvotes direction payload (`{ direction: 'up' }` only). Downvoting is removed backend-side.
-- **POST `/api/issues/:id/follow`**: Toggles followed status database-side. Updates card icon styling.
+- **POST `/api/issues/:id/follow`**: Toggles followed status database-side.
 - **POST `/api/issues/:id/comments`**: Submits comment payloads (`{ text }`). Appends the comment to the drawer scroll view immediately and updates feed comment counts.

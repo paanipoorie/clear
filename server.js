@@ -31,7 +31,9 @@ let issues = [
     timeline: [
       { status: "Review Queue", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString() },
       { status: "Acknowledged", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 22).toISOString() }
-    ]
+    ],
+    authorId: "user-abhyudaya",
+    authorName: "Abhyudaya Sengar"
   },
   {
     id: 2,
@@ -54,7 +56,9 @@ let issues = [
     resolutionNote: "",
     timeline: [
       { status: "Review Queue", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString() }
-    ]
+    ],
+    authorId: "user",
+    authorName: "user"
   },
   {
     id: 3,
@@ -77,7 +81,9 @@ let issues = [
       { status: "Review Queue", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 6).toISOString() },
       { status: "Acknowledged", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString() },
       { status: "In Progress", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 4).toISOString() }
-    ]
+    ],
+    authorId: "user-nishant",
+    authorName: "Nishant Kumar"
   },
   {
     id: 4,
@@ -103,7 +109,9 @@ let issues = [
       { status: "Acknowledged", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 46).toISOString() },
       { status: "In Progress", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 40).toISOString() },
       { status: "Resolved", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString() }
-    ]
+    ],
+    authorId: "officer",
+    authorName: "officer"
   }
 ];
 
@@ -131,6 +139,7 @@ let notices = [
 ];
 
 let currentUser = {
+  id: "user",
   username: "user",
   avatar: "/images/avatar.png"
 };
@@ -142,7 +151,7 @@ let notifications = [];
 
 // Get all issues with filters (subLocation, myIssues, search, followedOnly)
 app.get('/api/issues', (req, res) => {
-  const { subLocation, myIssues, search, followedOnly } = req.query;
+  const { subLocation, myIssues, search, followedOnly, userId } = req.query;
   let filteredIssues = [...issues];
 
   if (subLocation) {
@@ -152,7 +161,11 @@ app.get('/api/issues', (req, res) => {
   }
 
   if (myIssues === 'true') {
-    filteredIssues = filteredIssues.filter(issue => issue.id === 1 || issue.followed);
+    if (userId) {
+      filteredIssues = filteredIssues.filter(issue => issue.authorId === userId);
+    } else {
+      filteredIssues = filteredIssues.filter(issue => issue.id === 1 || issue.followed);
+    }
   }
 
   if (followedOnly === 'true') {
@@ -176,7 +189,7 @@ app.get('/api/issues', (req, res) => {
 
 // Create a new issue
 app.post('/api/issues', (req, res) => {
-  const { title, description, location, subLocation, imageType, coordinates, images, links } = req.body;
+  const { title, description, location, subLocation, imageType, coordinates, images, links, authorId, authorName } = req.body;
   if (!title || !location || !subLocation) {
     return res.status(400).json({ error: "Missing required fields" });
   }
@@ -203,7 +216,9 @@ app.post('/api/issues', (req, res) => {
     resolutionNote: "",
     timeline: [
       { status: "Review Queue", timestamp: new Date().toISOString() }
-    ]
+    ],
+    authorId: authorId || "user",
+    authorName: authorName || "user"
   };
 
   issues.push(newIssue);
