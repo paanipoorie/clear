@@ -1,0 +1,51 @@
+- generic [ref=f7e70]:
+  - banner [ref=f7e71]:
+    - generic [ref=f7e74]:
+      - img "CLEAR" [ref=f7e75]
+      - heading "clear" [level=1] [ref=f7e76]
+    - textbox "Find reports or districts..." [ref=f7e79]
+  - generic [ref=f7e86]:
+    - complementary [ref=f7e87]:
+      - generic [ref=f7e228]:
+        - button "Triage Board" [ref=f7e229] [cursor=pointer]
+        - button "Resolved Issues" [ref=f7e232] [cursor=pointer]
+        - button "Manage Notices" [ref=f7e236] [cursor=pointer]
+      - generic [ref=f7e113]:
+        - generic [ref=f7e118]:
+          - generic [ref=f7e119]: user
+          - generic [ref=f7e120]: Operations Officer (LUDHIANA)
+        - button "Profile options" [ref=f7e121] [cursor=pointer]
+    - main [ref=f7e126]:
+      - generic [ref=f7e240]:
+        - generic [ref=f7e241]:
+          - generic [ref=f7e242]:
+            - generic [ref=f7e243]: Pending Review
+            - generic [ref=f7e244]: "0"
+            - generic [ref=f7e245]: Awaiting triage decision
+          - generic [ref=f7e246]:
+            - generic [ref=f7e247]: Acknowledged
+            - generic [ref=f7e248]: "1"
+            - generic [ref=f7e249]: Triaged & accepted
+          - generic [ref=f7e250]:
+            - generic [ref=f7e251]: In Progress
+            - generic [ref=f7e252]: "0"
+            - generic [ref=f7e253]: Active field crew dispatch
+        - generic [ref=f7e254]:
+          - generic [ref=f7e256]:
+            - heading "Review Queue" [level=3] [ref=f7e257]
+            - generic [ref=f7e258]: "0"
+          - generic [ref=f7e260]:
+            - generic [ref=f7e261]:
+              - heading "Acknowledged" [level=3] [ref=f7e262]
+              - generic [ref=f7e263]: "1"
+            - generic [ref=f7e265] [cursor=pointer]:
+              - heading "open waste burning causing the smoke" [level=4] [ref=f7e266]
+              - generic [ref=f7e267]: LUDHIANA
+              - paragraph [ref=f7e268]: Dry leaves and plastic waste being burned in the open field opposite the public school, causing severe smoke and breathing difficulties.
+              - generic [ref=f7e269]:
+                - generic [ref=f7e270]: 7 verifications
+                - generic [ref=f7e275]: 28 upvotes
+                - generic [ref=f7e279]: 19h ago
+          - generic [ref=f7e281]:
+            - heading "In Progress" [level=3] [ref=f7e282]
+            - generic [ref=f7e283]: "0"

@@ -1,3 +1,35 @@
+// Workspace configuration list (Bonus: easy extension for other workspaces)
+const WORKSPACES = [
+  {
+    id: 'public',
+    title: 'Citizen Portal',
+    description: 'Report environmental issues, participate in community verification, follow local resolutions and stay informed about environmental updates.',
+    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+             <circle cx="9" cy="7" r="4"></circle>
+             <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+             <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+           </svg>`,
+    buttonText: 'Continue'
+  },
+  {
+    id: 'municipality',
+    title: 'Municipal Operations',
+    description: 'Review incoming reports, manage triage queues, assign field work, publish official notices and close environmental cases.',
+    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+             <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
+             <line x1="9" y1="22" x2="9" y2="16"></line>
+             <line x1="15" y1="22" x2="15" y2="16"></line>
+             <line x1="9" y1="16" x2="15" y2="16"></line>
+             <path d="M8 6h2"></path>
+             <path d="M14 6h2"></path>
+             <path d="M8 10h2"></path>
+             <path d="M14 10h2"></path>
+           </svg>`,
+    buttonText: 'Continue'
+  }
+];
+
 // Application State
 const state = {
   activePortal: 'landing', // 'landing', 'public', 'municipality'
@@ -92,9 +124,125 @@ document.addEventListener('DOMContentLoaded', () => {
   initApp();
 });
 
+// Authentication UX Helper Functions
+function showAuthScreen(screenId) {
+  const screens = ['authLandingScreen', 'authLoginScreen', 'authRegisterScreen', 'authWorkspaceScreen'];
+  
+  // Find current active screen element
+  let currentScreen = null;
+  screens.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && el.classList.contains('active')) {
+      currentScreen = el;
+    }
+  });
+
+  const targetScreen = document.getElementById(screenId);
+  if (!targetScreen) return;
+
+  // Toggle minimal navigation header (only on Choose Workspace screen)
+  const authHeader = document.getElementById('authHeader');
+  if (authHeader) {
+    authHeader.style.display = (screenId === 'authWorkspaceScreen') ? 'flex' : 'none';
+  }
+
+  if (currentScreen && currentScreen.id !== screenId) {
+    // Fade out current active screen
+    currentScreen.style.opacity = '0';
+    currentScreen.classList.remove('active');
+    
+    setTimeout(() => {
+      currentScreen.style.display = 'none';
+      
+      // Prepare and display target screen
+      targetScreen.style.display = (screenId === 'authLandingScreen' || screenId === 'authWorkspaceScreen') ? 'flex' : 'block';
+      // Trigger browser reflow
+      targetScreen.offsetHeight;
+      
+      // Fade in target screen
+      targetScreen.style.opacity = '1';
+      targetScreen.classList.add('active');
+    }, 200);
+  } else {
+    // Immediate display setup (e.g. initial load)
+    screens.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.style.display = 'none';
+        el.classList.remove('active');
+        el.style.opacity = '0';
+      }
+    });
+
+    targetScreen.style.display = (screenId === 'authLandingScreen' || screenId === 'authWorkspaceScreen') ? 'flex' : 'block';
+    targetScreen.offsetHeight;
+    targetScreen.style.opacity = '1';
+    targetScreen.classList.add('active');
+  }
+}
+
+function renderChooseWorkspaceView() {
+  const container = document.getElementById('workspaceCardsContainer');
+  if (!container) return;
+
+  container.innerHTML = '';
+
+  WORKSPACES.forEach(ws => {
+    const card = document.createElement('div');
+    card.className = 'workspace-card';
+    card.setAttribute('data-id', ws.id);
+
+    card.innerHTML = `
+      <div class="workspace-card-icon">
+        ${ws.icon}
+      </div>
+      <h3 class="workspace-card-title">${ws.title}</h3>
+      <p class="workspace-card-description">${ws.description}</p>
+      <button class="workspace-card-btn">${ws.buttonText}</button>
+    `;
+
+    // Click handler for entire workspace card
+    card.addEventListener('click', () => {
+      localStorage.setItem('clear_last_workspace', ws.id);
+      switchPortal(ws.id);
+    });
+
+    container.appendChild(card);
+  });
+}
+
+function authenticateUser(username, password) {
+  let users = JSON.parse(localStorage.getItem('clear_users') || '[]');
+  if (users.length === 0) {
+    users = [
+      { username: 'user', password: 'password' },
+      { username: 'officer', password: 'password' }
+    ];
+    localStorage.setItem('clear_users', JSON.stringify(users));
+  }
+  return users.find(u => u.username.toLowerCase() === username.toLowerCase() && u.password === password);
+}
+
+function registerNewUser(username, email, password) {
+  let users = JSON.parse(localStorage.getItem('clear_users') || '[]');
+  if (users.length === 0) {
+    users = [
+      { username: 'user', password: 'password' },
+      { username: 'officer', password: 'password' }
+    ];
+  }
+  if (users.some(u => u.username.toLowerCase() === username.toLowerCase())) {
+    return { success: false, error: 'Username already exists' };
+  }
+  users.push({ username, email, password });
+  localStorage.setItem('clear_users', JSON.stringify(users));
+  return { success: true };
+}
+
 function initApp() {
   fetchUser();
   setupEventListeners();
+  renderChooseWorkspaceView(); // pre-render workspace list based on configuration
   switchPortal('landing');
 
   // Render NoticeForm
@@ -126,6 +274,19 @@ function switchPortal(portalName) {
   if (portalName === 'landing') {
     landingPortal.style.display = 'flex';
     mainAppLayout.style.display = 'none';
+    
+    // Determine screen based on login status and workspace selection history
+    const isAuthenticated = localStorage.getItem('clear_user_authenticated') === 'true';
+    if (isAuthenticated) {
+      const lastWorkspace = localStorage.getItem('clear_last_workspace');
+      if (lastWorkspace && WORKSPACES.some(ws => ws.id === lastWorkspace)) {
+        switchPortal(lastWorkspace);
+      } else {
+        showAuthScreen('authWorkspaceScreen');
+      }
+    } else {
+      showAuthScreen('authLandingScreen');
+    }
   } else {
     landingPortal.style.display = 'none';
     mainAppLayout.style.display = 'flex';
@@ -216,6 +377,10 @@ async function fetchUser() {
     const res = await fetch('/api/user');
     if (res.ok) {
       const user = await res.json();
+      const storedUsername = localStorage.getItem('clear_username');
+      if (storedUsername) {
+        user.username = storedUsername;
+      }
       state.currentUser = user;
       document.getElementById('usernameLabel').textContent = user.username;
     }
@@ -811,18 +976,152 @@ function NoticeForm() {
 
 // Setup Event Listeners
 function setupEventListeners() {
-  // Portal selector triggers
-  document.getElementById('enterPublicBtn').addEventListener('click', () => switchPortal('public'));
-  document.getElementById('enterMunicipalBtn').addEventListener('click', () => switchPortal('municipality'));
-  const headerRoleSwitcherBtn = document.getElementById('headerRoleSwitcherBtn');
-  if (headerRoleSwitcherBtn) {
-    headerRoleSwitcherBtn.addEventListener('click', () => switchPortal('landing'));
+  // New Auth flow triggers
+  const goToLoginBtn = document.getElementById('goToLoginBtn');
+  if (goToLoginBtn) {
+    goToLoginBtn.addEventListener('click', () => showAuthScreen('authLoginScreen'));
   }
   
-  const menuSwitchRoleBtn = document.getElementById('menuSwitchRoleBtn');
-  if (menuSwitchRoleBtn) {
-    menuSwitchRoleBtn.addEventListener('click', () => {
+  const goToRegisterBtn = document.getElementById('goToRegisterBtn');
+  if (goToRegisterBtn) {
+    goToRegisterBtn.addEventListener('click', () => showAuthScreen('authRegisterScreen'));
+  }
+  
+  const loginBackBtn = document.getElementById('loginBackBtn');
+  if (loginBackBtn) {
+    loginBackBtn.addEventListener('click', () => showAuthScreen('authLandingScreen'));
+  }
+  
+  const registerBackBtn = document.getElementById('registerBackBtn');
+  if (registerBackBtn) {
+    registerBackBtn.addEventListener('click', () => showAuthScreen('authLandingScreen'));
+  }
+  
+  const linkToRegister = document.getElementById('linkToRegister');
+  if (linkToRegister) {
+    linkToRegister.addEventListener('click', (e) => {
+      e.preventDefault();
+      showAuthScreen('authRegisterScreen');
+    });
+  }
+  
+  const linkToLogin = document.getElementById('linkToLogin');
+  if (linkToLogin) {
+    linkToLogin.addEventListener('click', (e) => {
+      e.preventDefault();
+      showAuthScreen('authLoginScreen');
+    });
+  }
+  
+  // Login Form Submission
+  const loginForm = document.getElementById('loginForm');
+  if (loginForm) {
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const usernameInput = document.getElementById('loginUsername');
+      const passwordInput = document.getElementById('loginPassword');
+      
+      const username = usernameInput.value.trim();
+      const password = passwordInput.value;
+      
+      const user = authenticateUser(username, password);
+      if (user) {
+        // Authenticate successfully
+        localStorage.setItem('clear_user_authenticated', 'true');
+        localStorage.setItem('clear_username', user.username);
+        
+        // Update user state
+        state.currentUser = {
+          username: user.username,
+          avatar: '/images/avatar.png'
+        };
+        const usernameLabel = document.getElementById('usernameLabel');
+        if (usernameLabel) usernameLabel.textContent = user.username;
+        
+        showToast(`Welcome back, ${user.username}!`);
+        
+        // Clear input values
+        loginForm.reset();
+        
+        // Check if there is role memory
+        const lastWorkspace = localStorage.getItem('clear_last_workspace');
+        if (lastWorkspace && WORKSPACES.some(ws => ws.id === lastWorkspace)) {
+          switchPortal(lastWorkspace);
+        } else {
+          showAuthScreen('authWorkspaceScreen');
+        }
+      } else {
+        showToast('Invalid username or password.');
+      }
+    });
+  }
+  
+  // Register Form Submission
+  const registerForm = document.getElementById('registerForm');
+  if (registerForm) {
+    registerForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const usernameInput = document.getElementById('registerUsername');
+      const emailInput = document.getElementById('registerEmail');
+      const passwordInput = document.getElementById('registerPassword');
+      const confirmPasswordInput = document.getElementById('registerConfirmPassword');
+      
+      const username = usernameInput.value.trim();
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+      const confirmPassword = confirmPasswordInput.value;
+      
+      if (password !== confirmPassword) {
+        showToast('Passwords do not match.');
+        return;
+      }
+      
+      const reg = registerNewUser(username, email, password);
+      if (reg.success) {
+        // Register and log in successfully
+        localStorage.setItem('clear_user_authenticated', 'true');
+        localStorage.setItem('clear_username', username);
+        
+        state.currentUser = {
+          username: username,
+          avatar: '/images/avatar.png'
+        };
+        const usernameLabel = document.getElementById('usernameLabel');
+        if (usernameLabel) usernameLabel.textContent = username;
+        
+        showToast('Account created successfully!');
+        
+        registerForm.reset();
+        
+        // New account has no workspace history, show Choose Workspace screen
+        showAuthScreen('authWorkspaceScreen');
+      } else {
+        showToast(reg.error || 'Failed to register.');
+      }
+    });
+  }
+
+  // Auth Header Logout Button (Choose Workspace Screen)
+  const authHeaderLogoutBtn = document.getElementById('authHeaderLogoutBtn');
+  if (authHeaderLogoutBtn) {
+    authHeaderLogoutBtn.addEventListener('click', async () => {
+      localStorage.removeItem('clear_user_authenticated');
+      try {
+        await fetch('/api/user/logout', { method: 'POST' });
+      } catch (err) {
+        console.error(err);
+      }
+      showToast('Logged out successfully');
+      switchPortal('landing');
+    });
+  }
+
+  // Change Workspace Button (Dashboard profile menu)
+  const changeWorkspaceBtn = document.getElementById('changeWorkspaceBtn');
+  if (changeWorkspaceBtn) {
+    changeWorkspaceBtn.addEventListener('click', () => {
       profileDropdown.classList.remove('open');
+      localStorage.removeItem('clear_last_workspace');
       switchPortal('landing');
     });
   }
@@ -969,6 +1268,7 @@ function setupEventListeners() {
 
   logoutBtn.addEventListener('click', async () => {
     profileDropdown.classList.remove('open');
+    localStorage.removeItem('clear_user_authenticated');
     try {
       const res = await fetch('/api/user/logout', { method: 'POST' });
       if (res.ok) {

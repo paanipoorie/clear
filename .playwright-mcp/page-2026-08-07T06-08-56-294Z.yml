@@ -1,0 +1,71 @@
+- generic [ref=f3e29]:
+  - banner [ref=f3e30]:
+    - generic [ref=f3e33]:
+      - img "CLEAR" [ref=f3e34]
+      - heading "clear" [level=1] [ref=f3e35]
+    - textbox "Find reports or districts..." [ref=f3e38]
+    - generic [ref=f3e39]:
+      - button "Switch Role" [ref=f3e40] [cursor=pointer]
+      - button "Notifications" [ref=f3e118] [cursor=pointer]
+  - generic [ref=f3e44]:
+    - complementary [ref=f3e45]:
+      - generic [ref=f3e123]:
+        - button "Explore" [ref=f3e124] [cursor=pointer]
+        - button "Following" [ref=f3e128] [cursor=pointer]
+        - button "Notices" [ref=f3e131] [cursor=pointer]
+      - button "Create Report" [ref=f3e136] [cursor=pointer]
+      - generic [ref=f3e138]:
+        - generic [ref=f3e139]: Location Filter
+        - button "Punjab" [ref=f3e140] [cursor=pointer]
+      - generic [ref=f3e59]:
+        - generic [ref=f3e64]:
+          - generic [ref=f3e65]: user
+          - generic [ref=f3e66]: Resident Reporter
+        - button "Profile options" [ref=f3e67] [cursor=pointer]
+    - main [ref=f3e72]:
+      - generic [ref=f3e148]:
+        - article [ref=f3e149] [cursor=pointer]:
+          - heading "Unclogged drain overflowing onto main road" [level=3] [ref=f3e150]
+          - generic [ref=f3e151]: PATIALA
+          - img "Report photo" [ref=f3e154]
+          - paragraph [ref=f3e155]: Monsoon clogging in the sewer drainage system leading to wastewater overflowing onto the public street, creating a traffic bottleneck and hygiene issue.
+          - generic [ref=f3e156]:
+            - button "Upvote" [ref=f3e157]:
+              - generic [ref=f3e160]: "16"
+              - generic [ref=f3e161]: Upvotes
+            - button "Comments" [ref=f3e162]:
+              - generic [ref=f3e165]: "0"
+            - button "Follow report" [ref=f3e167]:
+              - generic [ref=f3e171]: Follow
+            - button "Share post" [ref=f3e172]:
+              - generic [ref=f3e176]: Share
+        - article [ref=f3e177] [cursor=pointer]:
+          - heading "open waste burning causing the smoke" [level=3] [ref=f3e178]
+          - generic [ref=f3e179]: LUDHIANA
+          - img "Report photo" [ref=f3e182]
+          - paragraph [ref=f3e183]: Dry leaves and plastic waste being burned in the open field opposite the public school, causing severe smoke and breathing difficulties.
+          - generic [ref=f3e184]:
+            - button "Upvote" [ref=f3e185]:
+              - generic [ref=f3e188]: "28"
+              - generic [ref=f3e189]: Upvotes
+            - button "Comments" [ref=f3e190]:
+              - generic [ref=f3e193]: "1"
+            - button "Follow report" [ref=f3e195]:
+              - generic [ref=f3e199]: Follow
+            - button "Share post" [ref=f3e200]:
+              - generic [ref=f3e204]: Share
+        - article [ref=f3e205] [cursor=pointer]:
+          - heading "Illegal dumping behind residential area" [level=3] [ref=f3e206]
+          - generic [ref=f3e207]: SAS NAGAR
+          - img "Report photo" [ref=f3e210]
+          - paragraph [ref=f3e211]: Piles of trash bags and plastic debris accumulating behind the residential block, causing odor and attracting stray animals.
+          - generic [ref=f3e212]:
+            - button "Upvote" [ref=f3e213]:
+              - generic [ref=f3e216]: "42"
+              - generic [ref=f3e217]: Upvotes
+            - button "Comments" [ref=f3e218]:
+              - generic [ref=f3e221]: "2"
+            - button "Follow report" [ref=f3e223]:
+              - generic [ref=f3e227]: Follow
+            - button "Share post" [ref=f3e228]:
+              - generic [ref=f3e232]: Share

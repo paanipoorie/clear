@@ -1,0 +1,52 @@
+- generic [ref=f4e29]:
+  - banner [ref=f4e30]:
+    - generic [ref=f4e31]:
+      - heading "C.L.E.A.R." [level=1] [ref=f4e32]
+      - generic [ref=f4e33]: MUNICIPAL OPS • LUDHIANA
+    - textbox "Find reports or districts..." [ref=f4e36]
+    - button "Switch Role" [ref=f4e38] [cursor=pointer]
+  - generic [ref=f4e42]:
+    - complementary [ref=f4e43]:
+      - generic [ref=f4e44]:
+        - button "Triage Board" [ref=f4e45] [cursor=pointer]
+        - button "Resolved Issues" [ref=f4e48] [cursor=pointer]
+        - button "Manage Notices" [ref=f4e52] [cursor=pointer]
+      - generic [ref=f4e57]:
+        - generic [ref=f4e62]:
+          - generic [ref=f4e63]: user
+          - generic [ref=f4e64]: Operations Officer (LUDHIANA)
+        - button "Profile options" [ref=f4e65] [cursor=pointer]
+    - main [ref=f4e70]:
+      - generic [ref=f4e71]:
+        - generic [ref=f4e72]:
+          - generic [ref=f4e73]:
+            - generic [ref=f4e74]: Pending Review
+            - generic [ref=f4e75]: "0"
+            - generic [ref=f4e76]: Awaiting triage decision
+          - generic [ref=f4e77]:
+            - generic [ref=f4e78]: Acknowledged
+            - generic [ref=f4e79]: "1"
+            - generic [ref=f4e80]: Triaged & accepted
+          - generic [ref=f4e81]:
+            - generic [ref=f4e82]: In Progress
+            - generic [ref=f4e83]: "0"
+            - generic [ref=f4e84]: Active field crew dispatch
+        - generic [ref=f4e85]:
+          - generic [ref=f4e87]:
+            - heading "Review Queue" [level=3] [ref=f4e88]
+            - generic [ref=f4e89]: "0"
+          - generic [ref=f4e91]:
+            - generic [ref=f4e92]:
+              - heading "Acknowledged" [level=3] [ref=f4e93]
+              - generic [ref=f4e94]: "1"
+            - generic [ref=f4e96] [cursor=pointer]:
+              - heading "open waste burning causing the smoke" [level=4] [ref=f4e97]
+              - generic [ref=f4e98]: LUDHIANA
+              - paragraph [ref=f4e99]: Dry leaves and plastic waste being burned in the open field opposite the public school, causing severe smoke and breathing difficulties.
+              - generic [ref=f4e100]:
+                - generic [ref=f4e101]: 7 verifications
+                - generic [ref=f4e106]: 28 upvotes
+                - generic [ref=f4e110]: 18h ago
+          - generic [ref=f4e112]:
+            - heading "In Progress" [level=3] [ref=f4e113]
+            - generic [ref=f4e114]: "0"

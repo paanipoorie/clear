@@ -23,50 +23,131 @@
 </head>
 <body>
 
-  <!-- Landing Portal / Role Selector Overlay -->
-  <div id="landingPortal" class="landing-portal-light">
-    <div class="landing-mesh-bg-light"></div>
-    <div class="landing-card-container-light">
-      <div class="landing-header-light">
-        <h1 class="landing-title-light">C.L.E.A.R.</h1>
-        <div class="landing-tagline-light">Crowdsourced Local Environmental Action & Resolution</div>
-        <p class="landing-desc-light">Report environmental hazards, track citizen triages, and coordinate local resolution efforts. Select a role below to access the platform.</p>
+  <!-- Landing Portal / Auth / Workspace Selection Wrapper -->
+  <div id="landingPortal" class="auth-portal-wrapper">
+    <!-- Minimal Header for Choose Workspace and optionally auth pages -->
+    <header class="auth-header" id="authHeader" style="display: none;">
+      <div class="auth-header-logo">
+        <brand-logo text="clear"></brand-logo>
       </div>
+      <button class="btn btn-secondary btn-sm" id="authHeaderLogoutBtn">Logout</button>
+    </header>
+
+    <div class="auth-container">
       
-      <div class="role-cards-grid-light">
-        <!-- Citizen Portal Card -->
-        <div class="role-card-light citizen-card-light" id="enterPublicBtn">
-          <div class="role-card-content-light">
-            <div class="role-icon-wrapper-light">
-              <svg class="role-icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                <circle cx="9" cy="7" r="4"></circle>
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-              </svg>
-            </div>
-            <h3>Citizen Portal</h3>
-            <p>Report environmental issues, select map coordinates, upvote community concerns, and track real-time resolution pipelines.</p>
-            <button class="role-enter-btn-light">Access Citizen Portal</button>
+      <!-- 1. LANDING SCREEN -->
+      <div id="authLandingScreen" class="auth-screen">
+        <div class="landing-hero">
+          <div class="logo-badge">
+            <brand-logo text="clear"></brand-logo>
           </div>
-        </div>
-        
-        <!-- Municipality Portal Card -->
-        <div class="role-card-light municipal-card-light" id="enterMunicipalBtn">
-          <div class="role-card-content-light">
-            <div class="role-icon-wrapper-light">
-              <svg class="role-icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-                <line x1="8" y1="21" x2="16" y2="21"></line>
-                <line x1="12" y1="17" x2="12" y2="21"></line>
-              </svg>
-            </div>
-            <h3>Operations Console</h3>
-            <p>Monitor incoming triages, verify community upvotes, assign municipal work crews, and publish official bulletins.</p>
-            <button class="role-enter-btn-light">Access Operations Console</button>
+          <h1 class="landing-title">Crowdsourced Local Environmental Action & Resolution</h1>
+          <p class="landing-subtitle">
+            C.L.E.A.R. connects residents and municipal operations to report, verify, and resolve local environmental issues collaboratively.
+          </p>
+          <div class="landing-actions">
+            <button class="btn btn-primary btn-lg" id="goToLoginBtn">Sign In</button>
+            <button class="btn btn-outline btn-lg" id="goToRegisterBtn">Create Account</button>
           </div>
         </div>
       </div>
+
+      <!-- 2. LOGIN SCREEN -->
+      <div id="authLoginScreen" class="auth-screen" style="display: none;">
+        <div class="auth-card">
+          <button class="btn-back" id="loginBackBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-sm">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            Back
+          </button>
+          
+          <div class="auth-card-header">
+            <h2>Welcome back</h2>
+            <p>Access your C.L.E.A.R. account to continue.</p>
+          </div>
+          
+          <form id="loginForm" class="auth-form">
+            <div class="form-group">
+              <label for="loginUsername">Username</label>
+              <input type="text" id="loginUsername" placeholder="Enter your username" required autocomplete="username">
+            </div>
+            
+            <div class="form-group">
+              <label for="loginPassword">Password</label>
+              <input type="password" id="loginPassword" placeholder="••••••••" required autocomplete="current-password">
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-block btn-lg">Sign In</button>
+          </form>
+          
+          <div class="auth-card-footer">
+            <p>Don't have an account? <a href="#" id="linkToRegister">Create account</a></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. REGISTER SCREEN -->
+      <div id="authRegisterScreen" class="auth-screen" style="display: none;">
+        <div class="auth-card">
+          <button class="btn-back" id="registerBackBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-sm">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            Back
+          </button>
+          
+          <div class="auth-card-header">
+            <h2>Create your account</h2>
+            <p>Join the collective effort to keep our environment clean.</p>
+          </div>
+          
+          <form id="registerForm" class="auth-form">
+            <div class="form-group">
+              <label for="registerUsername">Username</label>
+              <input type="text" id="registerUsername" placeholder="Choose a username" required autocomplete="username">
+            </div>
+            
+            <div class="form-group">
+              <label for="registerEmail">Email Address</label>
+              <input type="email" id="registerEmail" placeholder="you@example.com" required autocomplete="email">
+            </div>
+            
+            <div class="form-group">
+              <label for="registerPassword">Password</label>
+              <input type="password" id="registerPassword" placeholder="••••••••" required autocomplete="new-password">
+            </div>
+            
+            <div class="form-group">
+              <label for="registerConfirmPassword">Confirm Password</label>
+              <input type="password" id="registerConfirmPassword" placeholder="••••••••" required autocomplete="new-password">
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-block btn-lg">Create Account</button>
+          </form>
+          
+          <div class="auth-card-footer">
+            <p>Already have an account? <a href="#" id="linkToLogin">Sign in</a></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. CHOOSE WORKSPACE SCREEN -->
+      <div id="authWorkspaceScreen" class="auth-screen" style="display: none;">
+        <div class="workspace-selection-container">
+          <div class="workspace-header">
+            <h2>Choose Your Workspace</h2>
+            <p>Select the environment you want to continue into.</p>
+          </div>
+          
+          <div class="workspace-cards-grid" id="workspaceCardsContainer">
+            <!-- Dynamic workspace cards will be injected here -->
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -230,6 +311,15 @@
                   <line x1="16" y1="17" x2="8" y2="17"></line>
                 </svg>
                 My Issues
+              </button>
+              <button class="dropdown-item" id="changeWorkspaceBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-sm">
+                  <rect x="3" y="3" width="7" height="7"></rect>
+                  <rect x="14" y="3" width="7" height="7"></rect>
+                  <rect x="14" y="14" width="7" height="7"></rect>
+                  <rect x="3" y="14" width="7" height="7"></rect>
+                </svg>
+                Change Workspace
               </button>
               <button class="dropdown-item danger" id="logoutBtn">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-sm">

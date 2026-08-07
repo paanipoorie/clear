@@ -1,0 +1,52 @@
+- generic [ref=f3e29]:
+  - banner [ref=f3e30]:
+    - generic [ref=f3e33]:
+      - img "CLEAR" [ref=f3e34]
+      - heading "clear" [level=1] [ref=f3e35]
+    - textbox "Find reports or districts..." [ref=f3e38]
+    - button "Switch Role" [ref=f3e40] [cursor=pointer]
+  - generic [ref=f3e44]:
+    - complementary [ref=f3e45]:
+      - generic [ref=f3e46]:
+        - button "Triage Board" [ref=f3e47] [cursor=pointer]
+        - button "Resolved Issues" [ref=f3e50] [cursor=pointer]
+        - button "Manage Notices" [ref=f3e54] [cursor=pointer]
+      - generic [ref=f3e59]:
+        - generic [ref=f3e64]:
+          - generic [ref=f3e65]: user
+          - generic [ref=f3e66]: Operations Officer (LUDHIANA)
+        - button "Profile options" [ref=f3e67] [cursor=pointer]
+    - main [ref=f3e72]:
+      - generic [ref=f3e73]:
+        - generic [ref=f3e74]:
+          - generic [ref=f3e75]:
+            - generic [ref=f3e76]: Pending Review
+            - generic [ref=f3e77]: "0"
+            - generic [ref=f3e78]: Awaiting triage decision
+          - generic [ref=f3e79]:
+            - generic [ref=f3e80]: Acknowledged
+            - generic [ref=f3e81]: "1"
+            - generic [ref=f3e82]: Triaged & accepted
+          - generic [ref=f3e83]:
+            - generic [ref=f3e84]: In Progress
+            - generic [ref=f3e85]: "0"
+            - generic [ref=f3e86]: Active field crew dispatch
+        - generic [ref=f3e87]:
+          - generic [ref=f3e89]:
+            - heading "Review Queue" [level=3] [ref=f3e90]
+            - generic [ref=f3e91]: "0"
+          - generic [ref=f3e93]:
+            - generic [ref=f3e94]:
+              - heading "Acknowledged" [level=3] [ref=f3e95]
+              - generic [ref=f3e96]: "1"
+            - generic [ref=f3e98] [cursor=pointer]:
+              - heading "open waste burning causing the smoke" [level=4] [ref=f3e99]
+              - generic [ref=f3e100]: LUDHIANA
+              - paragraph [ref=f3e101]: Dry leaves and plastic waste being burned in the open field opposite the public school, causing severe smoke and breathing difficulties.
+              - generic [ref=f3e102]:
+                - generic [ref=f3e103]: 7 verifications
+                - generic [ref=f3e108]: 28 upvotes
+                - generic [ref=f3e112]: 19h ago
+          - generic [ref=f3e114]:
+            - heading "In Progress" [level=3] [ref=f3e115]
+            - generic [ref=f3e116]: "0"

@@ -1,0 +1,107 @@
+- generic [active] [ref=f4e28]:
+  - generic [ref=f4e29]:
+    - banner [ref=f4e30]:
+      - generic [ref=f4e31]:
+        - heading "C.L.E.A.R." [level=1] [ref=f4e32]
+        - generic [ref=f4e33]: MUNICIPAL OPS • LUDHIANA
+      - textbox "Find reports or districts..." [ref=f4e36]
+      - button "Switch Role" [ref=f4e38] [cursor=pointer]
+    - generic [ref=f4e42]:
+      - complementary [ref=f4e43]:
+        - generic [ref=f4e44]:
+          - button "Triage Board" [ref=f4e45] [cursor=pointer]
+          - button "Resolved Issues" [ref=f4e48] [cursor=pointer]
+          - button "Manage Notices" [ref=f4e52] [cursor=pointer]
+        - generic [ref=f4e57]:
+          - generic [ref=f4e62]:
+            - generic [ref=f4e63]: user
+            - generic [ref=f4e64]: Operations Officer (LUDHIANA)
+          - button "Profile options" [ref=f4e65] [cursor=pointer]
+      - main [ref=f4e70]:
+        - generic [ref=f4e71]:
+          - generic [ref=f4e72]:
+            - generic [ref=f4e73]:
+              - generic [ref=f4e74]: Pending Review
+              - generic [ref=f4e75]: "0"
+              - generic [ref=f4e76]: Awaiting triage decision
+            - generic [ref=f4e77]:
+              - generic [ref=f4e78]: Acknowledged
+              - generic [ref=f4e79]: "1"
+              - generic [ref=f4e80]: Triaged & accepted
+            - generic [ref=f4e81]:
+              - generic [ref=f4e82]: In Progress
+              - generic [ref=f4e83]: "0"
+              - generic [ref=f4e84]: Active field crew dispatch
+          - generic [ref=f4e85]:
+            - generic [ref=f4e189]:
+              - heading "Review Queue" [level=3] [ref=f4e190]
+              - generic [ref=f4e191]: "0"
+            - generic [ref=f4e193]:
+              - generic [ref=f4e194]:
+                - heading "Acknowledged" [level=3] [ref=f4e195]
+                - generic [ref=f4e196]: "1"
+              - generic [ref=f4e198] [cursor=pointer]:
+                - heading "open waste burning causing the smoke" [level=4] [ref=f4e199]
+                - generic [ref=f4e200]: LUDHIANA
+                - paragraph [ref=f4e201]: Dry leaves and plastic waste being burned in the open field opposite the public school, causing severe smoke and breathing difficulties.
+                - generic [ref=f4e202]:
+                  - generic [ref=f4e203]: 7 verifications
+                  - generic [ref=f4e208]: 28 upvotes
+                  - generic [ref=f4e212]: 18h ago
+            - generic [ref=f4e214]:
+              - heading "In Progress" [level=3] [ref=f4e215]
+              - generic [ref=f4e216]: "0"
+  - generic [ref=f4e219]:
+    - generic [ref=f4e220]:
+      - heading "Report Inspection" [level=3] [ref=f4e221]
+      - button "Close details panel" [ref=f4e222] [cursor=pointer]: ×
+    - generic [ref=f4e223]:
+      - generic [ref=f4e224]:
+        - heading "General" [level=4] [ref=f4e225]
+        - generic [ref=f4e226]:
+          - generic [ref=f4e227]:
+            - generic [ref=f4e228]: Title
+            - generic [ref=f4e229]: open waste burning causing the smoke
+          - generic [ref=f4e230]:
+            - generic [ref=f4e231]: District
+            - generic [ref=f4e232]: LUDHIANA
+          - generic [ref=f4e233]:
+            - generic [ref=f4e234]: Status
+            - generic [ref=f4e235]: Acknowledged
+      - generic [ref=f4e236]:
+        - heading "Evidence" [level=4] [ref=f4e237]
+        - generic [ref=f4e238]:
+          - text: Images
+          - img "Details photo" [ref=f4e240] [cursor=pointer]
+        - generic [ref=f4e241]:
+          - text: Description
+          - paragraph [ref=f4e242]: Dry leaves and plastic waste being burned in the open field opposite the public school, causing severe smoke and breathing difficulties.
+        - generic [ref=f4e243]:
+          - text: Map
+          - generic [ref=f4e244]:
+            - button "Marker" [ref=f4e245] [cursor=pointer]
+            - generic:
+              - generic [ref=f4e246]:
+                - button "Zoom in" [ref=f4e247] [cursor=pointer]: +
+                - button "Zoom out" [ref=f4e248] [cursor=pointer]: −
+              - generic [ref=f4e249]:
+                - link "Leaflet" [ref=f4e250] [cursor=pointer]:
+                  - /url: https://leafletjs.com
+                - text: "| © OpenStreetMap"
+          - generic [ref=f4e255]: "Approximate Center: LUDHIANA"
+      - generic [ref=f4e256]:
+        - heading "Municipality" [level=4] [ref=f4e257]
+        - generic [ref=f4e260]:
+          - generic [ref=f4e261]: Municipality Actions
+          - generic [ref=f4e262]: "Ready to launch field crews:"
+          - button "Start Work" [ref=f4e264] [cursor=pointer]
+      - generic [ref=f4e265]:
+        - heading "Comments" [level=4] [ref=f4e266]
+        - generic [ref=f4e268]:
+          - generic [ref=f4e269]:
+            - generic [ref=f4e270]: Amrit
+            - generic [ref=f4e271]: 3 hours ago
+          - paragraph [ref=f4e272]: This happens every evening around 5 PM. It's a major health hazard.
+        - generic [ref=f4e273]:
+          - textbox "Write a comment..." [ref=f4e274]
+          - button "Post" [ref=f4e275] [cursor=pointer]
