@@ -21,7 +21,7 @@ class BrandLogo extends HTMLElement {
   }
 
   render() {
-    const faviconSrc = this.getAttribute('favicon-src') || '/favicon/favicon.svg';
+    const faviconSrc = this.getAttribute('favicon-src') || 'favicon/favicon.svg';
     const text = this.getAttribute('text') || 'clear';
 
     this.innerHTML = `
