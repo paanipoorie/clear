@@ -77,6 +77,62 @@
   --transition-speed: 150ms;
 }
 
+/* Dark Theme Tokens */
+[data-theme="dark"] {
+  --color-bg: #121410;
+  --color-card-bg: #1B1E19;
+  
+  --color-primary: #6bb352;
+  --color-primary-hover: #8ac873;
+  --color-primary-soft: #252e20;
+  --color-accent-secondary: #99cb6b;
+  --color-border: #2E362A;
+  --color-border-hover: #6bb352;
+  
+  --color-accent: var(--color-primary);
+  --color-accent-hover: var(--color-primary-hover);
+  --color-accent-soft: var(--color-primary-soft);
+  
+  --color-text-main: #F2F5F1;
+  --color-text-muted: #A1B29D;
+  --color-text-subtle: #72826F;
+  --color-destructive: #FF6B53;
+  --color-destructive-soft: #2E1E1C;
+  
+  --color-status-review-bg: #23261C;
+  --color-status-review-text: #C0D17F;
+  --color-status-review-border: #3A3F2F;
+  
+  --color-status-ack-bg: #1A2820;
+  --color-status-ack-text: #71C28F;
+  --color-status-ack-border: #273E31;
+  
+  --color-status-progress-bg: #35321A;
+  --color-status-progress-text: #EAD267;
+  --color-status-progress-border: #4D4925;
+  
+  --color-status-resolved-bg: #1A2820;
+  --color-status-resolved-text: #71C28F;
+  --color-status-resolved-border: #273E31;
+  
+  --color-status-rejected-bg: #2E1E1C;
+  --color-status-rejected-text: #FF6B53;
+  --color-status-rejected-border: #4E322F;
+
+  --shadow-flat-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-flat-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  --shadow-flat-primary: 0 4px 12px rgba(107, 179, 82, 0.08);
+  --shadow-flat-dark: 0 4px 12px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-button-hover: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .leaflet-tile-container {
+  filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+}
+[data-theme="dark"] .leaflet-container {
+  background: #121410;
+}
+
 /* ==========================================================================
    Base Styles
    ========================================================================== */
