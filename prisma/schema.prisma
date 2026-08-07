@@ -1,13 +1,136 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+  output          = "../generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+model User {
+  id            String         @id @default(uuid())
+  username      String         @unique
+  email         String         @unique
+  password      String
+  role          String         @default("citizen")
+  district      String?
+  authKey       String?
+  createdAt     DateTime       @default(now())
+  reports       Report[]       @relation("ReportAuthor")
+  comments      Comment[]      @relation("CommentAuthor")
+  follows       ReportFollow[]
+  upvotes       ReportUpvote[]
+  notices       Notice[]       @relation("NoticeAuthor")
+  notifications Notification[]
+}
+
+model Report {
+  id               Int             @id @default(autoincrement())
+  title            String
+  description      String?
+  location         String          @default("Punjab")
+  subLocation      String
+  latitude         Float
+  longitude        Float
+  imageType        String          @default("default")
+  images           String[]
+  links            String[]
+  upvotes          Int             @default(1)
+  createdAt        DateTime        @default(now())
+  status           String          @default("Review Queue")
+  internalNotes    String          @default("")
+  resolutionNote   String?
+  resolutionImages String[]
+  rejectionReason  String?
+  rejectedAt       DateTime?
+  appealMessage    String?
+  additionalImages String[]
+  appealedAt       DateTime?
+  isAnonymous      Boolean         @default(false)
+  authorId         String
+  author           User            @relation("ReportAuthor", fields: [authorId], references: [id])
+  comments         Comment[]
+  timeline         TimelineEvent[]
+  followers        ReportFollow[]
+  voters           ReportUpvote[]
+  notifications    Notification[]
+
+  @@index([subLocation])
+  @@index([status])
+  @@index([authorId])
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  reportId  Int
+  report    Report   @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation("CommentAuthor", fields: [authorId], references: [id])
+  text      String
+  createdAt DateTime @default(now())
+
+  @@index([reportId])
+  @@index([authorId])
+}
+
+model TimelineEvent {
+  id        Int      @id @default(autoincrement())
+  reportId  Int
+  report    Report   @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  status    String
+  timestamp DateTime @default(now())
+
+  @@index([reportId])
+}
+
+model ReportFollow {
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reportId Int
+  report   Report @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  @@id([userId, reportId])
+}
+
+model ReportUpvote {
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reportId Int
+  report   Report @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  @@id([userId, reportId])
+}
+
+model Notice {
+  id          Int       @id @default(autoincrement())
+  title       String
+  description String
+  location    String    @default("Punjab")
+  subLocation String
+  type        String
+  expiryDate  DateTime?
+  createdAt   DateTime  @default(now())
+  authorId    String
+  author      User      @relation("NoticeAuthor", fields: [authorId], references: [id])
+
+  @@index([subLocation])
+  @@index([expiryDate])
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reportId  Int
+  report    Report   @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  message   String
+  status    String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }

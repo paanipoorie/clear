@@ -799,16 +799,7 @@ function handleRouting() {
   const path = window.location.pathname;
 
   if (isAuthenticated) {
-    // Get the user's role synchronously
-    const storedUsername = localStorage.getItem('clear_username');
-    let userRole = 'citizen';
-    if (storedUsername) {
-      const users = JSON.parse(localStorage.getItem('clear_users') || '[]');
-      const found = users.find(u => u.username.toLowerCase() === storedUsername.toLowerCase());
-      if (found) {
-        userRole = (found.role === 'civil' || found.role === 'citizen') ? 'citizen' : 'municipal';
-      }
-    }
+    const userRole = state.currentUser ? state.currentUser.role : 'citizen';
     
     if (path === '/citizen/dashboard') {
       if (userRole === 'citizen') {
@@ -967,30 +958,98 @@ function updateSidebarActiveBtn(activeBtn) {
 
 // REST API helper functions
 
+async function fetchNotificationsCount() {
+  const dot = document.querySelector('#notificationBtn .notification-dot');
+  if (!dot) return;
+  try {
+    const res = await fetch('/api/notifications');
+    if (res.ok) {
+      const notifications = await res.json();
+      const unreadCount = notifications.filter(n => !n.read).length;
+      dot.style.display = unreadCount > 0 ? 'block' : 'none';
+    }
+  } catch (err) {
+    console.error('Error fetching notification count:', err);
+  }
+}
+
+async function loadAndRenderNotifications(dropdown) {
+  const listContainer = dropdown.querySelector('#notificationsList');
+  try {
+    const res = await fetch('/api/notifications');
+    if (res.ok) {
+      const notifications = await res.json();
+      
+      const unreadCount = notifications.filter(n => !n.read).length;
+      const dot = document.querySelector('#notificationBtn .notification-dot');
+      if (dot) {
+        dot.style.display = unreadCount > 0 ? 'block' : 'none';
+      }
+
+      if (notifications.length === 0) {
+        listContainer.innerHTML = `<div class="notification-list-empty">No updates yet.</div>`;
+        return;
+      }
+
+      listContainer.innerHTML = notifications.map(n => `
+        <div class="notification-item ${n.read ? '' : 'unread'}" data-id="${n.id}" data-report-id="${n.reportId}">
+          <div class="notification-item-message">${escapeHTML(n.message)}</div>
+          <div class="notification-item-time">${timeAgo(n.createdAt)}</div>
+        </div>
+      `).join('');
+
+      listContainer.querySelectorAll('.notification-item').forEach(item => {
+        item.addEventListener('click', async () => {
+          const id = item.dataset.id;
+          const reportId = item.dataset.reportId;
+          
+          try {
+            await fetch(`/api/notifications/${id}/read`, { method: 'PATCH' });
+          } catch (err) {
+            console.error('Error marking notification as read:', err);
+          }
+
+          dropdown.classList.remove('open');
+          
+          try {
+            const reportRes = await fetch(`/api/issues/${reportId}`);
+            if (reportRes.ok) {
+              const report = await reportRes.json();
+              openOpsDetailPanel(report);
+            }
+          } catch (err) {
+            console.error('Error fetching issue details:', err);
+          }
+        });
+      });
+    }
+  } catch (err) {
+    console.error('Error loading notifications:', err);
+    listContainer.innerHTML = `<div class="notification-list-empty">Error loading updates.</div>`;
+  }
+}
+
 async function fetchUser() {
   try {
     const res = await fetch('/api/user');
     if (res.ok) {
       const user = await res.json();
-      const storedUsername = localStorage.getItem('clear_username');
-      if (storedUsername) {
-        user.username = storedUsername;
-        // Retrieve role & district from local clear_users DB
-        const users = getOrInitializeUsers();
-        const found = users.find(u => u.username.toLowerCase() === storedUsername.toLowerCase());
-        if (found) {
-          user.id = found.id || found.username;
-          user.role = (found.role === 'civil' || found.role === 'citizen') ? 'citizen' : 'municipal';
-          user.district = found.district || 'LUDHIANA';
-          MOCK_MUNICIPALITY_DISTRICT = user.district;
-        } else {
-          user.id = storedUsername;
-        }
-      } else {
-        user.id = 'user';
+      state.currentUser = {
+        id: user.id,
+        username: user.username,
+        role: user.role,
+        district: user.district || 'LUDHIANA'
+      };
+      if (user.district) {
+        MOCK_MUNICIPALITY_DISTRICT = user.district;
       }
-      state.currentUser = user;
       document.getElementById('usernameLabel').textContent = user.username;
+      
+      // Fetch notification count on startup
+      await fetchNotificationsCount();
+    } else {
+      localStorage.removeItem('clear_user_authenticated');
+      localStorage.removeItem('clear_username');
     }
   } catch (err) {
     console.error('Error fetching user:', err);
@@ -1800,7 +1859,7 @@ function setupEventListeners() {
   // Login Form Submission
   const loginForm = document.getElementById('loginForm');
   if (loginForm) {
-    loginForm.addEventListener('submit', (e) => {
+    loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       
       const isCivil = loginRoleCivilBtn ? loginRoleCivilBtn.classList.contains('active') : true;
@@ -1815,43 +1874,49 @@ function setupEventListeners() {
         password = document.getElementById('loginMunicipalAuthKey').value;
       }
       
-      const user = authenticateUser(emailOrUsername, password);
-      if (user) {
-        // Authenticate successfully
-        localStorage.setItem('clear_user_authenticated', 'true');
-        localStorage.setItem('clear_username', user.username);
-        
-        // Update user state
-        state.currentUser = {
-          id: user.id || user.username,
-          username: user.username,
-          avatar: '/images/avatar.png',
-          role: user.role,
-          district: user.district || 'LUDHIANA'
-        };
-        
-        if (user.district) {
-          MOCK_MUNICIPALITY_DISTRICT = user.district;
-        }
-        
-        const usernameLabel = document.getElementById('usernameLabel');
-        if (usernameLabel) usernameLabel.textContent = user.username;
-        
-        showToast(`Welcome back, ${user.username}!`);
-        
-        // Clear input values
-        loginForm.reset();
-        
-        // Redirect directly based on role
-        if (state.currentUser.role === 'municipal') {
-          window.history.pushState(null, '', '/municipal/dashboard');
-          switchPortal('municipality');
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ emailOrUsername, password })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const user = data.user;
+          localStorage.setItem('clear_user_authenticated', 'true');
+          localStorage.setItem('clear_username', user.username);
+          
+          state.currentUser = {
+            id: user.id,
+            username: user.username,
+            avatar: '/images/avatar.png',
+            role: user.role,
+            district: user.district || 'LUDHIANA'
+          };
+          
+          if (user.district) {
+            MOCK_MUNICIPALITY_DISTRICT = user.district;
+          }
+          
+          const usernameLabel = document.getElementById('usernameLabel');
+          if (usernameLabel) usernameLabel.textContent = user.username;
+          
+          showToast(`Welcome back, ${user.username}!`);
+          loginForm.reset();
+          
+          if (state.currentUser.role === 'municipal') {
+            window.history.pushState(null, '', '/municipal/dashboard');
+            switchPortal('municipality');
+          } else {
+            window.history.pushState(null, '', '/citizen/dashboard');
+            switchPortal('public');
+          }
         } else {
-          window.history.pushState(null, '', '/citizen/dashboard');
-          switchPortal('public');
+          const err = await res.json();
+          showToast(err.error || 'Invalid email, username or password/auth key.');
         }
-      } else {
-        showToast('Invalid email, username or password/auth key.');
+      } catch (err) {
+        showToast('Connection error. Failed to log in.');
       }
     });
   }
@@ -1859,7 +1924,7 @@ function setupEventListeners() {
   // Register Form Submission
   const registerForm = document.getElementById('registerForm');
   if (registerForm) {
-    registerForm.addEventListener('submit', (e) => {
+    registerForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       
       const isCivil = registerRoleCivilBtn ? registerRoleCivilBtn.classList.contains('active') : true;
@@ -1868,6 +1933,7 @@ function setupEventListeners() {
       let password = '';
       let confirmPassword = '';
       let district = '';
+      let authKey = '';
       
       if (isCivil) {
         email = document.getElementById('registerCivilEmail').value.trim();
@@ -1881,6 +1947,7 @@ function setupEventListeners() {
         district = document.getElementById('registerMunicipalDistrict').value;
         password = document.getElementById('registerMunicipalAuthKey').value;
         confirmPassword = password;
+        authKey = password;
       }
       
       if (password !== confirmPassword) {
@@ -1888,41 +1955,49 @@ function setupEventListeners() {
         return;
       }
       
-      const reg = registerNewUser(username, email, password, isCivil ? 'citizen' : 'municipal', district);
-      if (reg.success) {
-        // Register and log in successfully
-        localStorage.setItem('clear_user_authenticated', 'true');
-        localStorage.setItem('clear_username', username);
-        
-        state.currentUser = {
-          id: reg.user.id || username,
-          username: username,
-          avatar: '/images/avatar.png',
-          role: isCivil ? 'citizen' : 'municipal',
-          district: district || 'LUDHIANA'
-        };
-        
-        if (district) {
-          MOCK_MUNICIPALITY_DISTRICT = district;
-        }
-        
-        const usernameLabel = document.getElementById('usernameLabel');
-        if (usernameLabel) usernameLabel.textContent = username;
-        
-        showToast('Account created successfully!');
-        
-        registerForm.reset();
-        
-        // Redirect directly based on role
-        if (state.currentUser.role === 'municipal') {
-          window.history.pushState(null, '', '/municipal/dashboard');
-          switchPortal('municipality');
+      try {
+        const res = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, email, password, role: isCivil ? 'citizen' : 'municipal', district, authKey })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const user = data.user;
+          localStorage.setItem('clear_user_authenticated', 'true');
+          localStorage.setItem('clear_username', user.username);
+          
+          state.currentUser = {
+            id: user.id,
+            username: user.username,
+            avatar: '/images/avatar.png',
+            role: user.role,
+            district: user.district || 'LUDHIANA'
+          };
+          
+          if (user.district) {
+            MOCK_MUNICIPALITY_DISTRICT = user.district;
+          }
+          
+          const usernameLabel = document.getElementById('usernameLabel');
+          if (usernameLabel) usernameLabel.textContent = user.username;
+          
+          showToast('Account created successfully!');
+          registerForm.reset();
+          
+          if (state.currentUser.role === 'municipal') {
+            window.history.pushState(null, '', '/municipal/dashboard');
+            switchPortal('municipality');
+          } else {
+            window.history.pushState(null, '', '/citizen/dashboard');
+            switchPortal('public');
+          }
         } else {
-          window.history.pushState(null, '', '/citizen/dashboard');
-          switchPortal('public');
+          const err = await res.json();
+          showToast(err.error || 'Failed to create account.');
         }
-      } else {
-        showToast(reg.error || 'Failed to register.');
+      } catch (err) {
+        showToast('Connection error. Failed to create account.');
       }
     });
   }
@@ -2106,7 +2181,7 @@ function setupEventListeners() {
     try {
       const res = await fetch('/api/user/logout', { method: 'POST' });
       if (res.ok) {
-        showToast('Logged out successfully (Simulated)');
+        showToast('Logged out successfully');
       }
     } catch (err) {
       console.error(err);
@@ -2114,6 +2189,54 @@ function setupEventListeners() {
     window.history.pushState(null, '', '/');
     switchPortal('landing');
   });
+
+  // Notifications Bell Setup
+  const notificationBtn = document.getElementById('notificationBtn');
+  if (notificationBtn) {
+    let dropdown = document.querySelector('.notifications-dropdown');
+    if (!dropdown) {
+      dropdown = document.createElement('div');
+      dropdown.className = 'notifications-dropdown';
+      dropdown.innerHTML = `
+        <div class="notifications-dropdown-header">
+          <h3>Alerts & Updates</h3>
+          <button class="notifications-clear-btn" id="clearAllNotificationsBtn">Dismiss All</button>
+        </div>
+        <div id="notificationsList" class="notification-list-container">
+          <div class="notification-list-empty">Loading notifications...</div>
+        </div>
+      `;
+      notificationBtn.parentElement.appendChild(dropdown);
+    }
+
+    notificationBtn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const isOpen = dropdown.classList.toggle('open');
+      if (isOpen) {
+        await loadAndRenderNotifications(dropdown);
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!dropdown.contains(e.target) && e.target !== notificationBtn && !notificationBtn.contains(e.target)) {
+        dropdown.classList.remove('open');
+      }
+    });
+
+    const clearAllBtn = dropdown.querySelector('#clearAllNotificationsBtn');
+    clearAllBtn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      try {
+        const res = await fetch('/api/notifications/clear', { method: 'POST' });
+        if (res.ok) {
+          showToast('All notifications dismissed');
+          await loadAndRenderNotifications(dropdown);
+        }
+      } catch (err) {
+        console.error('Error clearing notifications:', err);
+      }
+    });
+  }
 
   // Editor helper functions for location, photos, and links
   function resetEditorState() {

@@ -1,483 +1,643 @@
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
+const crypto = require('crypto');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser');
+const dotenv = require('dotenv');
+const pg = require('pg');
+const { PrismaPg } = require('@prisma/adapter-pg');
+const { PrismaClient } = require('./generated/prisma');
+
+dotenv.config();
+
 const app = express();
 const PORT = process.env.PORT || 3000;
+const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-key-clear';
+const MUNICIPAL_AUTH_KEY = process.env.MUNICIPAL_AUTH_KEY || 'HX291Z';
 
-app.use(express.json({ limit: '10mb' })); // support larger base64 uploads
+// Database setup
+function getDirectConnectionString() {
+  const urlStr = process.env.DATABASE_URL;
+  if (!urlStr) {
+    throw new Error("DATABASE_URL is not set in environment variables.");
+  }
+
+  if (urlStr.startsWith('prisma+postgres://')) {
+    try {
+      const url = new URL(urlStr);
+      const apiKey = url.searchParams.get('api_key');
+      if (apiKey) {
+        const decoded = Buffer.from(apiKey, 'base64').toString('utf-8');
+        const data = JSON.parse(decoded);
+        if (data.databaseUrl) {
+          return data.databaseUrl;
+        }
+      }
+    } catch (e) {
+      console.error("Failed to parse prisma+postgres URL, fallback to original:", e);
+    }
+  }
+
+  return urlStr;
+}
+
+const pool = new pg.Pool({ connectionString: getDirectConnectionString() });
+const adapter = new PrismaPg(pool);
+const prisma = new PrismaClient({ adapter });
+
+// Ensure upload directory exists
+const UPLOAD_DIR = path.join(__dirname, 'media', 'uploads');
+if (!fs.existsSync(UPLOAD_DIR)) {
+  fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+}
+
+function saveBase64Image(base64Str) {
+  if (!base64Str || typeof base64Str !== 'string' || !base64Str.startsWith('data:image')) {
+    return base64Str;
+  }
+
+  try {
+    const matches = base64Str.match(/^data:image\/([A-Za-z+]+);base64,(.+)$/);
+    if (!matches || matches.length !== 3) {
+      return base64Str;
+    }
+
+    const ext = matches[1] === 'jpeg' ? 'jpg' : matches[1];
+    const dataBuffer = Buffer.from(matches[2], 'base64');
+    
+    const hash = crypto.createHash('md5').update(dataBuffer).digest('hex');
+    const filename = `${Date.now()}-${hash}.${ext}`;
+    const filepath = path.join(UPLOAD_DIR, filename);
+
+    fs.writeFileSync(filepath, dataBuffer);
+    
+    return `/media/uploads/${filename}`;
+  } catch (err) {
+    console.error('Failed to save base64 image:', err);
+    return base64Str;
+  }
+}
+
+app.use(express.json({ limit: '10mb' })); // Support larger base64 uploads
+app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/media', express.static(path.join(__dirname, 'media')));
 
-// In-memory Database
-let issues = [
-  {
-    id: 1,
-    title: "Illegal dumping behind residential area",
-    location: "Punjab",
-    subLocation: "SAS NAGAR",
-    description: "Piles of trash bags and plastic debris accumulating behind the residential block, causing odor and attracting stray animals.",
-    images: ["/media/issues/garbage.jpeg"],
-    imageType: "dumping",
-    upvotes: 42,
-    downvotes: 0,
-    followed: false,
-    reported: false,
-    comments: [
-      { id: 1, user: "Karan", text: "This has been building up for two weeks. Needs immediate collection.", timestamp: "2 hours ago" },
-      { id: 2, user: "Simran", text: "Contacted local council last Tuesday but no action taken yet.", timestamp: "1 hour ago" }
-    ],
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 1 day ago
-    status: "Acknowledged",
-    internalNotes: "Assigned to the Sector 4 cleanliness squad. Cleanup scheduled for Friday morning.",
-    resolutionImages: [],
-    resolutionNote: "",
-    timeline: [
-      { status: "Review Queue", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString() },
-      { status: "Acknowledged", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 22).toISOString() }
-    ],
-    authorId: "user-abhyudaya",
-    authorName: "Abhyudaya Sengar"
-  },
-  {
-    id: 2,
-    title: "open waste burning causing the smoke",
-    location: "Punjab",
-    subLocation: "LUDHIANA",
-    description: "Dry leaves and plastic waste being burned in the open field opposite the public school, causing severe smoke and breathing difficulties.",
-    imageType: "burning",
-    upvotes: 28,
-    downvotes: 0,
-    followed: false,
-    reported: false,
-    comments: [
-      { id: 1, user: "Amrit", text: "This happens every evening around 5 PM. It's a major health hazard.", timestamp: "3 hours ago" }
-    ],
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString(), // 12 hours ago
-    status: "Review Queue",
-    internalNotes: "",
-    resolutionImages: [],
-    resolutionNote: "",
-    timeline: [
-      { status: "Review Queue", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString() }
-    ],
-    authorId: "user",
-    authorName: "user"
-  },
-  {
-    id: 3,
-    title: "Unclogged drain overflowing onto main road",
-    location: "Punjab",
-    subLocation: "PATIALA",
-    description: "Monsoon clogging in the sewer drainage system leading to wastewater overflowing onto the public street, creating a traffic bottleneck and hygiene issue.",
-    imageType: "water",
-    upvotes: 15,
-    downvotes: 0,
-    followed: false,
-    reported: false,
-    comments: [],
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 6).toISOString(), // 6 hours ago
-    status: "In Progress",
-    internalNotes: "Contracted plumbing team dispatched to clear blockages.",
-    resolutionImages: [],
-    resolutionNote: "",
-    timeline: [
-      { status: "Review Queue", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 6).toISOString() },
-      { status: "Acknowledged", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString() },
-      { status: "In Progress", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 4).toISOString() }
-    ],
-    authorId: "user-nishant",
-    authorName: "Nishant Kumar"
-  },
-  {
-    id: 4,
-    title: "Hazardous chemical leakage in industrial park",
-    location: "Punjab",
-    subLocation: "LUDHIANA",
-    description: "Chemical containers leaking near the storm drain in sector 4. Corrosive fluid pooling on the ground.",
-    imageType: "default",
-    upvotes: 65,
-    downvotes: 0,
-    followed: true,
-    reported: false,
-    comments: [
-      { id: 1, user: "Rajesh", text: "Reported this to safety officer yesterday.", timestamp: "1 day ago" }
-    ],
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
-    status: "Resolved",
-    internalNotes: "Hazardous response team dispatched. Sealed leak and neutralised soil.",
-    resolutionImages: ["https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&auto=format&fit=crop&q=60"], // mockup image
-    resolutionNote: "Our chemical containment team successfully sealed the containers and cleaned up the spill using absorbent sand. The storm drain was verified clean.",
-    timeline: [
-      { status: "Review Queue", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString() },
-      { status: "Acknowledged", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 46).toISOString() },
-      { status: "In Progress", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 40).toISOString() },
-      { status: "Resolved", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString() }
-    ],
-    authorId: "officer",
-    authorName: "officer"
-  },
-  {
-    id: 5,
-    title: "Massive pile of garbage dumped next to Sector 70 park",
-    location: "Punjab",
-    subLocation: "SAS NAGAR",
-    description: "Someone has dumped a huge pile of domestic waste and plastic packages right at the entrance of Sector 70 public park. It is attracting stray dogs and flies, creating an extremely unhygienic environment for children.",
-    images: ["/media/issues/garbage%20dumping.jpeg"],
-    imageType: "dumping",
-    upvotes: 18,
-    downvotes: 0,
-    followed: false,
-    reported: false,
-    comments: [
-      { id: 1, user: "Simran Kaur", text: "This is horrible, we need this cleared before the weekend.", timestamp: "10 hours ago" },
-      { id: 2, user: "Karan Malhotra", text: "I saw a commercial mini-truck dumping this last night. We need CCTV cameras here.", timestamp: "8 hours ago" }
-    ],
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 18).toISOString(),
-    status: "Review Queue",
-    internalNotes: "",
-    resolutionImages: [],
-    resolutionNote: "",
-    timeline: [
-      { status: "Review Queue", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 18).toISOString() }
-    ],
-    authorId: "user-amrit",
-    authorName: "Amrit Singh"
-  },
-  {
-    id: 6,
-    title: "Unauthorised mass cutting of trees along Phase 7 boundary wall",
-    location: "Punjab",
-    subLocation: "SAS NAGAR",
-    description: "Several healthy neem and eucalyptus trees are being cut down along the boundary wall of Phase 7 without any municipal authorization or notices. Please investigate immediately.",
-    images: ["/media/issues/tree%20mass%20cut.jpeg"],
-    imageType: "default",
-    upvotes: 35,
-    downvotes: 0,
-    followed: true,
-    reported: false,
-    comments: [
-      { id: 1, user: "Abhyudaya Sengar", text: "This is illegal! Thank you for raising this.", timestamp: "3 hours ago" },
-      { id: 2, user: "Nishant Kumar", text: "Forestry dept needs to check this.", timestamp: "2 hours ago" }
-    ],
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 4).toISOString(),
-    status: "In Progress",
-    internalNotes: "Forestry officer dispatched. Work has been temporarily halted pending permit verification.",
-    resolutionImages: [],
-    resolutionNote: "",
-    timeline: [
-      { status: "Review Queue", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 4).toISOString() },
-      { status: "Acknowledged", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 3).toISOString() },
-      { status: "In Progress", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString() }
-    ],
-    authorId: "user-karan",
-    authorName: "Karan Malhotra"
-  },
-  {
-    id: 7,
-    title: "Blocked storm drain causing water accumulation in Sector 62",
-    location: "Punjab",
-    subLocation: "SAS NAGAR",
-    description: "A storm drain is completely clogged with plastic bottles and dry leaves near Sector 62 main junction. Rainwater has accumulated, forming a large pool that blocks traffic.",
-    images: ["/media/issues/water.jpeg"],
-    imageType: "water",
-    upvotes: 45,
-    downvotes: 0,
-    followed: true,
-    reported: false,
-    comments: [
-      { id: 1, user: "Karan Malhotra", text: "Water is slowly entering the ground floor shops.", timestamp: "1 day ago" }
-    ],
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
-    status: "Resolved",
-    internalNotes: "Drainage team cleared the blockage using suction machines. Verified clean.",
-    resolutionImages: ["/media/issues/water2.jpeg"],
-    resolutionNote: "Our maintenance team unclogged the municipal storm drain and drained all accumulated water. Flow is now fully restored.",
-    timeline: [
-      { status: "Review Queue", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString() },
-      { status: "Acknowledged", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 46).toISOString() },
-      { status: "In Progress", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 40).toISOString() },
-      { status: "Resolved", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString() }
-    ],
-    authorId: "user-simran",
-    authorName: "Simran Kaur"
-  },
-  {
-    id: 8,
-    title: "Tree branches hanging dangerously low over Sector 71 road",
-    location: "Punjab",
-    subLocation: "SAS NAGAR",
-    description: "A large branch of a mango tree is hanging low over the Sector 71 secondary road, posing a hazard for high trucks.",
-    images: ["/media/issues/tress%20cut.jpeg"],
-    imageType: "default",
-    upvotes: 5,
-    downvotes: 0,
-    followed: false,
-    reported: false,
-    comments: [],
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 20).toISOString(),
-    status: "Rejected",
-    rejectionReason: "The tree is located inside private property, not on municipal land. The owner has been notified to trim the branches.",
-    rejectedAt: new Date(Date.now() - 1000 * 60 * 60 * 10).toISOString(),
-    resolutionImages: [],
-    resolutionNote: "",
-    timeline: [
-      { status: "Review Queue", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 20).toISOString() },
-      { status: "Rejected", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 10).toISOString() }
-    ],
-    authorId: "user-abhyudaya",
-    authorName: "Abhyudaya Sengar"
-  },
-  {
-    id: 9,
-    title: "Commercial waste dumping behind Sector 55 market",
-    location: "Punjab",
-    subLocation: "SAS NAGAR",
-    description: "Large wooden crates and packaging plastic from retail shops are dumped behind Sector 55 market daily, blocking the fire escape.",
-    images: ["/media/issues/garbage%20dumping.jpeg"],
-    imageType: "dumping",
-    upvotes: 12,
-    downvotes: 0,
-    followed: true,
-    reported: false,
-    comments: [],
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
-    status: "Pending Review",
-    rejectionReason: "Considered minor littering. Advised local merchants association.",
-    rejectedAt: new Date(Date.now() - 1000 * 60 * 60 * 36).toISOString(),
-    appealMessage: "This is NOT minor littering! It completely blocks the fire exit of three major shops. This is a critical safety hazard. Please check the photos again.",
-    additionalImages: ["/media/issues/garbage.jpeg"],
-    appealedAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-    resolutionImages: [],
-    resolutionNote: "",
-    timeline: [
-      { status: "Review Queue", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString() },
-      { status: "Rejected", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 36).toISOString() },
-      { status: "Pending Review", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString() }
-    ],
-    authorId: "user-amrit",
-    authorName: "Amrit Singh"
-  },
-  {
-    id: 10,
-    title: "Pothole leakage causing muddy street in Sector 68",
-    location: "Punjab",
-    subLocation: "SAS NAGAR",
-    description: "A broken waterline under the main Sector 68 street is bubbling up water, creating a large muddy pothole. It is dangerous for two-wheelers and ruins road quality.",
-    images: ["/media/issues/water.jpeg"],
-    imageType: "water",
-    upvotes: 14,
-    downvotes: 0,
-    followed: true,
-    reported: false,
-    comments: [],
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(), // 5 hours ago
-    status: "Review Queue",
-    internalNotes: "",
-    resolutionImages: [],
-    resolutionNote: "",
-    timeline: [
-      { status: "Review Queue", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString() }
-    ],
-    authorId: "user-nishant",
-    authorName: "Nishant Kumar"
+// Middlewares
+const requireAuth = (req, res, next) => {
+  const token = req.cookies.token;
+  if (!token) {
+    return res.status(401).json({ error: "Unauthorized. Please log in." });
   }
-];
-
-let notices = [
-  {
-    id: 1,
-    title: "Air Quality Advisory - PM2.5 Alert",
-    description: "Due to seasonal stubble burning and low wind speeds, air quality in Ludhiana has dropped to 'Poor'. Senior citizens and children are advised to limit outdoor exposure.",
-    location: "Punjab",
-    subLocation: "LUDHIANA",
-    type: "Warning",
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString(),
-    expiryDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toISOString().split('T')[0] // 7 days from now
-  },
-  {
-    id: 2,
-    title: "Cleanliness Drive: Sector 32",
-    description: "The Municipal Corporation is organizing a community waste cleaning and sorting drive this Sunday. Cleanup tools and refreshments will be provided.",
-    location: "Punjab",
-    subLocation: "SAS NAGAR",
-    type: "Drive / Campaign",
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
-    expiryDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 2).toISOString().split('T')[0] // 2 days from now
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded; // { userId, username, role, district }
+    next();
+  } catch (err) {
+    return res.status(401).json({ error: "Invalid session. Please log in again." });
   }
-];
-
-let currentUser = {
-  id: "user",
-  username: "user",
-  avatar: "/images/avatar.png"
 };
 
-// Simulated Notification store
-let notifications = [];
+const requireRole = (role) => {
+  return (req, res, next) => {
+    if (!req.user || req.user.role !== role) {
+      return res.status(403).json({ error: "Forbidden. Insufficient permissions." });
+    }
+    next();
+  };
+};
 
-// Persistence helper for in-memory database
-const fs = require('fs');
-const os = require('os');
-const DATA_DIR = path.join(os.homedir(), '.gemini', 'antigravity-cli', 'clear-db');
-if (!fs.existsSync(DATA_DIR)) {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
-}
-const ISSUES_PATH = path.join(DATA_DIR, 'issues.json');
-const NOTICES_PATH = path.join(DATA_DIR, 'notices.json');
+// --- AUTHENTICATION ENDPOINTS ---
 
-function saveDatabase() {
+// Register
+app.post('/api/auth/register', async (req, res) => {
+  const { username, email, password, role, district, authKey } = req.body;
+  if (!username || !email || !password || !role) {
+    return res.status(400).json({ error: "Missing required fields." });
+  }
+
+  const targetRole = (role === 'civil' || role === 'citizen') ? 'citizen' : 'municipal';
+
+  if (targetRole === 'municipal') {
+    if (authKey !== MUNICIPAL_AUTH_KEY) {
+      return res.status(400).json({ error: "Invalid municipal authorization key." });
+    }
+    if (!district) {
+      return res.status(400).json({ error: "Municipal officers must specify a district." });
+    }
+  }
+
   try {
-    fs.writeFileSync(ISSUES_PATH, JSON.stringify(issues, null, 2), 'utf8');
-    fs.writeFileSync(NOTICES_PATH, JSON.stringify(notices, null, 2), 'utf8');
-  } catch (e) {
-    console.error("Failed to save database:", e);
-  }
-}
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { username: { equals: username, mode: 'insensitive' } },
+          { email: { equals: email, mode: 'insensitive' } }
+        ]
+      }
+    });
 
-function loadDatabase() {
-  if (fs.existsSync(ISSUES_PATH)) {
-    try {
-      issues = JSON.parse(fs.readFileSync(ISSUES_PATH, 'utf8'));
-    } catch (e) {
-      console.error("Failed to load issues:", e);
+    if (existingUser) {
+      return res.status(400).json({ error: "Username or email already registered." });
     }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = await prisma.user.create({
+      data: {
+        username,
+        email,
+        password: hashedPassword,
+        role: targetRole,
+        district: targetRole === 'municipal' ? district.toUpperCase() : null,
+        authKey: targetRole === 'municipal' ? authKey : null
+      }
+    });
+
+    const token = jwt.sign(
+      { userId: user.id, username: user.username, role: user.role, district: user.district },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: false, // Set to true in production
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
+
+    res.status(201).json({
+      success: true,
+      user: { id: user.id, username: user.username, role: user.role, district: user.district }
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Internal server error during registration." });
   }
-  if (fs.existsSync(NOTICES_PATH)) {
-    try {
-      notices = JSON.parse(fs.readFileSync(NOTICES_PATH, 'utf8'));
-    } catch (e) {
-      console.error("Failed to load notices:", e);
+});
+
+// Login
+app.post('/api/auth/login', async (req, res) => {
+  const { emailOrUsername, password } = req.body;
+  if (!emailOrUsername || !password) {
+    return res.status(400).json({ error: "Email/username and password are required." });
+  }
+
+  try {
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { username: { equals: emailOrUsername, mode: 'insensitive' } },
+          { email: { equals: emailOrUsername, mode: 'insensitive' } }
+        ]
+      }
+    });
+
+    if (!user) {
+      return res.status(401).json({ error: "Invalid credentials." });
     }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isAuthKeyValid = user.authKey === password;
+
+    if (!isPasswordValid && !isAuthKeyValid) {
+      return res.status(401).json({ error: "Invalid credentials." });
+    }
+
+    const token = jwt.sign(
+      { userId: user.id, username: user.username, role: user.role, district: user.district },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000
+    });
+
+    res.json({
+      success: true,
+      user: { id: user.id, username: user.username, role: user.role, district: user.district }
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Internal server error during login." });
   }
-}
+});
 
-loadDatabase();
+// Get profile
+app.get('/api/auth/me', requireAuth, async (req, res) => {
+  res.json({
+    id: req.user.userId,
+    username: req.user.username,
+    role: req.user.role,
+    district: req.user.district,
+    avatar: '/images/avatar.png'
+  });
+});
 
-// API Routes
+app.get('/api/user', requireAuth, async (req, res) => {
+  res.json({
+    id: req.user.userId,
+    username: req.user.username,
+    role: req.user.role,
+    district: req.user.district,
+    avatar: '/images/avatar.png'
+  });
+});
 
-// Get all issues with filters (subLocation, myIssues, search, followedOnly)
-app.get('/api/issues', (req, res) => {
+// Logout
+app.post('/api/auth/logout', (req, res) => {
+  res.clearCookie('token');
+  res.json({ success: true, message: "Logged out successfully" });
+});
+
+app.post('/api/user/logout', (req, res) => {
+  res.clearCookie('token');
+  res.json({ success: true, message: "Logged out successfully" });
+});
+
+// --- REPORT ENDPOINTS ---
+
+// Get all reports with filters
+app.get('/api/issues', requireAuth, async (req, res) => {
   const { subLocation, myIssues, search, followedOnly, userId } = req.query;
-  let filteredIssues = [...issues];
+  const filter = {};
 
   if (subLocation) {
-    filteredIssues = filteredIssues.filter(issue => 
-      issue.subLocation.toUpperCase() === subLocation.toUpperCase()
-    );
+    filter.subLocation = {
+      equals: subLocation.toUpperCase(),
+    };
   }
 
   if (myIssues === 'true') {
-    if (userId) {
-      filteredIssues = filteredIssues.filter(issue => issue.authorId === userId);
-    } else {
-      filteredIssues = filteredIssues.filter(issue => issue.id === 1 || issue.followed);
-    }
+    filter.OR = [
+      { authorId: req.user.userId },
+      { followers: { some: { userId: req.user.userId } } }
+    ];
   }
 
   if (followedOnly === 'true') {
-    filteredIssues = filteredIssues.filter(issue => issue.followed);
+    filter.followers = {
+      some: { userId: req.user.userId }
+    };
+  }
+
+  if (userId) {
+    filter.authorId = userId;
   }
 
   if (search) {
     const query = search.toLowerCase();
-    filteredIssues = filteredIssues.filter(issue => 
-      issue.title.toLowerCase().includes(query) || 
-      issue.description.toLowerCase().includes(query) ||
-      issue.subLocation.toLowerCase().includes(query)
-    );
+    filter.OR = [
+      { title: { contains: query, mode: 'insensitive' } },
+      { description: { contains: query, mode: 'insensitive' } },
+      { subLocation: { contains: query, mode: 'insensitive' } }
+    ];
   }
 
-  // Sort by newest
-  filteredIssues.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  try {
+    const reports = await prisma.report.findMany({
+      where: filter,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        author: true,
+        comments: {
+          include: { author: true },
+          orderBy: { createdAt: 'asc' }
+        },
+        timeline: {
+          orderBy: { timestamp: 'asc' }
+        },
+        followers: true
+      }
+    });
 
-  res.json(filteredIssues);
+    const isOfficer = req.user.role === 'municipal';
+
+    const formattedReports = reports.map(issue => {
+      const isAuthor = issue.authorId === req.user.userId;
+      const authorName = (issue.isAnonymous && !isOfficer && !isAuthor) ? "Anonymous" : issue.author.username;
+
+      return {
+        id: issue.id,
+        title: issue.title,
+        location: issue.location,
+        subLocation: issue.subLocation,
+        description: issue.description,
+        images: issue.images,
+        imageType: issue.imageType,
+        upvotes: issue.upvotes,
+        downvotes: 0,
+        followed: issue.followers.some(f => f.userId === req.user.userId),
+        reported: false,
+        comments: issue.comments.map(c => ({
+          id: c.id,
+          user: c.author.username,
+          text: c.text,
+          timestamp: c.createdAt.toISOString()
+        })),
+        createdAt: issue.createdAt.toISOString(),
+        status: issue.status,
+        internalNotes: issue.internalNotes,
+        resolutionImages: issue.resolutionImages,
+        resolutionNote: issue.resolutionNote || "",
+        timeline: issue.timeline.map(t => ({
+          status: t.status,
+          timestamp: t.timestamp.toISOString()
+        })),
+        authorId: issue.authorId,
+        authorName,
+        isAnonymous: issue.isAnonymous,
+        rejectionReason: issue.rejectionReason || "",
+        rejectedAt: issue.rejectedAt ? issue.rejectedAt.toISOString() : "",
+        appealMessage: issue.appealMessage || "",
+        additionalImages: issue.additionalImages,
+        appealedAt: issue.appealedAt ? issue.appealedAt.toISOString() : "",
+        links: issue.links,
+        coordinates: { lat: issue.latitude, lng: issue.longitude }
+      };
+    });
+
+    res.json(formattedReports);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch reports." });
+  }
 });
 
-// Create a new issue
-app.post('/api/issues', (req, res) => {
-  const { title, description, location, subLocation, imageType, coordinates, images, links, authorId, authorName, isAnonymous } = req.body;
+// Create report
+app.post('/api/issues', requireAuth, requireRole('citizen'), async (req, res) => {
+  const { title, description, location, subLocation, imageType, coordinates, images, links, isAnonymous } = req.body;
   if (!title || !location || !subLocation) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
-  const newIssue = {
-    id: issues.length + 1,
-    title,
-    description: description || "",
-    location,
-    subLocation: subLocation.toUpperCase(),
-    imageType: imageType || "default",
-    coordinates: coordinates || null,
-    images: images || [],
-    links: links || [],
-    upvotes: 1,
-    downvotes: 0,
-    followed: false,
-    reported: false,
-    comments: [],
-    createdAt: new Date().toISOString(),
-    status: "Review Queue",
-    internalNotes: "",
-    resolutionImages: [],
-    resolutionNote: "",
-    timeline: [
-      { status: "Review Queue", timestamp: new Date().toISOString() }
-    ],
-    authorId: authorId || "user",
-    authorName: authorName || "user",
-    isAnonymous: !!isAnonymous
-  };
+  const latitude = coordinates ? parseFloat(coordinates.lat) : 30.7333;
+  const longitude = coordinates ? parseFloat(coordinates.lng) : 76.7794;
 
-  issues.push(newIssue);
-  saveDatabase();
-  res.status(201).json(newIssue);
+  const savedImages = (images || []).map(img => saveBase64Image(img));
+
+  try {
+    const report = await prisma.$transaction(async (tx) => {
+      const newReport = await tx.report.create({
+        data: {
+          title,
+          description: description || "",
+          location,
+          subLocation: subLocation.toUpperCase(),
+          latitude,
+          longitude,
+          imageType: imageType || "default",
+          images: savedImages,
+          links: links || [],
+          upvotes: 1,
+          status: "Review Queue",
+          isAnonymous: !!isAnonymous,
+          authorId: req.user.userId,
+          timeline: {
+            create: {
+              status: "Review Queue"
+            }
+          }
+        },
+        include: {
+          author: true,
+          comments: {
+            include: { author: true }
+          },
+          timeline: true,
+          followers: true
+        }
+      });
+
+      // User automatically upvotes and follows their own report
+      await tx.reportUpvote.create({
+        data: {
+          userId: req.user.userId,
+          reportId: newReport.id
+        }
+      });
+
+      await tx.reportFollow.create({
+        data: {
+          userId: req.user.userId,
+          reportId: newReport.id
+        }
+      });
+
+      return newReport;
+    });
+
+    const isOfficer = req.user.role === 'municipal';
+    const isAuthor = report.authorId === req.user.userId;
+    const authorName = (report.isAnonymous && !isOfficer && !isAuthor) ? "Anonymous" : report.author.username;
+
+    res.status(201).json({
+      id: report.id,
+      title: report.title,
+      location: report.location,
+      subLocation: report.subLocation,
+      description: report.description,
+      images: report.images,
+      imageType: report.imageType,
+      upvotes: report.upvotes,
+      downvotes: 0,
+      followed: true,
+      reported: false,
+      comments: [],
+      createdAt: report.createdAt.toISOString(),
+      status: report.status,
+      internalNotes: report.internalNotes,
+      resolutionImages: report.resolutionImages,
+      resolutionNote: report.resolutionNote || "",
+      timeline: [{ status: "Review Queue", timestamp: report.createdAt.toISOString() }],
+      authorId: report.authorId,
+      authorName,
+      isAnonymous: report.isAnonymous,
+      rejectionReason: "",
+      rejectedAt: "",
+      appealMessage: "",
+      additionalImages: [],
+      appealedAt: "",
+      links: report.links,
+      coordinates: { lat: report.latitude, lng: report.longitude }
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to create report." });
+  }
+});
+
+// Retrieve specific report details
+app.get('/api/issues/:id', requireAuth, async (req, res) => {
+  const id = parseInt(req.params.id);
+  try {
+    const issue = await prisma.report.findUnique({
+      where: { id },
+      include: {
+        author: true,
+        comments: {
+          include: { author: true },
+          orderBy: { createdAt: 'asc' }
+        },
+        timeline: {
+          orderBy: { timestamp: 'asc' }
+        },
+        followers: true
+      }
+    });
+
+    if (!issue) {
+      return res.status(404).json({ error: "Issue not found" });
+    }
+
+    const isOfficer = req.user.role === 'municipal';
+    const isAuthor = issue.authorId === req.user.userId;
+    const authorName = (issue.isAnonymous && !isOfficer && !isAuthor) ? "Anonymous" : issue.author.username;
+
+    res.json({
+      id: issue.id,
+      title: issue.title,
+      location: issue.location,
+      subLocation: issue.subLocation,
+      description: issue.description,
+      images: issue.images,
+      imageType: issue.imageType,
+      upvotes: issue.upvotes,
+      downvotes: 0,
+      followed: issue.followers.some(f => f.userId === req.user.userId),
+      reported: false,
+      comments: issue.comments.map(c => ({
+        id: c.id,
+        user: c.author.username,
+        text: c.text,
+        timestamp: c.createdAt.toISOString()
+      })),
+      createdAt: issue.createdAt.toISOString(),
+      status: issue.status,
+      internalNotes: issue.internalNotes,
+      resolutionImages: issue.resolutionImages,
+      resolutionNote: issue.resolutionNote || "",
+      timeline: issue.timeline.map(t => ({
+        status: t.status,
+        timestamp: t.timestamp.toISOString()
+      })),
+      authorId: issue.authorId,
+      authorName,
+      isAnonymous: issue.isAnonymous,
+      rejectionReason: issue.rejectionReason || "",
+      rejectedAt: issue.rejectedAt ? issue.rejectedAt.toISOString() : "",
+      appealMessage: issue.appealMessage || "",
+      additionalImages: issue.additionalImages,
+      appealedAt: issue.appealedAt ? issue.appealedAt.toISOString() : "",
+      links: issue.links,
+      coordinates: { lat: issue.latitude, lng: issue.longitude }
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to retrieve report details." });
+  }
 });
 
 // Vote (upvote only)
-app.post('/api/issues/:id/vote', (req, res) => {
+app.post('/api/issues/:id/vote', requireAuth, requireRole('citizen'), async (req, res) => {
   const id = parseInt(req.params.id);
-  const { direction } = req.body; // 'up'
+  
+  try {
+    const existingUpvote = await prisma.reportUpvote.findUnique({
+      where: {
+        userId_reportId: {
+          userId: req.user.userId,
+          reportId: id
+        }
+      }
+    });
 
-  const issue = issues.find(i => i.id === id);
-  if (!issue) {
-    return res.status(404).json({ error: "Issue not found" });
+    if (existingUpvote) {
+      return res.status(400).json({ error: "You have already upvoted this report." });
+    }
+
+    const updated = await prisma.$transaction(async (tx) => {
+      await tx.reportUpvote.create({
+        data: {
+          userId: req.user.userId,
+          reportId: id
+        }
+      });
+
+      return tx.report.update({
+        where: { id },
+        data: {
+          upvotes: { increment: 1 }
+        }
+      });
+    });
+
+    res.json({ upvotes: updated.upvotes });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to submit upvote." });
   }
-
-  if (direction === 'up') {
-    issue.upvotes += 1;
-  }
-
-  saveDatabase();
-  res.json({ upvotes: issue.upvotes });
 });
 
-
-// Toggle Follow Post
-app.post('/api/issues/:id/follow', (req, res) => {
+// Toggle follow
+app.post('/api/issues/:id/follow', requireAuth, requireRole('citizen'), async (req, res) => {
   const id = parseInt(req.params.id);
-  const issue = issues.find(i => i.id === id);
-  if (!issue) {
-    return res.status(404).json({ error: "Issue not found" });
-  }
 
-  issue.followed = !issue.followed;
-  saveDatabase();
-  res.json({ followed: issue.followed });
+  try {
+    const existingFollow = await prisma.reportFollow.findUnique({
+      where: {
+        userId_reportId: {
+          userId: req.user.userId,
+          reportId: id
+        }
+      }
+    });
+
+    let followed = false;
+    if (existingFollow) {
+      await prisma.reportFollow.delete({
+        where: {
+          userId_reportId: {
+            userId: req.user.userId,
+            reportId: id
+          }
+        }
+      });
+      followed = false;
+    } else {
+      await prisma.reportFollow.create({
+        data: {
+          userId: req.user.userId,
+          reportId: id
+        }
+      });
+      followed = true;
+    }
+
+    res.json({ followed });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to toggle follow state." });
+  }
 });
 
-// Update Status (Municipality Triage)
-app.patch('/api/issues/:id/status', (req, res) => {
+// Update status (Municipality Triage)
+app.patch('/api/issues/:id/status', requireAuth, requireRole('municipal'), async (req, res) => {
   const id = parseInt(req.params.id);
   const { status, resolutionImages, resolutionNote, rejectionReason, rejectReason } = req.body;
-  
-  const issue = issues.find(i => i.id === id);
-  if (!issue) {
-    return res.status(404).json({ error: "Issue not found" });
-  }
 
   const validStatuses = ["Review Queue", "Acknowledged", "In Progress", "Resolved", "Rejected", "Pending Review"];
   if (status && !validStatuses.includes(status)) {
     return res.status(400).json({ error: "Invalid status" });
   }
+
+  const updateData = { status };
 
   if (status === "Resolved") {
     if (!resolutionImages || resolutionImages.length === 0) {
@@ -486,8 +646,8 @@ app.patch('/api/issues/:id/status', (req, res) => {
     if (!resolutionNote || resolutionNote.trim() === "") {
       return res.status(400).json({ error: "Resolution note is required" });
     }
-    issue.resolutionImages = resolutionImages;
-    issue.resolutionNote = resolutionNote;
+    updateData.resolutionImages = (resolutionImages || []).map(img => saveBase64Image(img));
+    updateData.resolutionNote = resolutionNote;
   }
 
   if (status === "Rejected") {
@@ -495,155 +655,373 @@ app.patch('/api/issues/:id/status', (req, res) => {
     if (!actualRejectionReason || actualRejectionReason.trim() === "") {
       return res.status(400).json({ error: "Rejection reason is required" });
     }
-    issue.rejectionReason = actualRejectionReason;
-    issue.rejectedAt = new Date().toISOString();
+    updateData.rejectionReason = actualRejectionReason;
+    updateData.rejectedAt = new Date();
   }
 
-  if (status) {
-    issue.status = status;
-    issue.timeline.push({
-      status,
-      timestamp: new Date().toISOString()
+  try {
+    const report = await prisma.report.update({
+      where: { id },
+      data: {
+        ...updateData,
+        timeline: {
+          create: {
+            status
+          }
+        }
+      },
+      include: {
+        author: true,
+        comments: {
+          include: { author: true },
+          orderBy: { createdAt: 'asc' }
+        },
+        timeline: {
+          orderBy: { timestamp: 'asc' }
+        },
+        followers: true
+      }
     });
 
     // Notify followers
-    if (issue.followed) {
-      notifications.push({
-        issueId: issue.id,
-        issueTitle: issue.title,
-        status: status,
-        timestamp: new Date().toISOString(),
-        read: false
+    const message = `Report "${report.title}" status updated to ${status}.`;
+    for (const f of report.followers) {
+      await prisma.notification.create({
+        data: {
+          userId: f.userId,
+          reportId: report.id,
+          message,
+          status
+        }
       });
     }
-  }
 
-  saveDatabase();
-  res.json(issue);
+    const isOfficer = req.user.role === 'municipal';
+    const isAuthor = report.authorId === req.user.userId;
+    const authorName = (report.isAnonymous && !isOfficer && !isAuthor) ? "Anonymous" : report.author.username;
+
+    res.json({
+      id: report.id,
+      title: report.title,
+      location: report.location,
+      subLocation: report.subLocation,
+      description: report.description,
+      images: report.images,
+      imageType: report.imageType,
+      upvotes: report.upvotes,
+      downvotes: 0,
+      followed: report.followers.some(f => f.userId === req.user.userId),
+      reported: false,
+      comments: report.comments.map(c => ({
+        id: c.id,
+        user: c.author.username,
+        text: c.text,
+        timestamp: c.createdAt.toISOString()
+      })),
+      createdAt: report.createdAt.toISOString(),
+      status: report.status,
+      internalNotes: report.internalNotes,
+      resolutionImages: report.resolutionImages,
+      resolutionNote: report.resolutionNote || "",
+      timeline: report.timeline.map(t => ({
+        status: t.status,
+        timestamp: t.timestamp.toISOString()
+      })),
+      authorId: report.authorId,
+      authorName,
+      isAnonymous: report.isAnonymous,
+      rejectionReason: report.rejectionReason || "",
+      rejectedAt: report.rejectedAt ? report.rejectedAt.toISOString() : "",
+      appealMessage: report.appealMessage || "",
+      additionalImages: report.additionalImages,
+      appealedAt: report.appealedAt ? report.appealedAt.toISOString() : "",
+      links: report.links,
+      coordinates: { lat: report.latitude, lng: report.longitude }
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to update report status." });
+  }
 });
 
-// Appeal / Submit Additional Evidence
-app.post('/api/issues/:id/appeal', (req, res) => {
+// Appeal rejected report
+app.post('/api/issues/:id/appeal', requireAuth, requireRole('citizen'), async (req, res) => {
   const id = parseInt(req.params.id);
   const { appealMessage, additionalImages } = req.body;
 
-  const issue = issues.find(i => i.id === id);
-  if (!issue) {
-    return res.status(404).json({ error: "Issue not found" });
-  }
+  try {
+    const issue = await prisma.report.findUnique({ where: { id } });
+    if (!issue) {
+      return res.status(404).json({ error: "Issue not found" });
+    }
 
-  if (issue.status !== "Rejected") {
-    return res.status(400).json({ error: "Only rejected reports can be appealed" });
-  }
+    if (issue.status !== "Rejected") {
+      return res.status(400).json({ error: "Only rejected reports can be appealed" });
+    }
 
-  if (!additionalImages || additionalImages.length === 0) {
-    return res.status(400).json({ error: "At least one additional photo is required" });
-  }
+    if (!additionalImages || additionalImages.length === 0) {
+      return res.status(400).json({ error: "At least one additional photo is required" });
+    }
 
-  issue.status = "Pending Review";
-  
-  if (issue.appealMessage) {
-    issue.appealMessage = issue.appealMessage + "\n\n" + (appealMessage || "");
-  } else {
-    issue.appealMessage = appealMessage || "";
-  }
-  
-  issue.additionalImages = [...(issue.additionalImages || []), ...(additionalImages || [])];
-  issue.appealedAt = new Date().toISOString();
-  
-  issue.timeline.push({
-    status: "Pending Review",
-    timestamp: issue.appealedAt
-  });
+    const savedAppealImages = (additionalImages || []).map(img => saveBase64Image(img));
 
-  saveDatabase();
-  res.json(issue);
+    let finalMessage = appealMessage || "";
+    if (issue.appealMessage) {
+      finalMessage = issue.appealMessage + "\n\n" + finalMessage;
+    }
+
+    const report = await prisma.report.update({
+      where: { id },
+      data: {
+        status: "Pending Review",
+        appealMessage: finalMessage,
+        additionalImages: [...(issue.additionalImages || []), ...savedAppealImages],
+        appealedAt: new Date(),
+        timeline: {
+          create: {
+            status: "Pending Review"
+          }
+        }
+      },
+      include: {
+        author: true,
+        comments: {
+          include: { author: true },
+          orderBy: { createdAt: 'asc' }
+        },
+        timeline: {
+          orderBy: { timestamp: 'asc' }
+        },
+        followers: true
+      }
+    });
+
+    // Notify followers of appeal status change
+    const message = `Appeal submitted for report "${report.title}". Status is now Pending Review.`;
+    for (const f of report.followers) {
+      await prisma.notification.create({
+        data: {
+          userId: f.userId,
+          reportId: report.id,
+          message,
+          status: "Pending Review"
+        }
+      });
+    }
+
+    const isOfficer = req.user.role === 'municipal';
+    const isAuthor = report.authorId === req.user.userId;
+    const authorName = (report.isAnonymous && !isOfficer && !isAuthor) ? "Anonymous" : report.author.username;
+
+    res.json({
+      id: report.id,
+      title: report.title,
+      location: report.location,
+      subLocation: report.subLocation,
+      description: report.description,
+      images: report.images,
+      imageType: report.imageType,
+      upvotes: report.upvotes,
+      downvotes: 0,
+      followed: report.followers.some(f => f.userId === req.user.userId),
+      reported: false,
+      comments: report.comments.map(c => ({
+        id: c.id,
+        user: c.author.username,
+        text: c.text,
+        timestamp: c.createdAt.toISOString()
+      })),
+      createdAt: report.createdAt.toISOString(),
+      status: report.status,
+      internalNotes: report.internalNotes,
+      resolutionImages: report.resolutionImages,
+      resolutionNote: report.resolutionNote || "",
+      timeline: report.timeline.map(t => ({
+        status: t.status,
+        timestamp: t.timestamp.toISOString()
+      })),
+      authorId: report.authorId,
+      authorName,
+      isAnonymous: report.isAnonymous,
+      rejectionReason: report.rejectionReason || "",
+      rejectedAt: report.rejectedAt ? report.rejectedAt.toISOString() : "",
+      appealMessage: report.appealMessage || "",
+      additionalImages: report.additionalImages,
+      appealedAt: report.appealedAt ? report.appealedAt.toISOString() : "",
+      links: report.links,
+      coordinates: { lat: report.latitude, lng: report.longitude }
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to submit appeal." });
+  }
 });
 
-// Save Internal notes
-app.patch('/api/issues/:id/notes', (req, res) => {
+// Update internal notes
+app.patch('/api/issues/:id/notes', requireAuth, requireRole('municipal'), async (req, res) => {
   const id = parseInt(req.params.id);
   const { internalNotes } = req.body;
 
-  const issue = issues.find(i => i.id === id);
-  if (!issue) {
-    return res.status(404).json({ error: "Issue not found" });
-  }
+  try {
+    await prisma.report.update({
+      where: { id },
+      data: {
+        internalNotes: internalNotes || ""
+      }
+    });
 
-  issue.internalNotes = internalNotes || "";
-  saveDatabase();
-  res.json({ success: true, internalNotes: issue.internalNotes });
+    res.json({ success: true, internalNotes: internalNotes || "" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to update internal notes." });
+  }
 });
 
-// Add Comment
-app.post('/api/issues/:id/comments', (req, res) => {
+// Add comment
+app.post('/api/issues/:id/comments', requireAuth, async (req, res) => {
   const id = parseInt(req.params.id);
   const { text } = req.body;
   if (!text) {
-    return res.status(400).json({ error: "Comment text is required" });
+    return res.status(400).json({ error: "Comment text is required." });
   }
 
-  const issue = issues.find(i => i.id === id);
-  if (!issue) {
-    return res.status(404).json({ error: "Issue not found" });
+  try {
+    const comment = await prisma.comment.create({
+      data: {
+        reportId: id,
+        authorId: req.user.userId,
+        text
+      },
+      include: {
+        author: true
+      }
+    });
+
+    res.status(201).json({
+      id: comment.id,
+      user: comment.author.username,
+      text: comment.text,
+      timestamp: "Just now"
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to submit comment." });
   }
-
-  const newComment = {
-    id: issue.comments.length + 1,
-    user: currentUser.username,
-    text,
-    timestamp: "Just now"
-  };
-
-  issue.comments.push(newComment);
-  saveDatabase();
-  res.status(201).json(newComment);
 });
 
-// Get Current User Profile
-app.get('/api/user', (req, res) => {
-  res.json(currentUser);
+// --- NOTICES ENDPOINTS ---
+
+// Get all notices
+app.get('/api/notices', requireAuth, async (req, res) => {
+  try {
+    const notices = await prisma.notice.findMany({
+      orderBy: { createdAt: 'desc' }
+    });
+
+    const formattedNotices = notices.map(n => ({
+      id: n.id,
+      title: n.title,
+      description: n.description,
+      location: n.location,
+      subLocation: n.subLocation,
+      type: n.type,
+      createdAt: n.createdAt.toISOString(),
+      expiryDate: n.expiryDate ? n.expiryDate.toISOString().split('T')[0] : null
+    }));
+
+    res.json(formattedNotices);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch notices." });
+  }
 });
 
-// Simulate Logout
-app.post('/api/user/logout', (req, res) => {
-  res.json({ success: true, message: "Logged out successfully" });
-});
-
-// Notices Endpoints
-app.get('/api/notices', (req, res) => {
-  // Sort notices by newest
-  const sortedNotices = [...notices].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-  res.json(sortedNotices);
-});
-
-app.post('/api/notices', (req, res) => {
+// Create notice
+app.post('/api/notices', requireAuth, requireRole('municipal'), async (req, res) => {
   const { title, description, subLocation, type, expiryDate } = req.body;
   if (!title || !description || !subLocation || !type) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
-  const newNotice = {
-    id: notices.length + 1,
-    title,
-    description,
-    location: "Punjab",
-    subLocation: subLocation.toUpperCase(),
-    type,
-    createdAt: new Date().toISOString(),
-    expiryDate: expiryDate || null
-  };
+  try {
+    const notice = await prisma.notice.create({
+      data: {
+        title,
+        description,
+        location: "Punjab",
+        subLocation: subLocation.toUpperCase(),
+        type,
+        expiryDate: expiryDate ? new Date(expiryDate) : null,
+        authorId: req.user.userId
+      }
+    });
 
-  notices.push(newNotice);
-  saveDatabase();
-  res.status(201).json(newNotice);
+    res.status(201).json({
+      id: notice.id,
+      title: notice.title,
+      description: notice.description,
+      location: notice.location,
+      subLocation: notice.subLocation,
+      type: notice.type,
+      createdAt: notice.createdAt.toISOString(),
+      expiryDate: notice.expiryDate ? notice.expiryDate.toISOString().split('T')[0] : null
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to create notice." });
+  }
 });
 
-// Fallback to serving index.html for frontend routing
+// --- NOTIFICATIONS ENDPOINTS ---
+
+// Get notifications
+app.get('/api/notifications', requireAuth, async (req, res) => {
+  try {
+    const notifications = await prisma.notification.findMany({
+      where: { userId: req.user.userId },
+      orderBy: { createdAt: 'desc' }
+    });
+    res.json(notifications);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch notifications." });
+  }
+});
+
+// Mark notification as read
+app.patch('/api/notifications/:id/read', requireAuth, async (req, res) => {
+  const id = parseInt(req.params.id);
+  try {
+    await prisma.notification.update({
+      where: { id },
+      data: { read: true }
+    });
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to update notification." });
+  }
+});
+
+// Dismiss all notifications
+app.post('/api/notifications/clear', requireAuth, async (req, res) => {
+  try {
+    await prisma.notification.updateMany({
+      where: { userId: req.user.userId, read: false },
+      data: { read: true }
+    });
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to clear notifications." });
+  }
+});
+
+// Serve frontend routing fallback
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 app.listen(PORT, () => {
-  console.log(`C.L.E.AR. Server running on port ${PORT}`);
+  console.log(`C.L.E.A.R. Server running on port ${PORT}`);
 });
