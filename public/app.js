@@ -660,17 +660,21 @@ function ReportPost(issue) {
 
   // Get author name
   let authorName = issue.authorName;
-  if (!authorName && issue.authorId) {
-    const users = JSON.parse(localStorage.getItem('clear_users') || '[]');
-    const found = users.find(u => u.id === issue.authorId || u.username.toLowerCase() === issue.authorId.toLowerCase());
-    if (found) {
-      authorName = found.username;
-    } else {
-      authorName = issue.authorId;
-    }
-  }
-  if (!authorName) {
+  if (issue.isAnonymous) {
     authorName = "Anonymous";
+  } else {
+    if (!authorName && issue.authorId) {
+      const users = JSON.parse(localStorage.getItem('clear_users') || '[]');
+      const found = users.find(u => u.id === issue.authorId || u.username.toLowerCase() === issue.authorId.toLowerCase());
+      if (found) {
+        authorName = found.username;
+      } else {
+        authorName = issue.authorId;
+      }
+    }
+    if (!authorName) {
+      authorName = "Anonymous";
+    }
   }
 
   // Order:
@@ -1455,6 +1459,10 @@ function setupEventListeners() {
 
     // Reset form fields
     createIssueForm.reset();
+    const anonCheckbox = document.getElementById('postAnonymously');
+    if (anonCheckbox) {
+      anonCheckbox.checked = false;
+    }
 
     const locationBtn = document.getElementById('modalLocationBtn');
     if (locationBtn) {
@@ -1746,6 +1754,7 @@ function setupEventListeners() {
     const title = document.getElementById('issueTitle').value.trim();
     const subLocation = document.getElementById('issueSubLocation').value;
     const description = document.getElementById('issueDescription').value.trim();
+    const isAnonymous = document.getElementById('postAnonymously') ? document.getElementById('postAnonymously').checked : false;
 
     if (!selectedCoordinates) {
       showToast('Please confirm location on the map first.');
@@ -1774,7 +1783,8 @@ function setupEventListeners() {
           images: attachedImages,
           links: attachedLinks,
           authorId: state.currentUser ? state.currentUser.id : 'user',
-          authorName: state.currentUser ? state.currentUser.username : 'user'
+          authorName: state.currentUser ? state.currentUser.username : 'user',
+          isAnonymous: isAnonymous
         })
       });
 
@@ -2343,17 +2353,21 @@ function renderOpsDetailPanel(issue) {
   
   // Get author name
   let authorName = issue.authorName;
-  if (!authorName && issue.authorId) {
-    const users = JSON.parse(localStorage.getItem('clear_users') || '[]');
-    const found = users.find(u => u.id === issue.authorId || u.username.toLowerCase() === issue.authorId.toLowerCase());
-    if (found) {
-      authorName = found.username;
-    } else {
-      authorName = issue.authorId;
-    }
-  }
-  if (!authorName) {
+  if (issue.isAnonymous) {
     authorName = "Anonymous";
+  } else {
+    if (!authorName && issue.authorId) {
+      const users = JSON.parse(localStorage.getItem('clear_users') || '[]');
+      const found = users.find(u => u.id === issue.authorId || u.username.toLowerCase() === issue.authorId.toLowerCase());
+      if (found) {
+        authorName = found.username;
+      } else {
+        authorName = issue.authorId;
+      }
+    }
+    if (!authorName) {
+      authorName = "Anonymous";
+    }
   }
 
   const authorEl = document.getElementById('opsDetailAuthor');

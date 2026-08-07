@@ -189,7 +189,7 @@ app.get('/api/issues', (req, res) => {
 
 // Create a new issue
 app.post('/api/issues', (req, res) => {
-  const { title, description, location, subLocation, imageType, coordinates, images, links, authorId, authorName } = req.body;
+  const { title, description, location, subLocation, imageType, coordinates, images, links, authorId, authorName, isAnonymous } = req.body;
   if (!title || !location || !subLocation) {
     return res.status(400).json({ error: "Missing required fields" });
   }
@@ -218,7 +218,8 @@ app.post('/api/issues', (req, res) => {
       { status: "Review Queue", timestamp: new Date().toISOString() }
     ],
     authorId: authorId || "user",
-    authorName: authorName || "user"
+    authorName: authorName || "user",
+    isAnonymous: !!isAnonymous
   };
 
   issues.push(newIssue);
