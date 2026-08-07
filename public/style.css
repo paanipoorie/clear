@@ -80,7 +80,7 @@
 }
 
 /* Dark Theme Tokens */
-#mainAppLayout[data-theme="dark"] {
+[data-theme="dark"] {
   --color-bg: #121410;
   --color-card-bg: #1B1E19;
   --color-app-bg: linear-gradient(180deg, #141712 0%, #0d0f0c 100%);
@@ -130,10 +130,10 @@
   --shadow-button-hover: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-#mainAppLayout[data-theme="dark"] .leaflet-tile-container {
+[data-theme="dark"] .leaflet-tile-container {
   filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
 }
-#mainAppLayout[data-theme="dark"] .leaflet-container {
+[data-theme="dark"] .leaflet-container {
   background: #121410;
 }
 
@@ -344,6 +344,21 @@ textarea {
    New Authentication & Workspace Selector Flow (Peerly-inspired Layout)
    ========================================================================== */
 .auth-portal-wrapper {
+  /* Force light theme variables on landing portal */
+  --color-bg: #FAFBF9;
+  --color-card-bg: #FFFFFF;
+  --color-primary: #4F8B3B;
+  --color-primary-hover: #335A29;
+  --color-primary-soft: #F3F8B8;
+  --color-accent-secondary: #88B55C;
+  --color-border: #DDE5D7;
+  --color-border-hover: #4F8B3B;
+  --color-text-main: #171F14;
+  --color-text-muted: #5C6E58;
+  --color-text-subtle: #8A9D85;
+  --color-destructive: #D9381E;
+  --color-destructive-soft: #FDF2F0;
+
   position: fixed;
   top: 0;
   left: 0;
