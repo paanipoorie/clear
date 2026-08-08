@@ -716,7 +716,13 @@
     <div class="ops-side-panel">
       <div class="side-panel-header">
         <h3 class="panel-header-title">Report Inspection</h3>
-        <button class="close-side-panel" id="closeOpsSidePanel" aria-label="Close details panel">&times;</button>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button id="exportReportPdfBtn" class="btn btn-secondary btn-sm" style="display: none; border-color: var(--color-border); box-shadow: var(--shadow-flat-sm); font-weight: 700; height: 32px; padding: 0 10px; font-size: 11px;">
+            <svg style="width: 14px; height: 14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Export PDF
+          </button>
+          <button class="close-side-panel" id="closeOpsSidePanel" aria-label="Close details panel">&times;</button>
+        </div>
       </div>
 
       <div class="side-panel-content">

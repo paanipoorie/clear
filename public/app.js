@@ -2690,6 +2690,17 @@ function setupEventListeners() {
     cleanupOpsDetailMap();
   });
 
+  const exportReportPdfBtn = document.getElementById('exportReportPdfBtn');
+  if (exportReportPdfBtn) {
+    exportReportPdfBtn.addEventListener('click', () => {
+      if (state.selectedIssueForOps) {
+        exportIssueToPdf(state.selectedIssueForOps);
+      } else {
+        showToast('No report selected');
+      }
+    });
+  }
+
 
 
   // Resolution modal closing
@@ -3446,6 +3457,419 @@ function cleanupOpsDetailMap() {
   }
 }
 
+function exportIssueToPdf(issue) {
+  const printWindow = window.open('', '_blank');
+  if (!printWindow) {
+    showToast('Failed to open export window. Please allow popups.');
+    return;
+  }
+
+  // Get author name
+  let authorName = issue.authorName;
+  if (issue.isAnonymous) {
+    authorName = "Anonymous";
+  } else if (!authorName && issue.authorId) {
+    const users = JSON.parse(localStorage.getItem('clear_users') || '[]');
+    const found = users.find(u => u.id === issue.authorId || u.username.toLowerCase() === issue.authorId.toLowerCase());
+    authorName = found ? found.username : issue.authorId;
+  }
+  if (!authorName) authorName = "Anonymous";
+
+  // Date parsing
+  const createdDateStr = new Date(issue.createdAt).toLocaleString();
+  
+  // Resolution Date
+  const resolvedStep = issue.timeline ? issue.timeline.find(t => t.status === 'Resolved') : null;
+  const resolvedDateStr = resolvedStep ? new Date(resolvedStep.timestamp).toLocaleString() : new Date(issue.createdAt).toLocaleString();
+
+  // Get absolute URLs for images
+  const getAbsoluteUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
+      return url;
+    }
+    return window.location.origin + url;
+  };
+
+  const beforeImg = getIssueImages(issue)[0] || "https://images.unsplash.com/photo-1530587191325-3db32d826c18?w=800&auto=format&fit=crop&q=60";
+  const beforeImgUrl = getAbsoluteUrl(beforeImg);
+
+  const afterImg = issue.resolutionImages && issue.resolutionImages[0] || "https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=800&auto=format&fit=crop&q=60";
+  const afterImgUrl = getAbsoluteUrl(afterImg);
+
+  // Attachments HTML
+  let attachmentsHtml = '';
+  if (issue.attachments && issue.attachments.length > 0) {
+    attachmentsHtml = `
+      <div class="section-title">Supporting Evidence & Attachments</div>
+      <ul class="attachments-list">
+        ${issue.attachments.map(att => {
+          const isMyAtt = state.currentUser && (att.contributorId === state.currentUser.id || att.contributorId === state.currentUser.username);
+          const name = isMyAtt ? 'You' : att.contributorName;
+          let attDetails = `<strong>Contributed by ${escapeHTML(name)}</strong>`;
+          if (att.attachmentImage) {
+            attDetails += `<div style="margin-top: 6px;"><img src="${getAbsoluteUrl(att.attachmentImage)}" style="max-height: 120px; border-radius: 4px; border: 1px solid #171F14;" /></div>`;
+          }
+          if (att.attachmentLink) {
+            attDetails += `<div style="margin-top: 4px;"><a href="${att.attachmentLink}" target="_blank" style="color: #4F8B3B; text-decoration: underline;">${escapeHTML(att.attachmentLink)}</a></div>`;
+          }
+          return `<li class="attachment-item" style="display: block; margin-bottom: 12px; border: 1px solid #171F14; padding: 10px; border-radius: 4px; background: #FAFBF9;">${attDetails}</li>`;
+        }).join('')}
+      </ul>
+    `;
+  }
+
+  // Comments HTML
+  let commentsHtml = '';
+  if (issue.comments && issue.comments.length > 0) {
+    commentsHtml = `
+      <div class="section-title">Resolution Comments & Discussion</div>
+      <div class="comments-section">
+        ${issue.comments.map(c => `
+          <div class="comment-item">
+            <div class="comment-meta">By ${escapeHTML(c.user)} &bull; ${new Date(c.timestamp).toLocaleString()}</div>
+            <p class="comment-text">${escapeHTML(c.text)}</p>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  // GPS coordinates
+  let lat = 31.1471;
+  let lng = 75.3412;
+  let hasCoords = false;
+  if (issue.coordinates && issue.coordinates.lat && issue.coordinates.lng) {
+    lat = issue.coordinates.lat;
+    lng = issue.coordinates.lng;
+    hasCoords = true;
+  } else if (districtCoords[issue.subLocation.toUpperCase()]) {
+    const coords = districtCoords[issue.subLocation.toUpperCase()];
+    lat = coords.lat;
+    lng = coords.lng;
+  }
+  const gpsStr = hasCoords ? `${lat.toFixed(4)}, ${lng.toFixed(4)}` : `Approximate Center of ${issue.subLocation}`;
+
+  const htmlContent = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>C.L.E.A.R. Resolution Report - ${escapeHTML(issue.title)}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Outfit:wght@700&display=swap" rel="stylesheet">
+  <style>
+    @media print {
+      body {
+        background-color: #FFFFFF !important;
+        color: #171F14 !important;
+        padding: 0;
+      }
+      .no-print {
+        display: none !important;
+      }
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+    }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: #FAFBF9;
+      color: #171F14;
+      margin: 0;
+      padding: 40px 20px;
+      line-height: 1.5;
+    }
+    .report-container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: #FFFFFF;
+      border: 3px solid #171F14;
+      border-radius: 8px;
+      box-shadow: 6px 6px 0px #171F14;
+      padding: 32px;
+    }
+    .report-header {
+      border-bottom: 3px solid #171F14;
+      padding-bottom: 20px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .logo-area h1 {
+      font-family: 'Outfit', sans-serif;
+      margin: 0;
+      font-size: 28px;
+      text-transform: uppercase;
+      letter-spacing: -0.5px;
+      color: #4F8B3B;
+    }
+    .logo-area p {
+      margin: 4px 0 0 0;
+      font-size: 12px;
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 1px;
+      color: #5C6E58;
+    }
+    .badge {
+      font-family: 'Outfit', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 6px 12px;
+      border-radius: 20px;
+      border: 2px solid #171F14;
+      background-color: #E7F3EC;
+      color: #2A7043;
+    }
+    .report-meta {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      background-color: #FAFBF9;
+      border: 2px solid #171F14;
+      border-radius: 6px;
+      padding: 16px;
+      margin-bottom: 28px;
+    }
+    .meta-item {
+      font-size: 13px;
+    }
+    .meta-item strong {
+      display: block;
+      font-family: 'Outfit', sans-serif;
+      text-transform: uppercase;
+      font-size: 11px;
+      color: #5C6E58;
+      margin-bottom: 4px;
+    }
+    .section-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 16px;
+      text-transform: uppercase;
+      border-bottom: 2px solid #171F14;
+      padding-bottom: 6px;
+      margin-top: 32px;
+      margin-bottom: 16px;
+      color: #171F14;
+      letter-spacing: 0.5px;
+    }
+    .description-box {
+      font-size: 14px;
+      line-height: 1.6;
+      color: #171F14;
+      margin-bottom: 20px;
+      white-space: pre-wrap;
+    }
+    .photo-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+    .photo-card {
+      border: 2px solid #171F14;
+      border-radius: 6px;
+      overflow: hidden;
+      background-color: #FAFBF9;
+      box-shadow: 3px 3px 0px #171F14;
+    }
+    .photo-card img {
+      width: 100%;
+      height: 240px;
+      object-fit: cover;
+      display: block;
+      border-bottom: 2px solid #171F14;
+    }
+    .photo-card-label {
+      padding: 8px 12px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #171F14;
+      background-color: #FFFFFF;
+    }
+    .attachments-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .attachment-item {
+      font-size: 13px;
+      padding: 8px 12px;
+      border: 1px solid #DDE5D7;
+      border-radius: 4px;
+      margin-bottom: 8px;
+      background-color: #FAFBF9;
+    }
+    .comments-section {
+      margin-top: 16px;
+    }
+    .comment-item {
+      padding: 10px 12px;
+      border: 2px solid #171F14;
+      background-color: #FAFBF9;
+      margin-bottom: 12px;
+      border-radius: 6px;
+      box-shadow: 2px 2px 0px #171F14;
+    }
+    .comment-meta {
+      font-size: 11px;
+      color: #5C6E58;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .comment-text {
+      font-size: 13px;
+      margin: 0;
+    }
+    .footer {
+      text-align: center;
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 2px solid #171F14;
+      font-size: 11px;
+      color: #5C6E58;
+      font-weight: 600;
+    }
+    .print-bar {
+      max-width: 800px;
+      margin: 0 auto 20px auto;
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+    .btn {
+      font-family: 'Outfit', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 2px solid #171F14;
+    }
+    .btn-primary {
+      background-color: #4F8B3B;
+      color: white;
+      box-shadow: 3px 3px 0px #171F14;
+    }
+    .btn-primary:hover {
+      background-color: #335A29;
+    }
+    .btn-secondary {
+      background-color: white;
+      color: #171F14;
+      box-shadow: 3px 3px 0px #171F14;
+    }
+    .btn-secondary:hover {
+      background-color: #FAFBF9;
+    }
+  </style>
+</head>
+<body>
+  <div class="print-bar no-print">
+    <button class="btn btn-primary" onclick="window.print()">Print / Save as PDF</button>
+    <button class="btn btn-secondary" onclick="window.close()">Close</button>
+  </div>
+
+  <div class="report-container">
+    <div class="report-header">
+      <div class="logo-area">
+        <h1>C.L.E.A.R.</h1>
+        <p>Civic Action Resolution Report</p>
+      </div>
+      <div class="badge">RESOLVED</div>
+    </div>
+
+    <div class="report-meta">
+      <div class="meta-item">
+        <strong>Report Title</strong>
+        ${escapeHTML(issue.title)}
+      </div>
+      <div class="meta-item">
+        <strong>District & Coordinates</strong>
+        ${escapeHTML(issue.subLocation)} (${gpsStr})
+      </div>
+      <div class="meta-item">
+        <strong>Reported By</strong>
+        ${escapeHTML(authorName)}
+      </div>
+      <div class="meta-item">
+        <strong>Report Date</strong>
+        ${createdDateStr}
+      </div>
+      <div class="meta-item">
+        <strong>Status</strong>
+        ${issue.status}
+      </div>
+      <div class="meta-item">
+        <strong>Resolution Date</strong>
+        ${resolvedDateStr}
+      </div>
+    </div>
+
+    <div class="section-title">Original Civic Report</div>
+    <div class="description-box">
+      ${escapeHTML(issue.description || 'No description provided.')}
+    </div>
+
+    <div class="section-title">Resolution Summary</div>
+    <div class="description-box">
+      <strong>Resolution Note:</strong><br>
+      ${escapeHTML(issue.resolutionNote || 'No resolution note provided.')}
+    </div>
+    
+    ${issue.internalNotes ? `
+    <div class="description-box" style="margin-top: 12px;">
+      <strong>Operations Completion Note:</strong><br>
+      ${escapeHTML(issue.internalNotes)}
+    </div>
+    ` : ''}
+
+    <div class="section-title">Visual Comparison Evidence</div>
+    <div class="photo-grid">
+      <div class="photo-card">
+        <img src="${beforeImgUrl}" alt="Before image" />
+        <div class="photo-card-label">Before (As Reported)</div>
+      </div>
+      <div class="photo-card">
+        <img src="${afterImgUrl}" alt="After image" />
+        <div class="photo-card-label">After (Resolved)</div>
+      </div>
+    </div>
+
+    ${attachmentsHtml}
+
+    ${commentsHtml}
+
+    <div class="footer">
+      This document is a certified resolution report generated by the C.L.E.A.R. Civic Platform.
+    </div>
+  </div>
+
+  <script>
+    // Auto-open print dialog on load
+    window.onload = function() {
+      setTimeout(function() {
+        window.print();
+      }, 500);
+    };
+  </script>
+</body>
+</html>
+  `;
+
+  printWindow.document.open();
+  printWindow.document.write(htmlContent);
+  printWindow.document.close();
+}
+
 function openOpsDetailPanel(issue) {
   state.selectedIssueForOps = issue;
   document.getElementById('opsSidePanel').classList.add('open');
@@ -3516,6 +3940,15 @@ function renderPublicTimelineHTML(issue) {
 }
 
 function renderOpsDetailPanel(issue) {
+  const exportBtn = document.getElementById('exportReportPdfBtn');
+  if (exportBtn) {
+    if (issue.status === 'Resolved') {
+      exportBtn.style.display = 'inline-flex';
+    } else {
+      exportBtn.style.display = 'none';
+    }
+  }
+
   document.getElementById('opsDetailTitle').textContent = issue.title;
   
   // Set labels dynamically for appealed reports

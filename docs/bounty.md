@@ -97,8 +97,10 @@ This section tracks the completion status and documentation of key decision ques
   1. **Role Scope**: Roles like `admin`, `authority`, `hospital`, `investigator`, and `reviewer` do not exist in the database or authorization systems (only `citizen` and `municipal` exist). Should we implement filters utilizing the existing `citizen` and `municipal` roles, or should we introduce any of the new roles into the authentication and data schema?
 
 ### Bounty 3: Project-Specific Report Export
-- **Status**: ⏳ Pending Implementation
-- **Clarification Questions**:
-  1. **Export Format**: Which file format (**HTML**, **CSV**, or **PDF**) should be the primary downloadable format for judging?
-  2. **Recommendations Mapping**: The current database model for `Report` has no "recommendation" field. Should we create a new `recommendations String?` column in the database schema, or map this to an existing text field?
+- **Status**: ✅ Completed (Interactive HTML/Print-to-PDF Export)
+- **Implementation Details**:
+  1. **Export PDF Button**: Added an "Export PDF" button to the header of the Report Inspection details side panel, displayed dynamically only when a report is in "Resolved" status.
+  2. **Print-to-PDF Layout**: Clicking the button opens a print-friendly window styled with the application's fonts (Outfit/Inter), Neo-Brutalist borders, and flat shadow tokens.
+  3. **Included Fields**: The export integrates all original civic report fields (Title, Description, District, GPS Coordinates, Author, Report Date) alongside the resolution details (Resolution Note, Operations Completion Note, Resolved Date), side-by-side Before/After comparison images, any supporting attachments, and the comment log.
+  4. **Auto-Trigger Print Dialog**: Automatically triggers the browser's native print/save-to-PDF dialog on load, with a clean "no-print" bar allowing manual printing or closing.
 
