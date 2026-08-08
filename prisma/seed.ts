@@ -50,12 +50,14 @@ const postsData = [
     images: ["/media/issues/chemicalwasteleakage.jpg"],
     links: [],
     upvotes: 34,
-    status: "Resolved",
-    internalNotes: "Hazardous response team dispatched. Sealed leak and neutralised soil.",
-    resolutionNote: "Our chemical containment team successfully sealed the containers and cleaned up the spill using absorbent sand. The storm drain was verified clean.",
-    resolutionImages: ["/media/issues/chemicalwasteleakage.jpg"],
+    status: "Review Queue",
+    internalNotes: "",
+    resolutionNote: null,
+    resolutionImages: [],
     isAnonymous: false,
-    authorId: "user1"
+    authorId: "user1",
+    attachmentImage: "/media/issues/chemicalwasteleakage.jpg",
+    attachmentLink: "https://www.punjab.gov.in/environmental-notices"
   },
   {
     title: "Construction debris dumped on protected wetlands",
@@ -68,14 +70,14 @@ const postsData = [
     images: ["/media/issues/constdebrisatprotectedland.jpg"],
     links: [],
     upvotes: 12,
-    status: "In Progress",
-    internalNotes: "Wetland conservation team notified. Cleanup contractor assigned.",
-    resolutionNote: null,
-    resolutionImages: [],
+    status: "Resolved",
+    internalNotes: "Wetland conservation team notified. Debris removed and site restored.",
+    resolutionNote: "The debris has been cleared from the protected wetlands and the area has been restored to its natural state.",
+    resolutionImages: ["/media/issues/resolvedconstructiondebri.jpeg"],
     isAnonymous: false,
     authorId: "user2",
     attachmentImage: "/media/issues/constdebrisatprotectedland.jpg",
-    attachmentLink: "https://www.punjab.gov.in/environmental-notices"
+    attachmentLink: ""
   },
   {
     title: "Dead fish floating due to water contamination",
@@ -92,8 +94,10 @@ const postsData = [
     internalNotes: "",
     resolutionNote: null,
     resolutionImages: [],
-    isAnonymous: true,
-    authorId: "user3"
+    isAnonymous: false,
+    authorId: "user3",
+    attachmentImage: "/media/issues/deadfishwatercontamination.jpg",
+    attachmentLink: ""
   },
   {
     title: "Toxic foam accumulation in the local canal",
@@ -111,7 +115,9 @@ const postsData = [
     resolutionNote: null,
     resolutionImages: [],
     isAnonymous: false,
-    authorId: "user4"
+    authorId: "user4",
+    attachmentImage: "/media/issues/foamcanal.jpg",
+    attachmentLink: ""
   },
   {
     title: "Illegal garbage dumping behind residential sector",
@@ -127,9 +133,11 @@ const postsData = [
     status: "Resolved",
     internalNotes: "Municipal cleanup crew dispatched. Removed garbage and cleaned area.",
     resolutionNote: "The sanitation team cleared the entire garbage pile and disinfected the area. Surveillance cameras will be installed to prevent future dumping.",
-    resolutionImages: ["/media/issues/garbagedumping.jpg"],
+    resolutionImages: ["/media/issues/resolvedgarbagedumping.jpeg"],
     isAnonymous: false,
-    authorId: "user1"
+    authorId: "user1",
+    attachmentImage: "/media/issues/garbagedumping.jpg",
+    attachmentLink: ""
   },
   {
     title: "Oil spill spreading in the drainage canal",
@@ -146,8 +154,10 @@ const postsData = [
     internalNotes: "",
     resolutionNote: null,
     resolutionImages: [],
-    isAnonymous: true,
-    authorId: "user2"
+    isAnonymous: false,
+    authorId: "user2",
+    attachmentImage: "/media/issues/oilspilldrainagecanal.jpg",
+    attachmentLink: ""
   },
   {
     title: "Open waste burning causing severe smoke and smog",
@@ -165,25 +175,29 @@ const postsData = [
     resolutionNote: null,
     resolutionImages: [],
     isAnonymous: false,
-    authorId: "user3"
+    authorId: "user3",
+    attachmentImage: "/media/issues/openwasteburning.jpg",
+    attachmentLink: ""
   },
   {
     title: "Blocked storm drain overflowing onto street",
     description: "Severe blockages in the sewer drainage system causing wastewater to overflow onto the public street, causing traffic bottlenecks.",
     location: "Punjab",
-    subLocation: "PATIALA",
-    latitude: 30.3350,
-    longitude: 76.3820,
+    subLocation: "SAS NAGAR",
+    latitude: 30.6810,
+    longitude: 76.7250,
     imageType: "default",
     images: ["/media/issues/overflowingdrain.jpg"],
     links: [],
     upvotes: 22,
-    status: "In Progress",
-    internalNotes: "Plumbing team dispatched with suction machine to clear blockage.",
+    status: "Review Queue",
+    internalNotes: "",
     resolutionNote: null,
     resolutionImages: [],
     isAnonymous: false,
-    authorId: "user4"
+    authorId: "user4",
+    attachmentImage: "/media/issues/overflowingdrain.jpg",
+    attachmentLink: ""
   },
   {
     title: "Unauthorized cutting of mature trees",
@@ -196,12 +210,14 @@ const postsData = [
     images: ["/media/issues/treecutwithoutauth.jpg"],
     links: [],
     upvotes: 29,
-    status: "Review Queue",
-    internalNotes: "",
+    status: "In Progress",
+    internalNotes: "Tree officers dispatched to verify permissions.",
     resolutionNote: null,
     resolutionImages: [],
     isAnonymous: false,
-    authorId: "user1"
+    authorId: "user1",
+    attachmentImage: "/media/issues/treecutwithoutauth.jpg",
+    attachmentLink: ""
   }
 ];
 
@@ -367,48 +383,113 @@ async function main() {
   console.log("Seeding comments...")
   const dbReports = await prisma.report.findMany();
   
-  const report1 = dbReports.find(r => r.title.includes("chemical"));
-  if (report1) {
-    await prisma.comment.create({
-      data: {
-        reportId: report1.id,
-        authorId: "user2",
-        text: "I passed by Phase 9 yesterday. The chemical smell was very strong. Glad it's resolved.",
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 8)
-      }
-    });
-    await prisma.comment.create({
-      data: {
-        reportId: report1.id,
-        authorId: "user3",
-        text: "Thanks to the municipal officer for the quick cleanup!",
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 6)
-      }
-    });
-  }
-
-  const report3 = dbReports.find(r => r.title.includes("Dead fish"));
-  if (report3) {
-    await prisma.comment.create({
-      data: {
-        reportId: report3.id,
-        authorId: "user1",
-        text: "This is a serious environmental threat. Upstream industrial outlets must be audited.",
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 3)
-      }
-    });
-  }
-
-  const report5 = dbReports.find(r => r.title.includes("garbage dumping"));
-  if (report5) {
-    await prisma.comment.create({
-      data: {
-        reportId: report5.id,
-        authorId: "user4",
-        text: "Finally, this eyesore has been cleared! Hopefully, people stop dumping here.",
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2)
-      }
-    });
+  for (const report of dbReports) {
+    if (report.title.includes("chemical")) {
+      await prisma.comment.create({
+        data: {
+          reportId: report.id,
+          authorId: "user2",
+          text: "I passed by Phase 9 yesterday. The chemical smell was very strong.",
+          createdAt: new Date(Date.now() - 1000 * 60 * 60 * 8)
+        }
+      });
+      await prisma.comment.create({
+        data: {
+          reportId: report.id,
+          authorId: "user3",
+          text: "This is extremely dangerous! We need immediate action.",
+          createdAt: new Date(Date.now() - 1000 * 60 * 60 * 6)
+        }
+      });
+    } else if (report.title.includes("debris")) {
+      await prisma.comment.create({
+        data: {
+          reportId: report.id,
+          authorId: "user4",
+          text: "Glad this was cleared up so quickly. The birds are returning.",
+          createdAt: new Date(Date.now() - 1000 * 60 * 60 * 8)
+        }
+      });
+      await prisma.comment.create({
+        data: {
+          reportId: report.id,
+          authorId: "user1",
+          text: "Great work by the municipality squad!",
+          createdAt: new Date(Date.now() - 1000 * 60 * 60 * 6)
+        }
+      });
+    } else if (report.title.includes("garbage")) {
+      await prisma.comment.create({
+        data: {
+          reportId: report.id,
+          authorId: "user3",
+          text: "The smell is finally gone. Thanks for resolving this!",
+          createdAt: new Date(Date.now() - 1000 * 60 * 60 * 8)
+        }
+      });
+      await prisma.comment.create({
+        data: {
+          reportId: report.id,
+          authorId: "user2",
+          text: "Hope they install a security camera here to catch dumpers.",
+          createdAt: new Date(Date.now() - 1000 * 60 * 60 * 6)
+        }
+      });
+    } else if (report.title.includes("burning")) {
+      await prisma.comment.create({
+        data: {
+          reportId: report.id,
+          authorId: "user4",
+          text: "Children at the school are coughing because of the heavy smoke.",
+          createdAt: new Date(Date.now() - 1000 * 60 * 60 * 8)
+        }
+      });
+    } else if (report.title.includes("trees")) {
+      await prisma.comment.create({
+        data: {
+          reportId: report.id,
+          authorId: "user2",
+          text: "This is heartbreaking. Those trees were decades old.",
+          createdAt: new Date(Date.now() - 1000 * 60 * 60 * 8)
+        }
+      });
+    } else if (report.title.includes("drain")) {
+      await prisma.comment.create({
+        data: {
+          reportId: report.id,
+          authorId: "user3",
+          text: "The water has flooded the sidewalk, pedestrians can't walk.",
+          createdAt: new Date(Date.now() - 1000 * 60 * 60 * 8)
+        }
+      });
+    } else if (report.title.includes("fish")) {
+      await prisma.comment.create({
+        data: {
+          reportId: report.id,
+          authorId: "user1",
+          text: "This is a serious environmental threat. Upstream industrial outlets must be audited.",
+          createdAt: new Date(Date.now() - 1000 * 60 * 60 * 8)
+        }
+      });
+    } else if (report.title.includes("foam")) {
+      await prisma.comment.create({
+        data: {
+          reportId: report.id,
+          authorId: "user2",
+          text: "Is the foam toxic? Pets shouldn't go near the canal.",
+          createdAt: new Date(Date.now() - 1000 * 60 * 60 * 8)
+        }
+      });
+    } else if (report.title.includes("oil")) {
+      await prisma.comment.create({
+        data: {
+          reportId: report.id,
+          authorId: "user1",
+          text: "Spill seems to be coming from the workshop nearby.",
+          createdAt: new Date(Date.now() - 1000 * 60 * 60 * 8)
+        }
+      });
+    }
   }
 
   console.log("Successfully seeded reports, comments, upvotes, follows, and timeline events.")
