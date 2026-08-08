@@ -263,3 +263,29 @@ For rapid verification and triage simulation, use these pre-seeded accounts:
 *   **SAS Nagar Deputy**: `officr1@email.com` (Auth Key/Password: `HX291Z` • District: `SAS NAGAR`)
 *   **Amritsar District Admin**: `officr2@email.com` (Auth Key/Password: `AMR98X` • District: `AMRITSAR`)
 *   **Ludhiana District Admin**: `officer@clear.gov` (Password: `password` • District: `LUDHIANA`)
+
+---
+
+## 🏆 Bounty Requirements Implementation
+
+C.L.E.A.R. has fully satisfied the three key bounty objectives as outlined in [`bounty.md`](docs/bounty.md).
+
+### 1. Bounty 1: Attachments to Environment Reports (Multi-Contributor Evidence)
+*   **DB Model**: Implemented the relational `ReportAttachment` model to allow users to attach supporting evidence to existing reports.
+*   **UI/UX Integration**: Attached evidence is displayed inside the Report Details panel. To maintain a clean visual workspace, attachments are wrapped in a collapsible, styled Neo-Brutalist `<details>` panel.
+*   **Permissions**: Restricts each user to **one** attachment submission per report, while allowing multiple users to contribute. Supporting uploads use the existing base64-decoded local file persistence.
+
+### 2. Bounty 2: Role-Aware Evidence Item Filters (Context-Scoped Dashboards)
+*   **Dynamic Role Switcher**: Added an interactive role selector in the user profile menu to test different permission settings.
+*   **Permissions & Visibility**:
+    *   **Authority (Municipal)**: Operations Officers triage only the reports occurring in their assigned home district.
+    *   **Investigator**: Read-only view restricted to active/open reports in their home district. Hides administrative and resolved lanes.
+    *   **Admin**: Global view allowing inspection of reports across all districts with a custom district dropdown selector.
+*   **Aesthetics**: Sub-role indicators update the profile badge dynamically, and selection alerts use high-contrast color styling.
+
+### 3. Bounty 3: Project-Specific Report Export (Print-to-PDF Auditing)
+*   **Actionable Trigger**: Added an "Export PDF" action button to the report details panel for resolved environmental issues.
+*   **Export Layout**: Generates a print-friendly document utilizing the project's Outfit/Inter design typography and layout borders.
+*   **Data Preservation**: Aggregates all original report fields (title, description, coordinates, author), resolution metrics (before/after images, completion summaries, dates), and the full citizen comment logs into the document.
+*   **Native Integration**: Automatically opens the system printing/saving window for quick PDF creation.
+
