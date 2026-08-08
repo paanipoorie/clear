@@ -1630,7 +1630,6 @@ function KanbanIssueCard(issue) {
   card.className = 'ops-issue-card';
   card.id = `ops-card-${issue.id}`;
   
-  const verificationCount = issue.verificationCount || Math.max(0, Math.floor(issue.upvotes / 4));
   const timeStr = timeAgo(issue.createdAt);
   const desc = issue.description || 'No description supplied.';
 
@@ -1639,13 +1638,6 @@ function KanbanIssueCard(issue) {
     <div class="ops-card-district">${escapeHTML(issue.subLocation)}</div>
     <p class="ops-card-desc-preview">${escapeHTML(desc)}</p>
     <div class="ops-card-meta-info">
-      <span class="ops-card-stat-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-xs" style="width:12px; height:12px;">
-          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-          <polyline points="22 4 12 14.01 9 11.01"></polyline>
-        </svg>
-        <span>${verificationCount} verifications</span>
-      </span>
       <span class="ops-card-stat-item">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="icon-xs" style="width:12px; height:12px;">
           <polyline points="18 15 12 9 6 15"></polyline>

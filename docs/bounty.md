@@ -92,7 +92,7 @@ This section tracks the completion status and documentation of key decision ques
   3. **Role Accessibility**: Verified that both Resident Reporters (citizens) and Operations Officers (municipalities) can view and contribute attachments correctly.
 
 ### Bounty 2: Role-Aware Evidence Item Filters
-- **Status**: ✅ Completed (Interactive Sub-Role Toggles)
+- **Status**: ✅ Completed (Interactive Sub-Role Toggles & Refinements)
 - **Implementation Details**:
   1. **Sub-Role Options**: Introduced a Switch Role menu in the user profile dropdown for Authority (municipal), Investigator, and Admin sub-roles.
   2. **Scoped List Results**:
@@ -100,6 +100,8 @@ This section tracks the completion status and documentation of key decision ques
      - **Investigator**: Scopes visibility to active reports (Review Queue, Pending Review, In Progress) within their district and hides Resolved/Notices sidebar tabs.
      - **Admin**: Views reports across all districts with a custom district dropdown selector.
   3. **Permission Scoping**: Restricts investigators to read-only access (restricted triage actions and internal notes), enforcing robust authorization boundaries.
+  4. **Clean Card Metadata**: Completely removed the mock "verifications" metric from municipal cards to ensure clean, clutter-free layouts.
+  5. **High-Contrast Toast**: Fixed role-switch toast readability by setting the text/SVG colors to `var(--color-bg)`, ensuring high contrast across both light and dark themes.
 
 ### Bounty 3: Project-Specific Report Export
 - **Status**: ✅ Completed (Interactive HTML/Print-to-PDF Export)

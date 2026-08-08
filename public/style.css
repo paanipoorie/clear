@@ -2538,7 +2538,7 @@ textarea {
 
 .toast {
   background-color: var(--color-text-main);
-  color: #FFFFFF;
+  color: var(--color-bg);
   border: var(--border-width) solid var(--color-text-main);
   border-radius: var(--radius-md);
   padding: 12px 18px;
