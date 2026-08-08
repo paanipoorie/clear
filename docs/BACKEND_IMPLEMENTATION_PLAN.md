@@ -304,24 +304,26 @@ We recommend **Local Directory Disk Storage** (using the `multer` middleware) as
 
 ## 8. Deployment Plan
 
-A clean and simple production deployment process on a single virtual server setup:
+The platform is deployed using a decoupled **Frontend/Backend Proxy** architecture to maximize performance, hosting efficiency, and maintain same-origin cookie mechanics:
 
-1.  **Frontend & Backend (Express Monolith)**:
-    - Deployed to a service like **Render** or **Railway** (or a single cloud server running Docker/PM2).
-    - Express serves public folder static files (`public/index.html`) at root and maps API paths.
-2.  **Database**:
-    - Hosted PostgreSQL database (e.g. **Neon**, **Supabase**, or **Render Database**).
-    - Prisma connects to the database via the connection string in the environment variables.
-3.  **Environment Variables (`.env`)**:
-    - `DATABASE_URL`: Hosted PostgreSQL connection string.
-    - `JWT_SECRET`: Secure encryption key for signing tokens.
-    - `MUNICIPAL_AUTH_KEY`: Secret string required to register as a municipal officer (e.g., `HX291Z`).
-    - `PORT`: Server port (default: 3000).
-    - `NODE_ENV`: `"production"`.
-4.  **File Persistence**:
-    - Mount a **Persistent Disk** (e.g., Render Disk) to the `/media` folder of the Express instance. This ensures user-uploaded photos are not deleted during server restarts or new git deployments.
-5.  **Domain & SSL**:
-    - Platform-provided domains (e.g. `clear.onrender.com`) provide automatic SSL certificates. A custom domain can be configured easily through DNS pointing (Cloudflare or standard DNS).
+1.  **Backend (Express API Server)**:
+    *   **Hosting**: Deployed on **Render** at `https://clear-oqy2.onrender.com`.
+    *   **Runtime**: Node.js `server.js` listening on Render's assigned dynamic port.
+    *   **Responsibility**: Rest APIs (`/api/*`), uploads handling, and serving static uploaded media (`/media/*`).
+2.  **Frontend (Static SPA)**:
+    *   **Hosting**: Deployed on **Vercel**.
+    *   **Output Target**: Configured to serve the static assets from the `public` directory directly.
+    *   **Proxy rewrites**: Utilizing `vercel.json` rewrites to proxy `/api/*` and `/media/*` requests under same-origin to the Render backend, preserving HTTP-Only session cookies with `SameSite=Strict`.
+3.  **Database**:
+    *   **Hosting**: Hosted Serverless PostgreSQL via **Neon**.
+    *   **Integration**: Connected via Prisma Client with the `driverAdapters` preview feature enabled.
+4.  **Environment Variables (`.env` Configuration)**:
+    *   `DATABASE_URL`: Neon connection string.
+    *   `JWT_SECRET`: Secure encryption key for signing user sessions.
+    *   `MUNICIPAL_AUTH_KEY`: Pre-shared credential for authority registration (configured as `HX291Z`).
+    *   `PORT`: Dynamic port assigned by Render.
+5.  **File Storage Warning**:
+    *   Render's local ephemeral filesystem is used for `/media/uploads/`. For long-term production persistence, this folder should be mapped to a Render Persistent Volume or migrated to cloud object storage (e.g. AWS S3 / Cloudinary).
 
 ---
 
