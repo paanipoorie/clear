@@ -92,9 +92,14 @@ This section tracks the completion status and documentation of key decision ques
   3. **Role Accessibility**: Verified that both Resident Reporters (citizens) and Operations Officers (municipalities) can view and contribute attachments correctly.
 
 ### Bounty 2: Role-Aware Evidence Item Filters
-- **Status**: ⏳ Pending Implementation
-- **Clarification Questions**:
-  1. **Role Scope**: Roles like `admin`, `authority`, `hospital`, `investigator`, and `reviewer` do not exist in the database or authorization systems (only `citizen` and `municipal` exist). Should we implement filters utilizing the existing `citizen` and `municipal` roles, or should we introduce any of the new roles into the authentication and data schema?
+- **Status**: ✅ Completed (Interactive Sub-Role Toggles)
+- **Implementation Details**:
+  1. **Sub-Role Options**: Introduced a Switch Role menu in the user profile dropdown for Authority (municipal), Investigator, and Admin sub-roles.
+  2. **Scoped List Results**:
+     - **Authority (municipal)**: Filters reports to the officer's assigned district (e.g., SAS NAGAR).
+     - **Investigator**: Scopes visibility to active reports (Review Queue, Pending Review, In Progress) within their district and hides Resolved/Notices sidebar tabs.
+     - **Admin**: Views reports across all districts with a custom district dropdown selector.
+  3. **Permission Scoping**: Restricts investigators to read-only access (restricted triage actions and internal notes), enforcing robust authorization boundaries.
 
 ### Bounty 3: Project-Specific Report Export
 - **Status**: ✅ Completed (Interactive HTML/Print-to-PDF Export)

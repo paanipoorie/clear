@@ -853,14 +853,14 @@ function handleRouting() {
         switchPortal('municipality');
       }
     } else if (path === '/municipal/dashboard') {
-      if (userRole === 'municipal') {
+      if (userRole === 'municipal' || userRole === 'investigator' || userRole === 'admin') {
         switchPortal('municipality');
       } else {
         window.history.replaceState(null, '', '/citizen/dashboard');
         switchPortal('public');
       }
     } else {
-      if (userRole === 'municipal') {
+      if (userRole === 'municipal' || userRole === 'investigator' || userRole === 'admin') {
         window.history.replaceState(null, '', '/municipal/dashboard');
         switchPortal('municipality');
       } else {
@@ -952,7 +952,36 @@ function switchPortal(portalName) {
       
       citizenViewport.style.display = 'none';
       
-      document.getElementById('userRoleLabel').textContent = `Operations Officer (${MOCK_MUNICIPALITY_DISTRICT})`;
+      // Update dropdown selections
+      updateProfileDropdown();
+
+      // Show admin district select if admin
+      const adminContainer = document.getElementById('adminDistrictSelectContainer');
+      if (adminContainer) {
+        adminContainer.style.display = state.currentUser && state.currentUser.role === 'admin' ? 'flex' : 'none';
+      }
+
+      // Hide sidebar tabs based on investigator role
+      const resolvedBtn = document.getElementById('opsResolvedTabBtn');
+      const noticesBtn = document.getElementById('opsNoticesTabBtn');
+      const role = state.currentUser ? state.currentUser.role : 'municipal';
+      if (resolvedBtn && noticesBtn) {
+        if (role === 'investigator') {
+          resolvedBtn.style.display = 'none';
+          noticesBtn.style.display = 'none';
+        } else {
+          resolvedBtn.style.display = '';
+          noticesBtn.style.display = '';
+        }
+      }
+
+      let roleLabel = `Operations Officer (${MOCK_MUNICIPALITY_DISTRICT})`;
+      if (role === 'investigator') {
+        roleLabel = `Operations Investigator (${MOCK_MUNICIPALITY_DISTRICT})`;
+      } else if (role === 'admin') {
+        roleLabel = `Operations Admin`;
+      }
+      document.getElementById('userRoleLabel').textContent = roleLabel;
       
       // Select Triage tab by default
       switchOpsTab('triage');
@@ -1073,6 +1102,44 @@ async function loadAndRenderNotifications(dropdown) {
   }
 }
 
+function updateProfileDropdown() {
+  const roleSwitch = document.getElementById('municipalRoleSwitch');
+  const myIssuesBtn = document.getElementById('myIssuesBtn');
+  const curRole = state.currentUser ? state.currentUser.role : 'citizen';
+  const isMunicipalSide = curRole === 'municipal' || curRole === 'investigator' || curRole === 'admin';
+
+  if (roleSwitch && myIssuesBtn) {
+    if (isMunicipalSide) {
+      roleSwitch.style.display = 'block';
+      myIssuesBtn.style.display = 'none';
+      
+      // Highlight active sub-role checkmarks
+      document.querySelectorAll('#municipalRoleSwitch .check-mark').forEach(el => el.style.display = 'none');
+      document.querySelectorAll('#municipalRoleSwitch .dropdown-item').forEach(el => el.classList.remove('active'));
+
+      if (curRole === 'municipal') {
+        const check = document.querySelector('#roleBtnAuthority .check-mark');
+        if (check) check.style.display = 'block';
+        const btn = document.getElementById('roleBtnAuthority');
+        if (btn) btn.classList.add('active');
+      } else if (curRole === 'investigator') {
+        const check = document.querySelector('#roleBtnInvestigator .check-mark');
+        if (check) check.style.display = 'block';
+        const btn = document.getElementById('roleBtnInvestigator');
+        if (btn) btn.classList.add('active');
+      } else if (curRole === 'admin') {
+        const check = document.querySelector('#roleBtnAdmin .check-mark');
+        if (check) check.style.display = 'block';
+        const btn = document.getElementById('roleBtnAdmin');
+        if (btn) btn.classList.add('active');
+      }
+    } else {
+      roleSwitch.style.display = 'none';
+      myIssuesBtn.style.display = 'block';
+    }
+  }
+}
+
 async function fetchUser() {
   try {
     const res = await fetch('/api/user');
@@ -1088,6 +1155,28 @@ async function fetchUser() {
         MOCK_MUNICIPALITY_DISTRICT = user.district;
       }
       document.getElementById('usernameLabel').textContent = user.username;
+      
+      // Update dropdown profile options & switches
+      updateProfileDropdown();
+
+      // Show admin district select if admin
+      const adminContainer = document.getElementById('adminDistrictSelectContainer');
+      if (adminContainer) {
+        adminContainer.style.display = user.role === 'admin' ? 'flex' : 'none';
+      }
+
+      // Hide/show sidebar tabs based on investigator role
+      const resolvedBtn = document.getElementById('opsResolvedTabBtn');
+      const noticesBtn = document.getElementById('opsNoticesTabBtn');
+      if (resolvedBtn && noticesBtn) {
+        if (user.role === 'investigator') {
+          resolvedBtn.style.display = 'none';
+          noticesBtn.style.display = 'none';
+        } else {
+          resolvedBtn.style.display = '';
+          noticesBtn.style.display = '';
+        }
+      }
       
       // Fetch notification count on startup
       await fetchNotificationsCount();
@@ -1578,6 +1667,16 @@ function KanbanIssueCard(issue) {
 function MunicipalityActionPanel(issue) {
   const container = document.createElement('div');
   container.className = 'municipality-action-panel';
+  
+  if (state.currentUser && state.currentUser.role === 'investigator') {
+    container.innerHTML = `
+      <span class="panel-action-title">Municipality Actions</span>
+      <div class="panel-action-subtitle" style="color: var(--color-destructive); font-weight: 600; padding: 4px 0;">
+        Access Restricted: Investigators have read-only permissions for report triage.
+      </div>
+    `;
+    return container;
+  }
   
   let contentHTML = `
     <span class="panel-action-title">Municipality Actions</span>
@@ -2217,6 +2316,85 @@ function setupEventListeners() {
     fetchIssues();
     sidebar.classList.remove('open');
   });
+
+  // Role selector buttons click handlers
+  const roleBtnAuthority = document.getElementById('roleBtnAuthority');
+  const roleBtnInvestigator = document.getElementById('roleBtnInvestigator');
+  const roleBtnAdmin = document.getElementById('roleBtnAdmin');
+
+  async function handleRoleSwitch(targetRole) {
+    profileDropdown.classList.remove('open');
+    try {
+      const res = await fetch('/api/user/role', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: targetRole })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        showToast(`Switched role to: ${targetRole}`);
+        state.currentUser.role = data.user.role;
+        
+        // Update dropdown and profile labels
+        updateProfileDropdown();
+        
+        // Update Admin district select visibility
+        const adminContainer = document.getElementById('adminDistrictSelectContainer');
+        if (adminContainer) {
+          adminContainer.style.display = data.user.role === 'admin' ? 'flex' : 'none';
+        }
+        
+        // Hide/show Resolved and Notices sidebar tabs based on role
+        const resolvedBtn = document.getElementById('opsResolvedTabBtn');
+        const noticesBtn = document.getElementById('opsNoticesTabBtn');
+        if (resolvedBtn && noticesBtn) {
+          if (data.user.role === 'investigator') {
+            resolvedBtn.style.display = 'none';
+            noticesBtn.style.display = 'none';
+          } else {
+            resolvedBtn.style.display = '';
+            noticesBtn.style.display = '';
+          }
+        }
+
+        let roleLabel = `Operations Officer (${MOCK_MUNICIPALITY_DISTRICT})`;
+        if (data.user.role === 'investigator') {
+          roleLabel = `Operations Investigator (${MOCK_MUNICIPALITY_DISTRICT})`;
+        } else if (data.user.role === 'admin') {
+          roleLabel = `Operations Admin`;
+        }
+        document.getElementById('userRoleLabel').textContent = roleLabel;
+        
+        // Reset tab view to triage board
+        switchOpsTab('triage');
+        fetchOpsData();
+      } else {
+        const errData = await res.json();
+        showToast(errData.error || 'Failed to switch role');
+      }
+    } catch (err) {
+      console.error(err);
+      showToast('Network error switching role');
+    }
+  }
+
+  if (roleBtnAuthority) {
+    roleBtnAuthority.addEventListener('click', () => handleRoleSwitch('municipal'));
+  }
+  if (roleBtnInvestigator) {
+    roleBtnInvestigator.addEventListener('click', () => handleRoleSwitch('investigator'));
+  }
+  if (roleBtnAdmin) {
+    roleBtnAdmin.addEventListener('click', () => handleRoleSwitch('admin'));
+  }
+
+  // Admin active district selector
+  const adminDistrictSelect = document.getElementById('adminDistrictSelect');
+  if (adminDistrictSelect) {
+    adminDistrictSelect.addEventListener('change', () => {
+      fetchOpsData();
+    });
+  }
 
   logoutBtn.addEventListener('click', async () => {
     profileDropdown.classList.remove('open');
@@ -3266,8 +3444,22 @@ async function fetchOpsData() {
     if (!issuesRes.ok) return;
     let issues = await issuesRes.json();
 
-    // Filter issues by the municipality's assigned district
-    issues = issues.filter(issue => issue.subLocation.toUpperCase() === MOCK_MUNICIPALITY_DISTRICT);
+    // Filter issues by active role and selected district
+    const curRole = state.currentUser ? state.currentUser.role : 'municipal';
+    if (curRole === 'admin') {
+      const adminDistrictSelect = document.getElementById('adminDistrictSelect');
+      const selectedDistrict = adminDistrictSelect ? adminDistrictSelect.value : 'ALL';
+      if (selectedDistrict !== 'ALL') {
+        issues = issues.filter(issue => issue.subLocation.toUpperCase() === selectedDistrict.toUpperCase());
+      }
+    } else {
+      issues = issues.filter(issue => issue.subLocation.toUpperCase() === MOCK_MUNICIPALITY_DISTRICT.toUpperCase());
+    }
+
+    if (curRole === 'investigator') {
+      const allowedStatuses = ['Review Queue', 'Pending Review', 'In Progress'];
+      issues = issues.filter(issue => allowedStatuses.includes(issue.status));
+    }
 
     // Support search query filter on Kanban columns
     if (state.searchQuery) {
@@ -3303,6 +3495,19 @@ function renderOpsDashboardSummaries(issues) {
   document.getElementById('countPending').textContent = pending;
   document.getElementById('countAcknowledged').textContent = acknowledged;
   document.getElementById('countInProgress').textContent = inProgress;
+
+  const isInvestigator = state.currentUser && state.currentUser.role === 'investigator';
+  const ackCard = document.querySelector('.summary-card[data-status="Acknowledged"]');
+  const summaryContainer = document.querySelector('.ops-dashboard-summary');
+  if (ackCard && summaryContainer) {
+    if (isInvestigator) {
+      ackCard.style.display = 'none';
+      summaryContainer.style.gridTemplateColumns = 'repeat(2, 1fr)';
+    } else {
+      ackCard.style.display = 'block';
+      summaryContainer.style.gridTemplateColumns = 'repeat(3, 1fr)';
+    }
+  }
 }
 
 // Render notices in Ops Notices Management Tab
@@ -3310,8 +3515,18 @@ function renderOpsNoticesFeed(notices) {
   const feed = document.getElementById('opsNoticesFeed');
   if (!feed) return;
   
-  // Filter notices list by the municipality's assigned district
-  const districtNotices = notices.filter(n => n.subLocation.toUpperCase() === MOCK_MUNICIPALITY_DISTRICT.toUpperCase());
+  // Filter notices list by active role and district
+  const curRole = state.currentUser ? state.currentUser.role : 'municipal';
+  let districtNotices = notices;
+  if (curRole === 'admin') {
+    const adminDistrictSelect = document.getElementById('adminDistrictSelect');
+    const selectedDistrict = adminDistrictSelect ? adminDistrictSelect.value : 'ALL';
+    if (selectedDistrict !== 'ALL') {
+      districtNotices = notices.filter(n => n.subLocation.toUpperCase() === selectedDistrict.toUpperCase());
+    }
+  } else {
+    districtNotices = notices.filter(n => n.subLocation.toUpperCase() === MOCK_MUNICIPALITY_DISTRICT.toUpperCase());
+  }
 
   if (districtNotices.length === 0) {
     feed.innerHTML = '<p class="empty-notices-msg">No notices published yet.</p>';
@@ -3357,9 +3572,18 @@ function renderKanbanBoard(issues) {
   if (!wrapper) return;
   wrapper.innerHTML = '';
   
-  wrapper.appendChild(KanbanColumn('Review Queue', 'countColPending', 'cardsReviewQueue'));
-  wrapper.appendChild(KanbanColumn('Acknowledged', 'countColAcknowledged', 'cardsAcknowledged'));
-  wrapper.appendChild(KanbanColumn('In Progress', 'countColInProgress', 'cardsInProgress'));
+  const isInvestigator = state.currentUser && state.currentUser.role === 'investigator';
+  
+  if (isInvestigator) {
+    wrapper.style.gridTemplateColumns = 'repeat(2, 1fr)';
+    wrapper.appendChild(KanbanColumn('Review Queue', 'countColPending', 'cardsReviewQueue'));
+    wrapper.appendChild(KanbanColumn('In Progress', 'countColInProgress', 'cardsInProgress'));
+  } else {
+    wrapper.style.gridTemplateColumns = 'repeat(3, 1fr)';
+    wrapper.appendChild(KanbanColumn('Review Queue', 'countColPending', 'cardsReviewQueue'));
+    wrapper.appendChild(KanbanColumn('Acknowledged', 'countColAcknowledged', 'cardsAcknowledged'));
+    wrapper.appendChild(KanbanColumn('In Progress', 'countColInProgress', 'cardsInProgress'));
+  }
 
   const cols = {
     'Review Queue': document.getElementById('cardsReviewQueue'),

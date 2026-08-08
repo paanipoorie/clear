@@ -102,7 +102,14 @@ const requireAuth = (req, res, next) => {
 
 const requireRole = (role) => {
   return (req, res, next) => {
-    if (!req.user || req.user.role !== role) {
+    if (!req.user) {
+      return res.status(401).json({ error: "Unauthorized. Please log in." });
+    }
+    if (role === 'municipal') {
+      if (req.user.role !== 'municipal' && req.user.role !== 'investigator' && req.user.role !== 'admin') {
+        return res.status(403).json({ error: "Forbidden. Insufficient permissions." });
+      }
+    } else if (req.user.role !== role) {
       return res.status(403).json({ error: "Forbidden. Insufficient permissions." });
     }
     next();
@@ -250,6 +257,56 @@ app.get('/api/user', requireAuth, async (req, res) => {
   });
 });
 
+// Switch role (municipal side switching)
+app.patch('/api/user/role', requireAuth, async (req, res) => {
+  const { role } = req.body;
+  if (!role) {
+    return res.status(400).json({ error: "Role is required." });
+  }
+  const allowedRoles = ['municipal', 'investigator', 'admin'];
+  if (!allowedRoles.includes(role)) {
+    return res.status(400).json({ error: "Invalid role selected." });
+  }
+
+  // Ensure current user is on the municipal-side
+  if (!allowedRoles.includes(req.user.role)) {
+    return res.status(403).json({ error: "Access denied. Only municipal-side users can switch roles." });
+  }
+
+  try {
+    const updatedUser = await prisma.user.update({
+      where: { id: req.user.userId },
+      data: { role }
+    });
+
+    const token = jwt.sign(
+      { userId: updatedUser.id, username: updatedUser.username, role: updatedUser.role, district: updatedUser.district },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000
+    });
+
+    res.json({
+      success: true,
+      user: {
+        id: updatedUser.id,
+        username: updatedUser.username,
+        role: updatedUser.role,
+        district: updatedUser.district
+      }
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to switch user role." });
+  }
+});
+
 // Logout
 app.post('/api/auth/logout', (req, res) => {
   res.clearCookie('token');
@@ -268,10 +325,25 @@ app.get('/api/issues', requireAuth, async (req, res) => {
   const { subLocation, myIssues, search, followedOnly, userId } = req.query;
   const filter = {};
 
-  if (subLocation) {
+  // Role-aware scoping
+  if (req.user.role === 'municipal') {
     filter.subLocation = {
-      equals: subLocation.toUpperCase(),
+      equals: req.user.district.toUpperCase(),
     };
+  } else if (req.user.role === 'investigator') {
+    filter.subLocation = {
+      equals: req.user.district.toUpperCase(),
+    };
+    filter.status = {
+      in: ['Review Queue', 'Pending Review', 'In Progress']
+    };
+  } else {
+    // Admins and Citizens can view any district
+    if (subLocation) {
+      filter.subLocation = {
+        equals: subLocation.toUpperCase(),
+      };
+    }
   }
 
   if (myIssues === 'true') {
@@ -525,8 +597,22 @@ app.get('/api/issues/:id', requireAuth, async (req, res) => {
       return res.status(404).json({ error: "Issue not found" });
     }
 
-    const isOfficer = req.user.role === 'municipal';
+    const isOfficer = req.user.role === 'municipal' || req.user.role === 'investigator' || req.user.role === 'admin';
     const isAuthor = issue.authorId === req.user.userId;
+
+    // Enforce district boundaries for municipal/investigator
+    if ((req.user.role === 'municipal' || req.user.role === 'investigator') && issue.subLocation.toUpperCase() !== req.user.district.toUpperCase()) {
+      return res.status(403).json({ error: "Access denied. You can only inspect reports from your district." });
+    }
+
+    // Enforce status boundaries for investigator
+    if (req.user.role === 'investigator') {
+      const allowedStatuses = ['Review Queue', 'Pending Review', 'In Progress'];
+      if (!allowedStatuses.includes(issue.status)) {
+        return res.status(403).json({ error: "Access denied. Investigators can only inspect active reports." });
+      }
+    }
+
     const authorName = (issue.isAnonymous && !isOfficer && !isAuthor) ? "Anonymous" : issue.author.username;
 
     res.json({
@@ -670,6 +756,26 @@ app.post('/api/issues/:id/follow', requireAuth, requireRole('citizen'), async (r
 app.patch('/api/issues/:id/status', requireAuth, requireRole('municipal'), async (req, res) => {
   const id = parseInt(req.params.id);
   const { status, resolutionImages, resolutionNote, rejectionReason, rejectReason } = req.body;
+
+  if (req.user.role === 'investigator') {
+    return res.status(403).json({ error: "Access denied. Investigators cannot triage or change report status." });
+  }
+
+  // If not admin, verify the report is in the user's assigned district
+  if (req.user.role !== 'admin') {
+    try {
+      const issue = await prisma.report.findUnique({ where: { id } });
+      if (!issue) {
+        return res.status(404).json({ error: "Report not found." });
+      }
+      if (issue.subLocation.toUpperCase() !== req.user.district.toUpperCase()) {
+        return res.status(403).json({ error: "Access denied. You cannot modify reports outside your district." });
+      }
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ error: "Failed to verify report permissions." });
+    }
+  }
 
   const validStatuses = ["Review Queue", "Acknowledged", "In Progress", "Resolved", "Rejected", "Pending Review"];
   if (status && !validStatuses.includes(status)) {
@@ -927,6 +1033,26 @@ app.patch('/api/issues/:id/notes', requireAuth, requireRole('municipal'), async 
   const id = parseInt(req.params.id);
   const { internalNotes } = req.body;
 
+  if (req.user.role === 'investigator') {
+    return res.status(403).json({ error: "Access denied. Investigators cannot update internal notes." });
+  }
+
+  // If not admin, verify the report is in the user's assigned district
+  if (req.user.role !== 'admin') {
+    try {
+      const issue = await prisma.report.findUnique({ where: { id } });
+      if (!issue) {
+        return res.status(404).json({ error: "Report not found." });
+      }
+      if (issue.subLocation.toUpperCase() !== req.user.district.toUpperCase()) {
+        return res.status(403).json({ error: "Access denied. You cannot modify reports outside your district." });
+      }
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ error: "Failed to verify report permissions." });
+    }
+  }
+
   try {
     await prisma.report.update({
       where: { id },
@@ -1085,6 +1211,15 @@ app.post('/api/notices', requireAuth, requireRole('municipal'), async (req, res)
   const { title, description, subLocation, type, expiryDate } = req.body;
   if (!title || !description || !subLocation || !type) {
     return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  if (req.user.role === 'investigator') {
+    return res.status(403).json({ error: "Access denied. Investigators cannot publish notices." });
+  }
+
+  // If not admin, verify publication target matches assigned district
+  if (req.user.role !== 'admin' && subLocation.toUpperCase() !== req.user.district.toUpperCase()) {
+    return res.status(403).json({ error: "Access denied. You can only publish notices for your assigned district." });
   }
 
   try {

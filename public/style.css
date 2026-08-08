@@ -1171,6 +1171,26 @@ textarea {
   background-color: var(--color-destructive-soft);
 }
 
+.dropdown-item svg.check-mark {
+  color: var(--color-primary);
+  stroke-width: 3px;
+}
+
+.dropdown-item.active {
+  background-color: var(--color-primary-soft);
+  color: var(--color-text-main);
+}
+
+.admin-district-select-container select {
+  box-shadow: 2px 2px 0 var(--color-text-main);
+  transition: all var(--transition-speed) ease;
+}
+
+.admin-district-select-container select:hover,
+.admin-district-select-container select:focus {
+  box-shadow: 3px 3px 0 var(--color-text-main);
+}
+
 .post-options-dropdown {
   position: absolute;
   top: 100%;
