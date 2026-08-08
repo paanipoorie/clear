@@ -3,6 +3,40 @@
 import "dotenv/config";
 import { defineConfig } from "prisma/config";
 
+function getMigrationDatabaseUrl(): string | undefined {
+  const urlStr = process.env["DATABASE_URL"];
+  if (!urlStr) return undefined;
+
+  // If a separate DIRECT_URL is provided, use it
+  if (process.env["DIRECT_URL"]) {
+    return process.env["DIRECT_URL"];
+  }
+
+  // If it's a Neon pooled URL, convert it to a direct URL
+  if (urlStr.includes("-pooler")) {
+    return urlStr.replace("-pooler", "");
+  }
+
+  // If it's a Prisma Postgres URL, extract the underlying databaseUrl
+  if (urlStr.startsWith("prisma+postgres://")) {
+    try {
+      const url = new URL(urlStr);
+      const apiKey = url.searchParams.get("api_key");
+      if (apiKey) {
+        const decoded = Buffer.from(apiKey, "base64").toString("utf-8");
+        const data = JSON.parse(decoded);
+        if (data.databaseUrl) {
+          return data.databaseUrl;
+        }
+      }
+    } catch (e) {
+      console.error("Failed to parse prisma+postgres URL for migration:", e);
+    }
+  }
+
+  return urlStr;
+}
+
 export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
@@ -10,6 +44,7 @@ export default defineConfig({
     seed: "npx tsx prisma/seed.ts",
   },
   datasource: {
-    url: process.env["DATABASE_URL"],
+    url: getMigrationDatabaseUrl(),
   },
 });
+
