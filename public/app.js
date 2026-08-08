@@ -1001,19 +1001,19 @@ function switchOpsTab(tabName) {
   
   if (tabName === 'triage') {
     updateSidebarActiveBtn(opsTriageTabBtn);
-    municipalTriageViewport.style.display = 'block';
+    municipalTriageViewport.style.display = 'flex';
     municipalResolvedViewport.style.display = 'none';
     municipalNoticesViewport.style.display = 'none';
   } else if (tabName === 'resolved') {
     updateSidebarActiveBtn(opsResolvedTabBtn);
     municipalTriageViewport.style.display = 'none';
-    municipalResolvedViewport.style.display = 'block';
+    municipalResolvedViewport.style.display = 'flex';
     municipalNoticesViewport.style.display = 'none';
   } else if (tabName === 'notices') {
     updateSidebarActiveBtn(opsNoticesTabBtn);
     municipalTriageViewport.style.display = 'none';
     municipalResolvedViewport.style.display = 'none';
-    municipalNoticesViewport.style.display = 'block';
+    municipalNoticesViewport.style.display = 'flex';
   }
   
   fetchOpsData();
