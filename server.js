@@ -313,7 +313,10 @@ app.get('/api/issues', requireAuth, async (req, res) => {
         timeline: {
           orderBy: { timestamp: 'asc' }
         },
-        followers: true
+        followers: true,
+        attachments: {
+          include: { contributor: true }
+        }
       }
     });
 
@@ -359,7 +362,17 @@ app.get('/api/issues', requireAuth, async (req, res) => {
         additionalImages: issue.additionalImages,
         appealedAt: issue.appealedAt ? issue.appealedAt.toISOString() : "",
         links: issue.links,
-        coordinates: { lat: issue.latitude, lng: issue.longitude }
+        coordinates: { lat: issue.latitude, lng: issue.longitude },
+        attachments: (issue.attachments || []).map(att => ({
+          id: att.id,
+          contributorId: att.contributorId,
+          contributorName: att.contributor.username,
+          attachmentImage: att.attachmentImage,
+          attachmentLink: att.attachmentLink,
+          createdAt: att.createdAt.toISOString()
+        })),
+        attachmentImage: (issue.attachments || []).find(att => att.contributorId === issue.authorId)?.attachmentImage || null,
+        attachmentLink: (issue.attachments || []).find(att => att.contributorId === issue.authorId)?.attachmentLink || null
       };
     });
 
@@ -411,7 +424,10 @@ app.post('/api/issues', requireAuth, requireRole('citizen'), async (req, res) =>
             include: { author: true }
           },
           timeline: true,
-          followers: true
+          followers: true,
+          attachments: {
+            include: { contributor: true }
+          }
         }
       });
 
@@ -465,7 +481,17 @@ app.post('/api/issues', requireAuth, requireRole('citizen'), async (req, res) =>
       additionalImages: [],
       appealedAt: "",
       links: report.links,
-      coordinates: { lat: report.latitude, lng: report.longitude }
+      coordinates: { lat: report.latitude, lng: report.longitude },
+      attachments: (report.attachments || []).map(att => ({
+        id: att.id,
+        contributorId: att.contributorId,
+        contributorName: att.contributor.username,
+        attachmentImage: att.attachmentImage,
+        attachmentLink: att.attachmentLink,
+        createdAt: att.createdAt.toISOString()
+      })),
+      attachmentImage: (report.attachments || []).find(att => att.contributorId === report.authorId)?.attachmentImage || null,
+      attachmentLink: (report.attachments || []).find(att => att.contributorId === report.authorId)?.attachmentLink || null
     });
   } catch (err) {
     console.error(err);
@@ -488,7 +514,10 @@ app.get('/api/issues/:id', requireAuth, async (req, res) => {
         timeline: {
           orderBy: { timestamp: 'asc' }
         },
-        followers: true
+        followers: true,
+        attachments: {
+          include: { contributor: true }
+        }
       }
     });
 
@@ -536,7 +565,17 @@ app.get('/api/issues/:id', requireAuth, async (req, res) => {
       additionalImages: issue.additionalImages,
       appealedAt: issue.appealedAt ? issue.appealedAt.toISOString() : "",
       links: issue.links,
-      coordinates: { lat: issue.latitude, lng: issue.longitude }
+      coordinates: { lat: issue.latitude, lng: issue.longitude },
+      attachments: (issue.attachments || []).map(att => ({
+        id: att.id,
+        contributorId: att.contributorId,
+        contributorName: att.contributor.username,
+        attachmentImage: att.attachmentImage,
+        attachmentLink: att.attachmentLink,
+        createdAt: att.createdAt.toISOString()
+      })),
+      attachmentImage: (issue.attachments || []).find(att => att.contributorId === issue.authorId)?.attachmentImage || null,
+      attachmentLink: (issue.attachments || []).find(att => att.contributorId === issue.authorId)?.attachmentLink || null
     });
   } catch (err) {
     console.error(err);
@@ -679,7 +718,10 @@ app.patch('/api/issues/:id/status', requireAuth, requireRole('municipal'), async
         timeline: {
           orderBy: { timestamp: 'asc' }
         },
-        followers: true
+        followers: true,
+        attachments: {
+          include: { contributor: true }
+        }
       }
     });
 
@@ -736,7 +778,17 @@ app.patch('/api/issues/:id/status', requireAuth, requireRole('municipal'), async
       additionalImages: report.additionalImages,
       appealedAt: report.appealedAt ? report.appealedAt.toISOString() : "",
       links: report.links,
-      coordinates: { lat: report.latitude, lng: report.longitude }
+      coordinates: { lat: report.latitude, lng: report.longitude },
+      attachments: (report.attachments || []).map(att => ({
+        id: att.id,
+        contributorId: att.contributorId,
+        contributorName: att.contributor.username,
+        attachmentImage: att.attachmentImage,
+        attachmentLink: att.attachmentLink,
+        createdAt: att.createdAt.toISOString()
+      })),
+      attachmentImage: (report.attachments || []).find(att => att.contributorId === report.authorId)?.attachmentImage || null,
+      attachmentLink: (report.attachments || []).find(att => att.contributorId === report.authorId)?.attachmentLink || null
     });
   } catch (err) {
     console.error(err);
@@ -792,7 +844,10 @@ app.post('/api/issues/:id/appeal', requireAuth, requireRole('citizen'), async (r
         timeline: {
           orderBy: { timestamp: 'asc' }
         },
-        followers: true
+        followers: true,
+        attachments: {
+          include: { contributor: true }
+        }
       }
     });
 
@@ -849,7 +904,17 @@ app.post('/api/issues/:id/appeal', requireAuth, requireRole('citizen'), async (r
       additionalImages: report.additionalImages,
       appealedAt: report.appealedAt ? report.appealedAt.toISOString() : "",
       links: report.links,
-      coordinates: { lat: report.latitude, lng: report.longitude }
+      coordinates: { lat: report.latitude, lng: report.longitude },
+      attachments: (report.attachments || []).map(att => ({
+        id: att.id,
+        contributorId: att.contributorId,
+        contributorName: att.contributor.username,
+        attachmentImage: att.attachmentImage,
+        attachmentLink: att.attachmentLink,
+        createdAt: att.createdAt.toISOString()
+      })),
+      attachmentImage: (report.attachments || []).find(att => att.contributorId === report.authorId)?.attachmentImage || null,
+      attachmentLink: (report.attachments || []).find(att => att.contributorId === report.authorId)?.attachmentLink || null
     });
   } catch (err) {
     console.error(err);
@@ -874,6 +939,85 @@ app.patch('/api/issues/:id/notes', requireAuth, requireRole('municipal'), async 
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to update internal notes." });
+  }
+});
+
+// Add or update attachment (image/link) to an existing environment report
+app.post('/api/issues/:id/attachment', requireAuth, async (req, res) => {
+  const id = parseInt(req.params.id);
+  const { attachmentImage, attachmentLink } = req.body;
+
+  try {
+    const issue = await prisma.report.findUnique({
+      where: { id }
+    });
+
+    if (!issue) {
+      return res.status(404).json({ error: "Report not found" });
+    }
+
+    let savedImagePath = null;
+    if (attachmentImage) {
+      if (attachmentImage.startsWith('data:image')) {
+        savedImagePath = saveBase64Image(attachmentImage);
+      } else {
+        savedImagePath = attachmentImage;
+      }
+    }
+
+    // If both are empty, delete their attachment record if it exists
+    if (!savedImagePath && !attachmentLink) {
+      try {
+        await prisma.reportAttachment.delete({
+          where: {
+            reportId_contributorId: {
+              reportId: id,
+              contributorId: req.user.userId
+            }
+          }
+        });
+      } catch (err) {
+        // Record might not exist, which is fine
+      }
+      return res.json({
+        success: true,
+        attachmentImage: null,
+        attachmentLink: null
+      });
+    }
+
+    const attachment = await prisma.reportAttachment.upsert({
+      where: {
+        reportId_contributorId: {
+          reportId: id,
+          contributorId: req.user.userId
+        }
+      },
+      update: {
+        attachmentImage: savedImagePath || null,
+        attachmentLink: attachmentLink || null
+      },
+      create: {
+        reportId: id,
+        contributorId: req.user.userId,
+        attachmentImage: savedImagePath || null,
+        attachmentLink: attachmentLink || null
+      },
+      include: {
+        contributor: true
+      }
+    });
+
+    res.json({
+      success: true,
+      attachmentImage: attachment.attachmentImage,
+      attachmentLink: attachment.attachmentLink,
+      contributorId: attachment.contributorId,
+      contributorName: attachment.contributor.username
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to update attachment." });
   }
 });
 

@@ -26,6 +26,7 @@ model User {
   upvotes       ReportUpvote[]
   notices       Notice[]       @relation("NoticeAuthor")
   notifications Notification[]
+  attachments   ReportAttachment[]
 }
 
 model Report {
@@ -58,6 +59,9 @@ model Report {
   followers        ReportFollow[]
   voters           ReportUpvote[]
   notifications    Notification[]
+  attachmentImage  String?
+  attachmentLink   String?
+  attachments      ReportAttachment[]
 
   @@index([subLocation])
   @@index([status])
@@ -133,4 +137,19 @@ model Notification {
   createdAt DateTime @default(now())
 
   @@index([userId])
+}
+
+model ReportAttachment {
+  id              Int      @id @default(autoincrement())
+  reportId        Int
+  report          Report   @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  contributorId   String
+  contributor     User     @relation(fields: [contributorId], references: [id], onDelete: Cascade)
+  attachmentImage String?
+  attachmentLink  String?
+  createdAt       DateTime @default(now())
+
+  @@unique([reportId, contributorId])
+  @@index([reportId])
+  @@index([contributorId])
 }

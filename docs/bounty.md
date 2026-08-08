@@ -85,10 +85,11 @@ The table below maps the concepts in the bounty requirements to existing C.L.E.A
 This section tracks the completion status and documentation of key decision questions for each bounty requirement.
 
 ### Bounty 1: Attachments to Environment Reports
-- **Status**: ⏳ Pending Implementation
-- **Clarification Questions**:
-  1. **Attachment Input Restrictions**: Should adding/editing an attachment to an existing environment report be restricted strictly to the **original author** (citizen) of the report, or can any logged-in citizen/officer append an attachment?
-  2. **Storage Handling**: Should we append the new attachment directly to the existing `images` / `links` fields of the `Report` record, or should we introduce explicit `attachmentImage` and `attachmentLink` fields in the schema?
+- **Status**: ✅ Completed (Enhanced with Multi-Contributor Support & Collapsible UI)
+- **Implementation & Clarifications**:
+  1. **Multi-Contributor Relationship**: Implemented a `ReportAttachment` model in the database allowing multiple authenticated citizens or municipal officers to contribute up to one supporting attachment per report, while maintaining compatibility with the original author's attachment.
+  2. **Collapsible View**: Wrapped the list of contributed evidence/attachments inside a styled Neo-Brutalist `<details>` collapsible component to prevent layout clutter when many attachments are submitted.
+  3. **Role Accessibility**: Verified that both Resident Reporters (citizens) and Operations Officers (municipalities) can view and contribute attachments correctly.
 
 ### Bounty 2: Role-Aware Evidence Item Filters
 - **Status**: ⏳ Pending Implementation

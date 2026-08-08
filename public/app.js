@@ -3006,10 +3006,152 @@ function setupEventListeners() {
     });
   }
 
+  // Supporting Attachment Event Listeners (Bounty 1)
+  const attachmentFileInput = document.getElementById('attachmentFileInput');
+  const attachmentFileName = document.getElementById('attachmentFileName');
+  const attachmentFilePreviewContainer = document.getElementById('attachmentFilePreviewContainer');
+  const attachmentFilePreview = document.getElementById('attachmentFilePreview');
+  const saveAttachmentBtn = document.getElementById('saveAttachmentBtn');
+  const removeAttachmentBtn = document.getElementById('removeAttachmentBtn');
+  const attachmentUrlInput = document.getElementById('attachmentUrlInput');
+
+  if (attachmentFileInput) {
+    attachmentFileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) {
+        attachmentFileName.textContent = 'No image selected';
+        attachmentFilePreviewContainer.style.display = 'none';
+        attachmentFilePreview.src = '';
+        selectedAttachmentBase64 = null;
+        return;
+      }
+
+      attachmentFileName.textContent = file.name;
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        selectedAttachmentBase64 = evt.target.result;
+        attachmentFilePreview.src = evt.target.result;
+        attachmentFilePreviewContainer.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  if (saveAttachmentBtn) {
+    saveAttachmentBtn.addEventListener('click', async () => {
+      const issue = state.selectedIssueForOps;
+      if (!issue) return;
+
+      const myAttachment = state.currentUser ? (issue.attachments || []).find(att => att.contributorId === state.currentUser.id || att.contributorId === state.currentUser.username) : null;
+      const urlValue = attachmentUrlInput ? attachmentUrlInput.value.trim() : '';
+      const payload = {
+        attachmentImage: selectedAttachmentBase64 || (myAttachment ? myAttachment.attachmentImage : null),
+        attachmentLink: urlValue || null
+      };
+
+      try {
+        const res = await fetch(`/api/issues/${issue.id}/attachment`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+          const result = await res.json();
+          if (!issue.attachments) {
+            issue.attachments = [];
+          }
+          const index = issue.attachments.findIndex(att => att.contributorId === state.currentUser.id || att.contributorId === state.currentUser.username);
+          if (index !== -1) {
+            if (result.attachmentImage || result.attachmentLink) {
+              issue.attachments[index] = {
+                id: result.id || issue.attachments[index].id,
+                contributorId: result.contributorId,
+                contributorName: result.contributorName,
+                attachmentImage: result.attachmentImage,
+                attachmentLink: result.attachmentLink,
+                createdAt: new Date().toISOString()
+              };
+            } else {
+              issue.attachments.splice(index, 1);
+            }
+          } else {
+            issue.attachments.push({
+              id: result.id || Date.now(),
+              contributorId: result.contributorId,
+              contributorName: result.contributorName,
+              attachmentImage: result.attachmentImage,
+              attachmentLink: result.attachmentLink,
+              createdAt: new Date().toISOString()
+            });
+          }
+          
+          showToast('Attachment saved successfully');
+          renderOpsDetailPanel(issue);
+          fetchIssues();
+        } else {
+          const errData = await res.json();
+          showToast(errData.error || 'Failed to save attachment');
+        }
+      } catch (err) {
+        console.error(err);
+        showToast('Network error saving attachment');
+      }
+    });
+  }
+
+  if (removeAttachmentBtn) {
+    removeAttachmentBtn.addEventListener('click', async () => {
+      const issue = state.selectedIssueForOps;
+      if (!issue) return;
+
+      if (!confirm('Are you sure you want to remove your attachment?')) {
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/issues/${issue.id}/attachment`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            attachmentImage: null,
+            attachmentLink: null
+          })
+        });
+
+        if (res.ok) {
+          if (issue.attachments) {
+            const index = issue.attachments.findIndex(att => att.contributorId === state.currentUser.id || att.contributorId === state.currentUser.username);
+            if (index !== -1) {
+              issue.attachments.splice(index, 1);
+            }
+          }
+          
+          if (attachmentFileInput) attachmentFileInput.value = '';
+          if (attachmentFileName) attachmentFileName.textContent = 'No image selected';
+          if (attachmentFilePreviewContainer) attachmentFilePreviewContainer.style.display = 'none';
+          if (attachmentFilePreview) attachmentFilePreview.src = '';
+          if (attachmentUrlInput) attachmentUrlInput.value = '';
+          selectedAttachmentBase64 = null;
+
+          showToast('Attachment removed successfully');
+          renderOpsDetailPanel(issue);
+          fetchIssues();
+        } else {
+          const errData = await res.json();
+          showToast(errData.error || 'Failed to remove attachment');
+        }
+      } catch (err) {
+        console.error(err);
+        showToast('Network error removing attachment');
+      }
+    });
+  }
 
 }
 
 // Track Modal State
+let selectedAttachmentBase64 = null;
 let trackMapInstance = null;
 let trackMapMarker = null;
 
@@ -3454,6 +3596,79 @@ function renderOpsDetailPanel(issue) {
   const gallery = document.getElementById('opsDetailPhotos');
   const detailImages = getIssueImages(issue);
   gallery.innerHTML = detailImages.map(img => `<img src="${img}" class="ops-detail-photo" alt="Details photo" onclick="window.open('${img}')">`).join('');
+
+  // --- Supporting Attachment (Bounty 1) ---
+  const attachmentDisplay = document.getElementById('opsDetailAttachmentDisplay');
+  const attachmentContent = document.getElementById('opsDetailAttachmentContent');
+  const attachmentInputContainer = document.getElementById('opsDetailAttachmentInputContainer');
+
+  const attachmentFileInput = document.getElementById('attachmentFileInput');
+  const attachmentFileName = document.getElementById('attachmentFileName');
+  const attachmentFilePreviewContainer = document.getElementById('attachmentFilePreviewContainer');
+  const attachmentFilePreview = document.getElementById('attachmentFilePreview');
+  const attachmentUrlInput = document.getElementById('attachmentUrlInput');
+  const removeAttachmentBtn = document.getElementById('removeAttachmentBtn');
+
+  // Find current user's attachment for this issue (if exists)
+  const myAttachment = state.currentUser ? (issue.attachments || []).find(att => att.contributorId === state.currentUser.id || att.contributorId === state.currentUser.username) : null;
+
+  if (attachmentFileInput) attachmentFileInput.value = '';
+  if (attachmentFileName) attachmentFileName.textContent = 'No image selected';
+  if (attachmentFilePreviewContainer) attachmentFilePreviewContainer.style.display = 'none';
+  if (attachmentFilePreview) attachmentFilePreview.src = '';
+  if (attachmentUrlInput) attachmentUrlInput.value = myAttachment ? (myAttachment.attachmentLink || '') : '';
+  selectedAttachmentBase64 = null;
+
+  if (issue.attachments && issue.attachments.length > 0) {
+    if (attachmentDisplay) attachmentDisplay.style.display = 'block';
+    
+    let html = `
+      <details class="evidence-collapsible" style="border: 2px solid var(--color-border); border-radius: var(--radius-sm); background-color: var(--color-bg); margin-bottom: 12px; box-shadow: 2px 2px 0 var(--color-border);">
+        <summary style="font-weight: 700; font-size: 11px; padding: 10px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none; text-transform: uppercase; color: var(--color-text-main);">
+          <span>Show Attachments (${issue.attachments.length})</span>
+          <span style="font-size: 10px; transition: transform 0.2s;">▼</span>
+        </summary>
+        <div style="padding: 10px; border-top: 2px solid var(--color-border); display: flex; flex-direction: column; gap: 12px; background-color: var(--color-bg);">
+    `;
+    for (const att of issue.attachments) {
+      const isMyAtt = state.currentUser && (att.contributorId === state.currentUser.id || att.contributorId === state.currentUser.username);
+      const displayName = isMyAtt ? 'You' : att.contributorName;
+      
+      html += `
+        <div style="padding: 10px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); background-color: var(--color-bg); position: relative;">
+          <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--color-text-subtle); display: block; margin-bottom: 6px;">Contributed by ${escapeHTML(displayName)}</span>
+      `;
+      if (att.attachmentImage) {
+        html += `<div style="margin-bottom: 6px;"><img src="${att.attachmentImage}" class="ops-detail-photo" alt="Attached evidence" onclick="window.open('${att.attachmentImage}')" style="max-height: 120px; cursor: pointer; object-fit: contain;"></div>`;
+      }
+      if (att.attachmentLink) {
+        html += `<div><a href="${att.attachmentLink}" target="_blank" rel="noopener noreferrer" style="font-size: 12px; color: var(--color-primary); text-decoration: underline;">${escapeHTML(att.attachmentLink)}</a></div>`;
+      }
+      html += `</div>`;
+    }
+    html += `
+        </div>
+      </details>
+    `;
+    
+    if (attachmentContent) attachmentContent.innerHTML = html;
+  } else {
+    if (attachmentDisplay) attachmentDisplay.style.display = 'none';
+    if (attachmentContent) attachmentContent.innerHTML = '';
+  }
+
+  if (myAttachment) {
+    if (removeAttachmentBtn) removeAttachmentBtn.style.display = 'inline-block';
+  } else {
+    if (removeAttachmentBtn) removeAttachmentBtn.style.display = 'none';
+  }
+
+  const isAuthenticated = !!state.currentUser;
+  if (isAuthenticated) {
+    if (attachmentInputContainer) attachmentInputContainer.style.display = 'block';
+  } else {
+    if (attachmentInputContainer) attachmentInputContainer.style.display = 'none';
+  }
 
   // Render comments
   renderOpsDetailPanelComments(issue);

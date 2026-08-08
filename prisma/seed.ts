@@ -73,7 +73,9 @@ const postsData = [
     resolutionNote: null,
     resolutionImages: [],
     isAnonymous: false,
-    authorId: "user2"
+    authorId: "user2",
+    attachmentImage: "/media/issues/constdebrisatprotectedland.jpg",
+    attachmentLink: "https://www.punjab.gov.in/environmental-notices"
   },
   {
     title: "Dead fish floating due to water contamination",
@@ -255,6 +257,17 @@ async function main() {
         authorId: p.authorId
       }
     });
+
+    if (p.attachmentImage || p.attachmentLink) {
+      await prisma.reportAttachment.create({
+        data: {
+          reportId: report.id,
+          contributorId: report.authorId,
+          attachmentImage: p.attachmentImage,
+          attachmentLink: p.attachmentLink
+        }
+      });
+    }
 
     // Create default follow and upvote by author
     await prisma.reportFollow.create({
