@@ -1964,6 +1964,37 @@ function setupEventListeners() {
   if (goToRegisterBtn) {
     goToRegisterBtn.addEventListener('click', () => showAuthScreen('authRegisterScreen'));
   }
+
+  const navLoginBtn = document.getElementById('navLoginBtn');
+  if (navLoginBtn) {
+    navLoginBtn.addEventListener('click', () => showAuthScreen('authLoginScreen'));
+  }
+  
+  const navRegisterBtn = document.getElementById('navRegisterBtn');
+  if (navRegisterBtn) {
+    navRegisterBtn.addEventListener('click', () => showAuthScreen('authRegisterScreen'));
+  }
+
+  // Scroll reveal trigger for revamped landing page
+  const initScrollReveal = () => {
+    const revealElements = document.querySelectorAll('.scroll-reveal');
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('revealed');
+          }
+        });
+      }, {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+      });
+      revealElements.forEach(el => observer.observe(el));
+    } else {
+      revealElements.forEach(el => el.classList.add('revealed'));
+    }
+  };
+  initScrollReveal();
   
   const loginBackBtn = document.getElementById('loginBackBtn');
   if (loginBackBtn) {

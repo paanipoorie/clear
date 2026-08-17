@@ -37,20 +37,247 @@
     <div class="auth-container">
       
       <!-- 1. LANDING SCREEN -->
-      <div id="authLandingScreen" class="auth-screen">
-        <div class="landing-hero">
-          <div class="logo-badge">
-            <brand-logo text="clear"></brand-logo>
+      <div id="authLandingScreen" class="auth-screen landing-page-layout">
+        
+        <!-- Sticky Navigation Header -->
+        <header class="landing-header">
+          <div class="landing-header-container">
+            <brand-logo text="clear" class="landing-logo"></brand-logo>
+            <nav class="landing-nav">
+              <a href="#how-it-works" class="landing-nav-link">How It Works</a>
+              <a href="#features" class="landing-nav-link">Features</a>
+              <a href="#about" class="landing-nav-link">About</a>
+            </nav>
+            <div class="landing-header-actions">
+              <button class="btn btn-outline btn-sm" id="navLoginBtn">Sign In</button>
+              <button class="btn btn-primary btn-sm" id="navRegisterBtn">Create Account</button>
+            </div>
           </div>
-          <h1 class="landing-title">Crowdsourced Local Environmental Action & Resolution</h1>
-          <p class="landing-subtitle">
-            C.L.E.A.R. connects residents and municipal operations to report, verify, and resolve local environmental issues collaboratively.
-          </p>
-          <div class="landing-actions">
-            <button class="btn btn-primary btn-lg" id="goToLoginBtn">Sign In</button>
-            <button class="btn btn-outline btn-lg" id="goToRegisterBtn">Create Account</button>
+        </header>
+
+        <!-- Hero Section -->
+        <section class="landing-hero-section">
+          <div class="landing-hero-content">
+            <h1 class="landing-title">Crowdsourced Local Environmental Action & Resolution</h1>
+            <p class="landing-subtitle">
+              C.L.E.A.R. bridges the communication gap between citizens and municipal authorities, empowering communities to report, track, and resolve local environmental issues collaboratively.
+            </p>
+            <div class="landing-actions">
+              <button class="btn btn-primary btn-lg" id="goToLoginBtn">
+                <span>Access Platform</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-sm inline-arrow" style="width: 16px; height: 16px;">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+              </button>
+              <button class="btn btn-outline btn-lg" id="goToRegisterBtn">Explore Features</button>
+            </div>
           </div>
-        </div>
+        </section>
+
+        <!-- How It Works Section -->
+        <section id="how-it-works" class="landing-section section-how-it-works scroll-reveal">
+          <div class="section-container">
+            <div class="section-header">
+              <h2 class="section-title">How C.L.E.A.R. Works</h2>
+              <p class="section-subtitle">A transparent, closed-loop resolution pipeline from report to resolution.</p>
+            </div>
+            <div class="how-it-works-grid">
+              
+              <!-- Card 1 -->
+              <div class="step-card">
+                <div class="step-icon-wrapper">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="step-icon">
+                    <path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                  </svg>
+                  <span class="step-number">1</span>
+                </div>
+                <h3>1. Report Evidence</h3>
+                <p>Citizens pinpoint issues on an interactive map, upload photo evidence, and attach supporting references.</p>
+              </div>
+
+              <!-- Card 2 -->
+              <div class="step-card">
+                <div class="step-icon-wrapper">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="step-icon">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="9" y1="3" x2="9" y2="21"></line>
+                    <line x1="15" y1="3" x2="15" y2="21"></line>
+                  </svg>
+                  <span class="step-number">2</span>
+                </div>
+                <h3>2. Triage Board</h3>
+                <p>Municipal Operations Officers triage reports, assign squads, and track progress transparently on a board.</p>
+              </div>
+
+              <!-- Card 3 -->
+              <div class="step-card">
+                <div class="step-icon-wrapper">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="step-icon">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                  </svg>
+                  <span class="step-number">3</span>
+                </div>
+                <h3>3. Action & Verify</h3>
+                <p>Field crews resolve the environmental hazard. Officers upload "After" photos, closing the public loop.</p>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        <!-- Features Section -->
+        <section id="features" class="landing-section section-features scroll-reveal">
+          <div class="section-container">
+            <div class="section-header">
+              <h2 class="section-title">Key Capabilities</h2>
+              <p class="section-subtitle">Engineered for real municipal operations and active civic participation.</p>
+            </div>
+            
+            <div class="features-grid">
+              
+              <!-- Feature 1 -->
+              <div class="feature-card">
+                <div class="feature-icon-wrapper">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                    <polyline points="2 17 12 22 22 17"></polyline>
+                    <polyline points="2 12 12 17 22 12"></polyline>
+                  </svg>
+                </div>
+                <h4>Role-Aware Workspaces</h4>
+                <p>Dedicated dashboard configurations scoped for Residents, District Authorities, and Investigators.</p>
+              </div>
+
+              <!-- Feature 2 -->
+              <div class="feature-card">
+                <div class="feature-icon-wrapper">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                  </svg>
+                </div>
+                <h4>Multi-Contributor Evidence</h4>
+                <p>Attach or link supporting photos, maps, and external URLs to expand documentation on active reports.</p>
+              </div>
+
+              <!-- Feature 3 -->
+              <div class="feature-card">
+                <div class="feature-icon-wrapper">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                  </svg>
+                </div>
+                <h4>Interactive GIS Mapping</h4>
+                <p>Drop precise coordinates utilizing Leaflet.js and OpenStreetMap to pinpoint issues in local districts.</p>
+              </div>
+
+              <!-- Feature 4 -->
+              <div class="feature-card">
+                <div class="feature-icon-wrapper">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                  </svg>
+                </div>
+                <h4>Official Notice Bulletins</h4>
+                <p>Municipal officers publish district-wide environmental bulletins, sorting drives, and air quality notices.</p>
+              </div>
+
+              <!-- Feature 5 -->
+              <div class="feature-card">
+                <div class="feature-icon-wrapper">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                  </svg>
+                </div>
+                <h4>Print-to-PDF Report Export</h4>
+                <p>Download structured report cards containing coordinates, timeline, resolution logs, and before/after comparisons.</p>
+              </div>
+
+              <!-- Feature 6 -->
+              <div class="feature-card">
+                <div class="feature-icon-wrapper">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                  </svg>
+                </div>
+                <h4>Real-Time Alerts</h4>
+                <p>Get notification feed updates automatically when followed issue statuses change or new notices are published.</p>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="landing-section section-about scroll-reveal">
+          <div class="section-container">
+            <div class="about-card">
+              <div class="about-content">
+                <span class="badge">Our Mission</span>
+                <h2>Restoring Trust & Accountability in Civic Infrastructure</h2>
+                <p>
+                  Traditional municipal reporting channels are slow, non-transparent, and lack spatial precision. This leads to delayed responses and a lack of public visibility into whether and how reported issues are resolved.
+                </p>
+                <p>
+                  C.L.E.A.R. fosters clean, safe, and sustainable neighborhoods by connecting citizens and authorities in a direct, digital dialog. By acting as the eyes on the ground, residents help squads optimize dispatch routes, track resolution history, and keep our natural local environments thriving.
+                </p>
+              </div>
+              <div class="about-artwork">
+                <div class="ui-mockup-wrapper">
+                  <div class="ui-mockup-header">
+                    <span class="dot red"></span>
+                    <span class="dot yellow"></span>
+                    <span class="dot green"></span>
+                    <span class="mockup-title">Triage Board</span>
+                  </div>
+                  <div class="ui-mockup-body">
+                    <div class="mockup-column">
+                      <span class="mockup-col-title">Review Queue</span>
+                      <div class="mockup-card">
+                        <div class="mockup-card-tag danger">Air Quality</div>
+                        <div class="mockup-card-text">Illegal waste burning reported near school grounds</div>
+                        <div class="mockup-card-meta">📍 Ludhiana</div>
+                      </div>
+                    </div>
+                    <div class="mockup-column">
+                      <span class="mockup-col-title">In Progress</span>
+                      <div class="mockup-card active">
+                        <div class="mockup-card-tag primary">Waste Disposal</div>
+                        <div class="mockup-card-text">Unregulated dumping along canal bank cleared</div>
+                        <div class="mockup-card-meta">📍 SAS Nagar</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="landing-footer">
+          <div class="footer-container">
+            <div class="footer-left">
+              <brand-logo text="clear" class="footer-logo"></brand-logo>
+              <p class="footer-desc">Crowdsourced Local Environmental Action & Resolution</p>
+            </div>
+            <div class="footer-right">
+              <p class="copyright">&copy; 2026 C.L.E.A.R. Project. Built for environmental resilience & transparent civic governance.</p>
+            </div>
+          </div>
+        </footer>
+
       </div>
 
       <!-- 2. LOGIN SCREEN -->
@@ -365,7 +592,7 @@
 
         <!-- Shared Location Filter -->
         <div class="sidebar-section citizen-only-nav">
-          <div class="section-title">Location Filter</div>
+          <div class="sidebar-section-title">Location</div>
           <button type="button" class="location-box" id="locationBoxBtn" aria-expanded="false" aria-controls="sublocationList">
             <svg class="icon color-green" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"></path>
