@@ -292,10 +292,6 @@ For rapid verification and triage simulation, use these pre-seeded accounts:
 
 ### 👤 Citizen Accounts (Resident Reporters)
 *   **Nishant**: `user1@clear.com` (Password: `password` • ID: `user1`)
-*   **Abhyudaya**: `user2@clear.com` (Password: `password` • ID: `user2`)
-*   **Naman**: `user3@clear.com` (Password: `password` • ID: `user3`)
-*   **Aashmi**: `user4@clear.com` (Password: `password` • ID: `user4`)
 
 ### 👮 Municipal Accounts (Operations Officers)
 *   **SAS Nagar Municipal Officer**: `municipal1@clear.gov` (Password: `password` • Auth Key: `HX291Z` • District: `SAS NAGAR` • ID: `municipal1`)
-*   **Ludhiana Municipal Officer**: `municipal2@clear.gov` (Password: `password` • Auth Key: `HX291Z` • District: `LUDHIANA` • ID: `municipal2`)
