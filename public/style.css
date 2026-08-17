@@ -3051,17 +3051,24 @@ textarea {
   }
 
   .sidebar {
-    width: 100%;
-    height: auto;
-    position: static;
-    border-right: none;
-    border-bottom: var(--border-width) solid var(--color-border);
-    padding: 16px;
-    display: none; /* Controlled by hamburger */
+    position: fixed;
+    top: var(--header-height);
+    left: -100%;
+    width: var(--sidebar-width);
+    height: calc(100vh - var(--header-height));
+    background-color: var(--color-card-bg);
+    border-right: var(--border-width) solid var(--color-border);
+    border-bottom: none;
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: left var(--transition-speed) ease;
+    z-index: 1000;
   }
 
-  .sidebar.mobile-open {
-    display: flex;
+  .sidebar.open {
+    left: 0;
   }
 
   .hamburger-menu-btn {
@@ -3070,6 +3077,17 @@ textarea {
 
   .kanban-board-wrapper {
     grid-template-columns: 1fr !important;
+  }
+
+  .kanban-col {
+    height: auto !important;
+    min-height: auto !important;
+  }
+
+  .kanban-col-cards {
+    max-height: none !important;
+    overflow: visible !important;
+    min-height: auto !important;
   }
 
   .ops-dashboard-summary {
@@ -3086,6 +3104,41 @@ textarea {
 
   .header-center {
     display: none; /* Hide search */
+  }
+
+  .main-content.municipality-portal.tab-triage,
+  .main-content.municipality-portal.tab-notices,
+  .main-content.municipality-portal.tab-resolved {
+    overflow-y: auto !important;
+  }
+
+  #municipalTriageViewport,
+  #municipalNoticesViewport,
+  #municipalResolvedViewport {
+    height: auto !important;
+    min-height: auto !important;
+  }
+
+  .modal-container {
+    width: calc(100% - 24px) !important;
+    margin: 12px !important;
+    max-height: calc(100vh - 48px) !important;
+  }
+
+  .modal-form {
+    overflow-y: auto !important;
+    max-height: calc(100vh - 120px) !important;
+  }
+
+  .ops-header-bar {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+
+  .admin-district-select-container {
+    width: 100% !important;
+    justify-content: space-between !important;
   }
 }
 
@@ -4005,6 +4058,42 @@ brand-logo {
   
   .footer-right .copyright {
     text-align: center;
+  }
+
+  .landing-actions {
+    flex-direction: column !important;
+    gap: 12px !important;
+    align-items: stretch !important;
+  }
+  
+  .landing-actions .btn {
+    width: 100% !important;
+    box-sizing: border-box;
+  }
+  
+  .post-card-actions {
+    gap: 4px !important;
+    flex-wrap: wrap !important;
+  }
+  
+  .action-pill {
+    padding: 0 8px !important;
+    font-size: 11px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .landing-header-container {
+    padding: 0 12px !important;
+  }
+  
+  .landing-header-actions {
+    gap: 8px !important;
+  }
+  
+  .landing-header-actions .btn {
+    padding: 6px 10px !important;
+    font-size: 11px !important;
   }
 }
 

@@ -2859,6 +2859,9 @@ function setupEventListeners() {
 
   // Close dropdowns/menus when clicking elsewhere
   document.addEventListener('click', (e) => {
+    if (sidebar && sidebar.classList.contains('open') && !sidebar.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+      sidebar.classList.remove('open');
+    }
     if (profileDropdown && !profileDropdown.contains(e.target) && e.target !== profileMenuTrigger) {
       profileDropdown.classList.remove('open');
     }
@@ -3648,9 +3651,13 @@ function renderKanbanBoard(issues) {
     colContainer.appendChild(card);
   });
 
-  document.getElementById('countColPending').textContent = counts['Review Queue'];
-  document.getElementById('countColAcknowledged').textContent = counts['Acknowledged'];
-  document.getElementById('countColInProgress').textContent = counts['In Progress'];
+  const pendingBadge = document.getElementById('countColPending');
+  const acknowledgedBadge = document.getElementById('countColAcknowledged');
+  const inProgressBadge = document.getElementById('countColInProgress');
+
+  if (pendingBadge) pendingBadge.textContent = counts['Review Queue'];
+  if (acknowledgedBadge) acknowledgedBadge.textContent = counts['Acknowledged'];
+  if (inProgressBadge) inProgressBadge.textContent = counts['In Progress'];
 }
 
 // REST call to update status
