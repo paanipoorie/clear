@@ -1,4 +1,23 @@
-# 🌿 C.L.E.A.R. — Crowdsourced Local Environmental Action & Resolution
+<p align="center">
+  <img src="public/favicon/favicon.svg" alt="C.L.E.A.R. Logo" width="120" height="120" />
+</p>
+
+<h1 align="center">🌿 C.L.E.A.R.</h1>
+
+<p align="center">
+  <b>Crowdsourced Local Environmental Action & Resolution</b><br/>
+  <i>Empowering citizens and municipal officers to collaboratively track and resolve local environmental issues.</i>
+</p>
+
+<p align="center">
+  <a href="#-user-interface-showcase">Showcase</a> •
+  <a href="#-core-features--capabilities">Features</a> •
+  <a href="#-system-workflows--design">System Design</a> •
+  <a href="#-rest-api-reference">API Reference</a> •
+  <a href="#-installation--setup">Setup Guide</a>
+</p>
+
+---
 
 **C.L.E.A.R.** is a modern civic engagement platform designed to bridge the communication gap between local residents (citizens) and municipal operations officers. By facilitating the collaborative identification, tracking, and resolution of local environmental issues—such as illegal waste dumping, open garbage burning, drainage blockages, and hazardous spills—C.L.E.A.R. empowers communities to act as eyes on the ground, while providing municipal squads with structured triage and dispatch tools to resolve issues transparently.
 
@@ -10,20 +29,19 @@ Below is a visual guide to the C.L.E.A.R. application interfaces. (Screenshots c
 
 <table width="100%">
   <tr>
-    <td width="50%" align="center"><b>Welcome & Landing Screen</b><br/><img src="media/readme/Screenshot%20From%202026-08-08%2011-42-10.png" width="100%" alt="Landing Page Screen" /></td>
-    <td width="50%" align="center"><b>Role-Based Authentication</b><br/><img src="media/readme/Screenshot%20From%202026-08-08%2011-42-52.png" width="100%" alt="Login Screen" /></td>
+    <td width="50%" align="center"><b>Welcome & Landing Screen</b><br/><img src="media/readme/Home.png" width="100%" alt="Landing Page Screen" /></td>
+    <td width="50%" align="center"><b>Citizen Dashboard (Public Feed)</b><br/><img src="media/readme/Public.png" width="100%" alt="Citizen Dashboard Feed" /></td>
   </tr>
   <tr>
-    <td width="50%" align="center"><b>Citizen Dashboard (District Filter)</b><br/><img src="media/readme/Screenshot%20From%202026-08-08%2011-43-08.png" width="100%" alt="Citizen Dashboard Filters" /></td>
-    <td width="50%" align="center"><b>Citizen Feed (Issue Card & Actions)</b><br/><img src="media/readme/Screenshot%20From%202026-08-08%2011-43-12.png" width="100%" alt="Citizen Feed Item" /></td>
+    <td width="50%" align="center"><b>Create Environmental Report</b><br/><img src="media/readme/Create%20Post.png" width="100%" alt="Create Environmental Report" /></td>
+    <td width="50%" align="center"><b>Municipal Triage Board (Kanban)</b><br/><img src="media/readme/Municipal%20Triage%20Board.png" width="100%" alt="Municipal Kanban Triage" /></td>
   </tr>
   <tr>
-    <td width="50%" align="center"><b>Municipal Operations Kanban Board</b><br/><img src="media/readme/Screenshot%20From%202026-08-08%2011-45-02.png" width="100%" alt="Municipal Operations Dashboard" /></td>
-    <td width="50%" align="center"><b>Resolved Reports Feed (Municipal)</b><br/><img src="media/readme/Screenshot%20From%202026-08-08%2011-42-35.png" width="100%" alt="Municipal Resolved View" /></td>
+    <td width="50%" align="center"><b>Resolved Reports Feed & Archives</b><br/><img src="media/readme/Resolved%20Issues.png" width="100%" alt="Resolved Reports Feed" /></td>
+    <td width="50%" align="center"><b>Project-Specific Report Export (PDF)</b><br/><img src="media/readme/Export%20Reports.png" width="100%" alt="Exportable PDF Report" /></td>
   </tr>
   <tr>
-    <td width="50%" align="center"><b>Citizen Feed (Detailed Visual Cards)</b><br/><img src="media/readme/Screenshot%20From%202026-08-08%2011-43-49.png" width="100%" alt="Citizen Detailed Feed" /></td>
-    <td width="50%" align="center"><b>Exportable Civic Resolution Report</b><br/><img src="media/readme/Screenshot%20From%202026-08-08%2011-44-10.png" width="100%" alt="Exportable PDF Report" /></td>
+    <td colspan="2" align="center"><b>Notices & Community Advisories</b><br/><img src="media/readme/Notices%20%26%20Advisories.png" width="70%" alt="Notices and Community Bulletins" /></td>
   </tr>
 </table>
 
@@ -42,29 +60,48 @@ C.L.E.A.R. is built with a lightweight, high-performance, single-page applicatio
 
 ---
 
-## 👥 Roles & Capabilities
+## 🌟 Core Features & Capabilities
 
-### 1. Resident Reporter (Civil / Citizen)
-*   **Sign Up & Sign In**: Accesses the portal using standard email credentials.
-*   **Report Environmental Issues**: Submits reports with a title, description, district, and coordinates (via Leaflet map marker).
-*   **Visual Attachments**: Uploads physical photos and references external links. An automatic Unsplash image fallback maps categories (dumping, burning, water, warning) if no custom cover photo is supplied.
-*   **Anonymous Mode**: Toggles public username visibility to submit reports anonymously.
-*   **Community Interaction**: Upvotes issues to raise priority status (1 vote limit per user) and posts comments on report timelines.
-*   **Appeal System**: Appeals rejected reports by submitting secondary evidence (text explanation + photo proof) to return the issue to the municipal queue.
-*   **Real-time Alerts**: Accesses an in-app notification bell feed tracking status changes of followed reports.
+### 📢 Citizen Environmental Reporting
+*   **Interactive Issue Submission**: Drop precise coordinate pins using integrated Leaflet/OpenStreetMap mapping, select a local district, choose hazard categories, and describe environmental issues.
+*   **Visual Proof & Category Fallbacks**: Upload local cover photos or reference external links. Implements category-specific Unsplash fallbacks (e.g., dumping, water) if no custom photo is supplied.
+*   **Anonymous Reporting Mode**: Toggle username visibility to file reports anonymously for community safety and privacy.
+*   **Appeals Workflow**: Appeal rejected reports by submitting clarification notes and secondary verification photos to put the issue back in the municipal triage queue.
 
-### 2. Operations Officer (Municipal)
-*   **Secure Registration**: Authenticates using a predefined secure administrative Auth Key.
-*   **District-Level Triage**: Filters and displays issues strictly belonging to the officer's designated district.
-*   **Kanban Board Control**: Manages issues across three distinct lanes:
-    1.  *Review Queue*: Unassessed reports and citizen appeals.
-    2.  *Acknowledged*: Accepted reports awaiting field squad dispatch.
-    3.  *In Progress*: Active field team deployments.
-*   **Actionable Triage Ribbon**: Slides open a details drawer to transition reports:
-    *   `Acknowledge` or `Reject` reports (requiring strict categorization like private property, incorrect location, duplicate, etc.).
-    *   `Start Work` to transition acknowledged tasks to active dispatches.
-    *   `Resolve` reports (requiring a community note + "After" verification photo).
-*   **Notice Board Bulletin**: Publishes and manages official community announcements (e.g. seasonal stubble burning alerts) with customizable expiration dates.
+### 📎 Evidence & Multi-Contributor Attachments
+*   **Collaborative Evidence Gathering**: Citizens can attach supporting evidence to existing reports filed by other residents, enabling community-driven investigation.
+*   **Rich Attachments**: Submit supporting images (stored locally in `/media/uploads/` via base64 encoding) and relevant web links.
+*   **Sleek UI Presentation**: Displays all multi-contributor attachments in a collapsible, Neo-Brutalist details panel to preserve interface space.
+*   **Spam & Duplicate Control**: Enforces database-level constraints allowing only one unique attachment submission per user per report.
+
+### ⚙️ Municipal Operations & Triage
+*   **Administrative Auth Keys**: Registration and access are protected with a secure municipal Auth Key matching environment security.
+*   **District-Scoped Triage**: Officers automatically filter and see only active reports belonging to their designated home district.
+*   **3-Lane Kanban Workflow**: Manage operational flow through three distinct dispatch stages:
+    1.  *Review Queue*: Initial unassessed citizen reports and active citizen appeals.
+    2.  *Acknowledged*: Validated issues waiting for maintenance team scheduling.
+    3.  *In Progress*: Dispatched teams working on resolution.
+*   **Detailed Operations Drawer**: Slides out from the right to update status, append internal notes, record rejection reasons, and log resolution summaries with mandatory "after" photo verification.
+*   **Community Bulletins**: Post time-bound official community warnings and environmental campaigns (e.g. stubble burning alerts) targeting specific districts.
+
+### 👥 Role-Aware Workflows
+*   **Role-Aware Filtering & Permissions**: Access to evidence items, Kanban lanes, and district listings dynamically adapts depending on user sub-roles.
+*   **Investigator Role**: Accesses a read-only, restricted view of active/open reports in their home district, hiding resolved lists and administrative boards.
+*   **Admin Role**: Full administrative oversight across all districts with a custom district selector.
+*   **Authority Role**: Standard district-scoped operations and Kanban triage access.
+*   **Interactive Simulator Switcher**: Officers can test different permissions instantly using a dynamic switcher built into their profile menu.
+
+### 💬 Community Interaction & Engagement
+*   **Priority Ranking Formula**: An algorithmic score weights upvotes and elapsed waiting hours to bubble urgent issues to the top:
+    $$\text{Priority Score} = (\text{Upvotes} \times 1.5) + (\text{Hours Waiting} \times 0.15)$$
+*   **Interactive Timelines & Comments**: Timeline event log records all stage updates. Citizens can discuss issues via commenting on report cards.
+*   **In-App Alerts Feed**: A real-time notification system alerts citizens whenever the status of a followed report is updated.
+
+### 📄 Project-Specific Report Export
+*   **One-Click PDF Generation**: Export comprehensive, print-ready civic audit reports of resolved issues directly from the details panel.
+*   **Professional Document Layout**: Employs the project's Outfit/Inter typographic styles and design borders for a polished presentation.
+*   **Data Compilation**: Compiles citizen coordinates, initial description, full history logs, comments thread, internal squad notes, and before-and-after photo comparisons.
+*   **Seamless Print Integration**: Automatically opens the system printing interface to save reports directly as PDFs.
 
 ---
 
@@ -254,38 +291,11 @@ Open your browser and navigate to:
 For rapid verification and triage simulation, use these pre-seeded accounts:
 
 ### 👤 Citizen Accounts (Resident Reporters)
-*   **User 1**: `user1@email.com` (Password: `password` • Name: `Nishant Kumar`)
-*   **User 2**: `user2@email.com` (Password: `password` • Name: `Abhyudaya Sengar`)
-*   **General**: `user@clear.gov` (Password: `password` • Name: `user`)
+*   **Nishant**: `user1@clear.com` (Password: `password` • ID: `user1`)
+*   **Abhyudaya**: `user2@clear.com` (Password: `password` • ID: `user2`)
+*   **Naman**: `user3@clear.com` (Password: `password` • ID: `user3`)
+*   **Aashmi**: `user4@clear.com` (Password: `password` • ID: `user4`)
 
 ### 👮 Municipal Accounts (Operations Officers)
-*   **SAS Nagar District Admin**: `officer2@clear.gov` (Password: `password` • District: `SAS NAGAR`)
-*   **SAS Nagar Deputy**: `officr1@email.com` (Auth Key/Password: `HX291Z` • District: `SAS NAGAR`)
-*   **Amritsar District Admin**: `officr2@email.com` (Auth Key/Password: `AMR98X` • District: `AMRITSAR`)
-*   **Ludhiana District Admin**: `officer@clear.gov` (Password: `password` • District: `LUDHIANA`)
-
----
-
-## 🏆 Bounty Requirements Implementation
-
-C.L.E.A.R. has fully satisfied the three key bounty objectives as outlined in [`bounty.md`](docs/bounty.md).
-
-### 1. Bounty 1: Attachments to Environment Reports (Multi-Contributor Evidence)
-*   **DB Model**: Implemented the relational `ReportAttachment` model to allow users to attach supporting evidence to existing reports.
-*   **UI/UX Integration**: Attached evidence is displayed inside the Report Details panel. To maintain a clean visual workspace, attachments are wrapped in a collapsible, styled Neo-Brutalist `<details>` panel.
-*   **Permissions**: Restricts each user to **one** attachment submission per report, while allowing multiple users to contribute. Supporting uploads use the existing base64-decoded local file persistence.
-
-### 2. Bounty 2: Role-Aware Evidence Item Filters (Context-Scoped Dashboards)
-*   **Dynamic Role Switcher**: Added an interactive role selector in the user profile menu to test different permission settings.
-*   **Permissions & Visibility**:
-    *   **Authority (Municipal)**: Operations Officers triage only the reports occurring in their assigned home district.
-    *   **Investigator**: Read-only view restricted to active/open reports in their home district. Hides administrative and resolved lanes.
-    *   **Admin**: Global view allowing inspection of reports across all districts with a custom district dropdown selector.
-*   **Aesthetics**: Sub-role indicators update the profile badge dynamically, and selection alerts use high-contrast color styling.
-
-### 3. Bounty 3: Project-Specific Report Export (Print-to-PDF Auditing)
-*   **Actionable Trigger**: Added an "Export PDF" action button to the report details panel for resolved environmental issues.
-*   **Export Layout**: Generates a print-friendly document utilizing the project's Outfit/Inter design typography and layout borders.
-*   **Data Preservation**: Aggregates all original report fields (title, description, coordinates, author), resolution metrics (before/after images, completion summaries, dates), and the full citizen comment logs into the document.
-*   **Native Integration**: Automatically opens the system printing/saving window for quick PDF creation.
-
+*   **SAS Nagar Municipal Officer**: `municipal1@clear.gov` (Password: `password` • Auth Key: `HX291Z` • District: `SAS NAGAR` • ID: `municipal1`)
+*   **Ludhiana Municipal Officer**: `municipal2@clear.gov` (Password: `password` • Auth Key: `HX291Z` • District: `LUDHIANA` • ID: `municipal2`)

@@ -13,17 +13,13 @@ The app features an authentication layer that governs access to the user portals
 - **Local User DB**: User accounts are initialized and stored client-side in the browser's `localStorage` under `clear_users`.
 - **Predefined Credentials**:
   - **Resident Reporters (Civil / Citizen)**:
-    - `user@clear.gov` (Password: `password` / Name: `user`)
-    - `user1@email.com` (Password: `password` / Name: `Nishant Kumar`)
-    - `user2@email.com` (Password: `password` / Name: `Abhyudaya Sengar`)
-    - `user3@email.com` (Password: `password` / Name: `Amrit Singh`)
-    - `user4@email.com` (Password: `password` / Name: `Karan Malhotra`)
-    - `user5@email.com` (Password: `password` / Name: `Simran Kaur`)
+    - `user1@clear.com` (Password: `password` / Name: `Nishant`)
+    - `user2@clear.com` (Password: `password` / Name: `Abhyudaya`)
+    - `user3@clear.com` (Password: `password` / Name: `Naman`)
+    - `user4@clear.com` (Password: `password` / Name: `Aashmi`)
   - **Operations Officers (Municipal)**:
-    - `officer@clear.gov` (Password: `password` / District: `LUDHIANA`)
-    - `officr1@email.com` (Auth Key / Password: `HX291Z` / District: `SAS NAGAR` / Name: `municipal`)
-    - `officer2@clear.gov` (Password: `password` / District: `SAS NAGAR` / Name: `SAS Nagar Admin`)
-    - `officr2@email.com` (Auth Key / Password: `AMR98X` / District: `AMRITSAR` / Name: `Amritsar Officer`)
+    - `municipal1@clear.gov` (Password / Auth Key: `HX291Z` / District: `SAS NAGAR` / Name: `municipal1`)
+    - `municipal2@clear.gov` (Password / Auth Key: `HX291Z` / District: `LUDHIANA` / Name: `municipal2`)
 - **Login Session Persistence**: Logged-in state is tracked in `localStorage` (`clear_user_authenticated` and `clear_username`).
 - **Routing**: Popstate history listeners map client requests dynamically to `/citizen/dashboard` or `/municipal/dashboard` based on authentication status and user roles.
 

@@ -13,10 +13,8 @@ This document details the step-by-step workflows, tools, and visual layouts avai
     *   **Login**: Email and secure **Auth Key** (functioning as password).
     *   **Registration**: Email, chosen username, secure Auth Key, and District (selection of one of the 23 Punjab districts).
 4.  **Mock Credentials**: The default mock municipal accounts are pre-populated in client storage:
-    *   `officer@clear.gov` (Password: `password` / District: `LUDHIANA`)
-    *   `officr1@email.com` (Auth Key: `HX291Z` / District: `SAS NAGAR`)
-    *   `officer2@clear.gov` (Password: `password` / District: `SAS NAGAR`)
-    *   `officr2@email.com` (Auth Key: `AMR98X` / District: `AMRITSAR`)
+    *   `municipal1@clear.gov` (Password: `password` • Auth Key: `HX291Z` • District: `SAS NAGAR`)
+    *   `municipal2@clear.gov` (Password: `password` • Auth Key: `HX291Z` • District: `LUDHIANA`)
 5.  **Session & District Binding**: Upon successful login, the session is tracked (`clear_user_authenticated = true`, `clear_username = username`). The officer's home district is locked into the session (`MOCK_MUNICIPALITY_DISTRICT = user.district`). The dashboard title is dynamically updated to display `"Operations Officer (DISTRICT_NAME)"`.
 6.  **Redirect**: Transition to `/municipal/dashboard`.
 
