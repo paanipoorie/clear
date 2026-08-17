@@ -2,7 +2,7 @@
   <img src="public/favicon/favicon.svg" alt="C.L.E.A.R. Logo" width="120" height="120" />
 </p>
 
-<h1 align="center">🌿 C.L.E.A.R.</h1>
+<h1 align="center">C.L.E.A.R.</h1>
 
 <p align="center">
   <b>Crowdsourced Local Environmental Action & Resolution</b><br/>
