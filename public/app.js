@@ -648,6 +648,44 @@ let attachedImages = [];
 let attachedLinks = [];
 let appealImagesBase64 = [];
 
+// Image compression helper to downscale large files before base64 upload
+function compressImage(file, callback) {
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const MAX_WIDTH = 1024;
+      const MAX_HEIGHT = 1024;
+      let width = img.width;
+      let height = img.height;
+
+      if (width > height) {
+        if (width > MAX_WIDTH) {
+          height *= MAX_WIDTH / width;
+          width = MAX_WIDTH;
+        }
+      } else {
+        if (height > MAX_HEIGHT) {
+          width *= MAX_HEIGHT / height;
+          height = MAX_HEIGHT;
+        }
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+
+      // Compress to JPEG with 0.8 quality
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+      callback(dataUrl);
+    };
+    img.src = event.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
 // Punjab districts center coordinates
 const districtCoords = {
   'AMRITSAR': { lat: 31.6340, lng: 74.8723 },
@@ -2578,7 +2616,8 @@ function setupEventListeners() {
         (error) => {
           console.warn('Geolocation error/denied. Defaulting to Punjab center.', error);
           initLeafletMap(31.1471, 75.3412);
-        }
+        },
+        { enableHighAccuracy: false, timeout: 3000, maximumAge: 30000 }
       );
     } else {
       initLeafletMap(31.1471, 75.3412);
@@ -2694,10 +2733,7 @@ function setupEventListeners() {
     files.forEach(file => {
       if (!file.type.startsWith('image/')) return;
       
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const dataUrl = event.target.result;
-        
+      compressImage(file, (dataUrl) => {
         if (attachedImages.includes(dataUrl)) return;
         attachedImages.push(dataUrl);
         
@@ -2715,8 +2751,7 @@ function setupEventListeners() {
         });
         
         previewsGrid.appendChild(previewItem);
-      };
-      reader.readAsDataURL(file);
+      });
     });
   });
 
@@ -2941,13 +2976,11 @@ function setupEventListeners() {
     const file = e.target.files[0];
     if (!file || !file.type.startsWith('image/')) return;
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      resolutionImageBase64 = event.target.result;
+    compressImage(file, (dataUrl) => {
+      resolutionImageBase64 = dataUrl;
       resImgEl.src = resolutionImageBase64;
       resPhotoPreview.style.display = 'block';
-    };
-    reader.readAsDataURL(file);
+    });
   });
 
   document.getElementById('removeResImgBtn').addEventListener('click', () => {
@@ -3107,10 +3140,7 @@ function setupEventListeners() {
       files.forEach(file => {
         if (!file.type.startsWith('image/')) return;
         
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          const dataUrl = event.target.result;
-          
+        compressImage(file, (dataUrl) => {
           if (appealImagesBase64.includes(dataUrl)) return;
           appealImagesBase64.push(dataUrl);
           
@@ -3131,8 +3161,7 @@ function setupEventListeners() {
           });
           
           appealPhotoPreview.appendChild(previewItem);
-        };
-        reader.readAsDataURL(file);
+        });
       });
     });
   }
