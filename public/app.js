@@ -2680,7 +2680,14 @@ function setupEventListeners() {
   // Photo Attachments (Multiple files upload + Base64 conversion)
   const photosInput = document.getElementById('issuePhotos');
   const previewsGrid = document.getElementById('photoPreviewsGrid');
-  
+
+  const photosIconBtn = document.getElementById('photosIconBtn');
+  if (photosIconBtn && photosInput) {
+    photosIconBtn.addEventListener('click', () => {
+      photosInput.click();
+    });
+  }
+
   photosInput.addEventListener('change', (e) => {
     const files = Array.from(e.target.files);
     
@@ -2922,6 +2929,12 @@ function setupEventListeners() {
   const resPhotoInput = document.getElementById('resolutionPhotosInput');
   const resPhotoPreview = document.getElementById('resolutionPhotoPreview');
   const resImgEl = document.getElementById('resImgEl');
+  const selectResolutionPhotoBtn = document.getElementById('selectResolutionPhotoBtn');
+  if (selectResolutionPhotoBtn && resPhotoInput) {
+    selectResolutionPhotoBtn.addEventListener('click', () => {
+      resPhotoInput.click();
+    });
+  }
   let resolutionImageBase64 = null;
 
   resPhotoInput.addEventListener('change', (e) => {
@@ -3077,6 +3090,14 @@ function setupEventListeners() {
   // Appeal Modal file conversion and previews
   const appealPhotosInput = document.getElementById('appealPhotosInput');
   const appealPhotoPreview = document.getElementById('appealPhotoPreview');
+
+  const selectAppealPhotosBtn = document.getElementById('selectAppealPhotosBtn');
+  if (selectAppealPhotosBtn && appealPhotosInput) {
+    selectAppealPhotosBtn.addEventListener('click', () => {
+      appealPhotosInput.click();
+    });
+  }
+
   if (appealPhotosInput) {
     appealPhotosInput.addEventListener('change', (e) => {
       appealPhotoPreview.innerHTML = '';
@@ -3229,6 +3250,13 @@ function setupEventListeners() {
   const saveAttachmentBtn = document.getElementById('saveAttachmentBtn');
   const removeAttachmentBtn = document.getElementById('removeAttachmentBtn');
   const attachmentUrlInput = document.getElementById('attachmentUrlInput');
+
+  const attachmentFileBtn = document.getElementById('attachmentFileBtn');
+  if (attachmentFileBtn && attachmentFileInput) {
+    attachmentFileBtn.addEventListener('click', () => {
+      attachmentFileInput.click();
+    });
+  }
 
   if (attachmentFileInput) {
     attachmentFileInput.addEventListener('change', (e) => {
