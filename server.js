@@ -54,33 +54,10 @@ if (!fs.existsSync(UPLOAD_DIR)) {
 }
 
 function saveBase64Image(base64Str) {
-  if (!base64Str || typeof base64Str !== 'string' || !base64Str.startsWith('data:image')) {
-    return base64Str;
-  }
-
-  try {
-    const matches = base64Str.match(/^data:image\/([A-Za-z+]+);base64,(.+)$/);
-    if (!matches || matches.length !== 3) {
-      return base64Str;
-    }
-
-    const ext = matches[1] === 'jpeg' ? 'jpg' : matches[1];
-    const dataBuffer = Buffer.from(matches[2], 'base64');
-    
-    const hash = crypto.createHash('md5').update(dataBuffer).digest('hex');
-    const filename = `${Date.now()}-${hash}.${ext}`;
-    const filepath = path.join(UPLOAD_DIR, filename);
-
-    fs.writeFileSync(filepath, dataBuffer);
-    
-    return `/media/uploads/${filename}`;
-  } catch (err) {
-    console.error('Failed to save base64 image:', err);
-    return base64Str;
-  }
+  return base64Str;
 }
 
-app.use(express.json({ limit: '10mb' })); // Support larger base64 uploads
+app.use(express.json({ limit: '50mb' })); // Support larger base64 uploads
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/media', express.static(path.join(__dirname, 'media')));
