@@ -643,7 +643,10 @@ const MOCK_MUNICIPALITY_STATE = 'Punjab';
 // Map and attachments editor state
 let mapInstance = null;
 let mapMarker = null;
+let mapLocationCircle = null;
 let selectedCoordinates = null;
+let isLocating = false;
+let districtManuallyChanged = false;
 let attachedImages = [];
 let attachedLinks = [];
 let appealImagesBase64 = [];
@@ -2522,8 +2525,242 @@ function setupEventListeners() {
   }
 
   // Editor helper functions for location, photos, and links
+  // Helper to find closest Punjab district from coordinates
+  function findNearestDistrict(lat, lng) {
+    let closest = 'SAS NAGAR';
+    let minDistance = Infinity;
+
+    const toRad = (deg) => deg * Math.PI / 180;
+    const R = 6371;
+
+    for (const [name, coords] of Object.entries(districtCoords)) {
+      const dLat = toRad(coords.lat - lat);
+      const dLng = toRad(coords.lng - lng);
+      const a = 
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(toRad(lat)) * Math.cos(toRad(coords.lat)) * 
+        Math.sin(dLng / 2) * Math.sin(dLng / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      const dist = R * c;
+
+      if (dist < minDistance) {
+        minDistance = dist;
+        closest = name;
+      }
+    }
+
+    return closest;
+  }
+
+  // Reverse geocoding helper via OpenStreetMap Nominatim
+  async function reverseGeocodeLocation(lat, lng) {
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=14&addressdetails=1`, {
+        headers: { 'Accept': 'application/json' }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        return { addressText: data.display_name };
+      }
+    } catch (err) {
+      // Quiet fail on network issues
+    }
+    return { addressText: null };
+  }
+
+  // Apply coordinates to editor state, marker, district dropdown, and badges
+  function applyLocationCoordinates(lat, lng, isManual = false) {
+    selectedCoordinates = { lat, lng };
+    setMapMarker(lat, lng);
+
+    const nearest = findNearestDistrict(lat, lng);
+    const subLocSelect = document.getElementById('issueSubLocation');
+    if (subLocSelect) {
+      subLocSelect.disabled = false;
+      if (!districtManuallyChanged || !subLocSelect.value) {
+        subLocSelect.value = nearest;
+      }
+    }
+
+    const locBtn = document.getElementById('modalLocationBtn');
+    const locBtnText = document.getElementById('locationBtnText');
+    const statusBadge = document.getElementById('locationStatusText');
+
+    if (locBtn) {
+      locBtn.classList.remove('locating');
+      locBtn.classList.add('selected');
+    }
+    if (locBtnText) {
+      locBtnText.textContent = isManual ? 'Location Set' : 'Location Confirmed';
+    }
+
+    const activeDistrict = (subLocSelect && subLocSelect.value) ? subLocSelect.value : nearest;
+
+    if (statusBadge) {
+      statusBadge.style.display = 'inline-flex';
+      statusBadge.classList.remove('locating');
+      statusBadge.innerHTML = `📍 ${activeDistrict} (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+    }
+
+    // Enhance badge asynchronously with street / area name if available
+    reverseGeocodeLocation(lat, lng).then((res) => {
+      if (res && res.addressText && statusBadge) {
+        const parts = res.addressText.split(',');
+        const shortAddr = parts.slice(0, 2).join(',').trim();
+        statusBadge.innerHTML = `📍 ${activeDistrict} • ${escapeHTML(shortAddr)} (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+        statusBadge.title = res.addressText;
+      }
+    }).catch(() => {});
+  }
+
+  // Leaflet marker helper
+  function setMapMarker(lat, lng) {
+    const latlng = [lat, lng];
+
+    if (mapMarker) {
+      mapMarker.setLatLng(latlng);
+    } else if (mapInstance) {
+      mapMarker = L.marker(latlng, { draggable: true }).addTo(mapInstance);
+      mapMarker.on('dragend', () => {
+        const pos = mapMarker.getLatLng();
+        applyLocationCoordinates(pos.lat, pos.lng, true);
+      });
+    }
+  }
+
+  // Leaflet location found event handler
+  function onLeafletLocationFound(e) {
+    isLocating = false;
+    const { lat, lng } = e.latlng;
+    const accuracy = e.accuracy;
+
+    if (mapLocationCircle) {
+      mapLocationCircle.remove();
+      mapLocationCircle = null;
+    }
+
+    if (mapInstance && accuracy && accuracy < 5000) {
+      mapLocationCircle = L.circle([lat, lng], {
+        radius: accuracy,
+        color: '#16a34a',
+        fillColor: '#22c55e',
+        fillOpacity: 0.15,
+        weight: 1
+      }).addTo(mapInstance);
+    }
+
+    applyLocationCoordinates(lat, lng, false);
+    const nearest = findNearestDistrict(lat, lng);
+    showToast(`📍 Location fetched via Leaflet (${nearest}: ${lat.toFixed(4)}, ${lng.toFixed(4)})`);
+  }
+
+  // Leaflet location error event handler
+  function onLeafletLocationError(e) {
+    isLocating = false;
+    console.warn('Leaflet locate error:', e);
+
+    const locBtn = document.getElementById('modalLocationBtn');
+    const locBtnText = document.getElementById('locationBtnText');
+    const statusBadge = document.getElementById('locationStatusText');
+
+    if (locBtn) locBtn.classList.remove('locating');
+    if (locBtnText) locBtnText.textContent = 'Set Location on Map';
+
+    if (!selectedCoordinates) {
+      const fallbackLat = 31.1471;
+      const fallbackLng = 75.3412;
+      applyLocationCoordinates(fallbackLat, fallbackLng, false);
+      if (statusBadge) {
+        statusBadge.classList.remove('locating');
+        statusBadge.innerHTML = '📍 Tap map or drag marker to set exact location';
+      }
+    }
+
+    showToast(`Location auto-detect unavailable (${e.message || 'Permission denied'}). Tap the map or select a district.`);
+  }
+
+  // Initialize Leaflet map inside modal
+  function initLeafletMap(lat, lng) {
+    const defaultLat = lat || 31.1471;
+    const defaultLng = lng || 75.3412;
+
+    if (!mapInstance) {
+      mapInstance = L.map('modalMap', {
+        center: [defaultLat, defaultLng],
+        zoom: 13,
+        zoomControl: true
+      });
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(mapInstance);
+
+      mapInstance.on('locationfound', onLeafletLocationFound);
+      mapInstance.on('locationerror', onLeafletLocationError);
+
+      mapInstance.on('click', (e) => {
+        applyLocationCoordinates(e.latlng.lat, e.latlng.lng, true);
+      });
+    } else {
+      mapInstance.setView([defaultLat, defaultLng], 13);
+    }
+
+    setMapMarker(defaultLat, defaultLng);
+
+    setTimeout(() => {
+      if (mapInstance) {
+        mapInstance.invalidateSize();
+      }
+    }, 100);
+  }
+
+  // Actually fetch location using Leaflet's native locate() API
+  function fetchLocationViaLeaflet() {
+    const container = document.getElementById('mapPickerContainer');
+    if (container) container.style.display = 'block';
+
+    const locBtn = document.getElementById('modalLocationBtn');
+    const locBtnText = document.getElementById('locationBtnText');
+    const statusBadge = document.getElementById('locationStatusText');
+
+    if (locBtn) locBtn.classList.add('locating');
+    if (locBtnText) locBtnText.textContent = 'Locating via Leaflet...';
+    if (statusBadge) {
+      statusBadge.style.display = 'inline-flex';
+      statusBadge.classList.add('locating');
+      statusBadge.innerHTML = '📍 Fetching location via Leaflet...';
+    }
+
+    // Initialize map if needed
+    if (!mapInstance) {
+      initLeafletMap(31.1471, 75.3412);
+    } else {
+      setTimeout(() => {
+        if (mapInstance) mapInstance.invalidateSize();
+      }, 100);
+    }
+
+    isLocating = true;
+
+    try {
+      mapInstance.locate({
+        setView: true,
+        maxZoom: 16,
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      });
+    } catch (err) {
+      console.warn('Error initiating Leaflet locate:', err);
+      onLeafletLocationError({ message: err.message || 'Geolocation failed' });
+    }
+  }
+
+  // Editor helper functions for location, photos, and links
   function resetEditorState() {
     selectedCoordinates = null;
+    districtManuallyChanged = false;
     attachedImages = [];
     attachedLinks = [];
 
@@ -2536,21 +2773,23 @@ function setupEventListeners() {
 
     const locationBtn = document.getElementById('modalLocationBtn');
     if (locationBtn) {
-      locationBtn.classList.remove('selected');
+      locationBtn.classList.remove('selected', 'locating');
       document.getElementById('locationBtnText').textContent = 'Add Location';
     }
 
     const statusText = document.getElementById('locationStatusText');
     if (statusText) {
       statusText.style.display = 'none';
+      statusText.classList.remove('locating');
       statusText.textContent = '';
+      statusText.removeAttribute('title');
     }
 
     const subLocSelect = document.getElementById('issueSubLocation');
     if (subLocSelect) {
-      subLocSelect.disabled = true;
+      subLocSelect.disabled = false;
       subLocSelect.innerHTML = `
-        <option value="" disabled selected>Select District (Confirm Location First)</option>
+        <option value="" disabled selected>Select District or Detect via Map</option>
         <option value="AMRITSAR">AMRITSAR</option>
         <option value="BARNALA">BARNALA</option>
         <option value="BATHINDA">BATHINDA</option>
@@ -2592,80 +2831,31 @@ function setupEventListeners() {
     const mapPicker = document.getElementById('mapPickerContainer');
     if (mapPicker) mapPicker.style.display = 'none';
 
+    if (mapLocationCircle) {
+      mapLocationCircle.remove();
+      mapLocationCircle = null;
+    }
     if (mapMarker) {
       mapMarker.remove();
       mapMarker = null;
     }
     if (mapInstance) {
+      if (isLocating) {
+        try { mapInstance.stopLocate(); } catch (_) {}
+      }
       mapInstance.remove();
       mapInstance = null;
     }
+    isLocating = false;
   }
 
-  function openMapPicker() {
-    const container = document.getElementById('mapPickerContainer');
-    container.style.display = 'block';
-
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const lat = position.coords.latitude;
-          const lng = position.coords.longitude;
-          initLeafletMap(lat, lng);
-        },
-        (error) => {
-          console.warn('Geolocation error/denied. Defaulting to Punjab center.', error);
-          initLeafletMap(31.1471, 75.3412);
-        },
-        { enableHighAccuracy: false, timeout: 3000, maximumAge: 30000 }
-      );
-    } else {
-      initLeafletMap(31.1471, 75.3412);
-    }
-  }
-
-  function initLeafletMap(lat, lng) {
-    if (!mapInstance) {
-      mapInstance = L.map('modalMap').setView([lat, lng], 13);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; OpenStreetMap contributors'
-      }).addTo(mapInstance);
-      
-      mapInstance.on('click', (e) => {
-        setMapMarker(e.latlng.lat, e.latlng.lng);
-      });
-    } else {
-      mapInstance.setView([lat, lng], 13);
-    }
-
-    setMapMarker(lat, lng);
-    
-    setTimeout(() => {
-      mapInstance.invalidateSize();
-    }, 100);
-  }
-
-  function setMapMarker(lat, lng) {
-    const latlng = [lat, lng];
-    selectedCoordinates = { lat, lng };
-
-    if (mapMarker) {
-      mapMarker.setLatLng(latlng);
-    } else {
-      mapMarker = L.marker(latlng, { draggable: true }).addTo(mapInstance);
-      mapMarker.on('dragend', () => {
-        const pos = mapMarker.getLatLng();
-        selectedCoordinates = { lat: pos.lat, lng: pos.lng };
-      });
-    }
-  }
-
-  // Create modal triggers
+  // Create modal triggers - automatically fetches location via Leaflet on post creation
   createIssueBtn.addEventListener('click', () => {
     createModal.classList.add('open');
     sidebar.classList.remove('open');
     resetEditorState();
+    // Actually fetch location via Leaflet when creating a post
+    fetchLocationViaLeaflet();
   });
 
   closeModalBtn.addEventListener('click', () => {
@@ -2681,17 +2871,31 @@ function setupEventListeners() {
   modalLocationBtn.addEventListener('click', () => {
     const picker = document.getElementById('mapPickerContainer');
     if (picker.style.display === 'none') {
-      openMapPicker();
+      picker.style.display = 'block';
+      if (mapInstance) {
+        setTimeout(() => mapInstance.invalidateSize(), 100);
+      } else {
+        fetchLocationViaLeaflet();
+      }
     } else {
-      picker.style.display = 'none';
+      fetchLocationViaLeaflet();
     }
   });
+
+  // Dedicated Locate Me button
+  const locateMeBtn = document.getElementById('locateMeBtn');
+  if (locateMeBtn) {
+    locateMeBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      fetchLocationViaLeaflet();
+    });
+  }
 
   // Confirm Location Map Button
   const confirmMapBtn = document.getElementById('confirmMapBtn');
   confirmMapBtn.addEventListener('click', () => {
     if (!selectedCoordinates) {
-      showToast('Please drop a pin on the map first.');
+      showToast('Please wait for Leaflet to detect location, or click the map.');
       return;
     }
 
@@ -2702,7 +2906,6 @@ function setupEventListeners() {
 
     const statusBadge = document.getElementById('locationStatusText');
     statusBadge.style.display = 'inline-flex';
-    statusBadge.innerHTML = `📍 ${selectedCoordinates.lat.toFixed(4)}, ${selectedCoordinates.lng.toFixed(4)}`;
 
     const subLocSelect = document.getElementById('issueSubLocation');
     subLocSelect.disabled = false;
@@ -2715,6 +2918,33 @@ function setupEventListeners() {
   cancelMapBtn.addEventListener('click', () => {
     document.getElementById('mapPickerContainer').style.display = 'none';
   });
+
+  // District dropdown manual selection syncs with map
+  const subLocationDropdown = document.getElementById('issueSubLocation');
+  if (subLocationDropdown) {
+    subLocationDropdown.addEventListener('change', (e) => {
+      districtManuallyChanged = true;
+      const dist = e.target.value;
+      if (dist && districtCoords[dist]) {
+        const coords = districtCoords[dist];
+        if (mapInstance) {
+          mapInstance.flyTo([coords.lat, coords.lng], 13);
+          setMapMarker(coords.lat, coords.lng);
+        }
+        selectedCoordinates = coords;
+        const statusBadge = document.getElementById('locationStatusText');
+        if (statusBadge) {
+          statusBadge.style.display = 'inline-flex';
+          statusBadge.classList.remove('locating');
+          statusBadge.innerHTML = `📍 ${dist} (${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)})`;
+        }
+        const locBtnText = document.getElementById('locationBtnText');
+        if (locBtnText) locBtnText.textContent = 'Location Confirmed';
+        const locBtn = document.getElementById('modalLocationBtn');
+        if (locBtn) locBtn.classList.add('selected');
+      }
+    });
+  }
 
   // Photo Attachments (Multiple files upload + Base64 conversion)
   const photosInput = document.getElementById('issuePhotos');
@@ -2826,12 +3056,24 @@ function setupEventListeners() {
   createIssueForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const title = document.getElementById('issueTitle').value.trim();
-    const subLocation = document.getElementById('issueSubLocation').value;
+    let subLocation = document.getElementById('issueSubLocation').value;
     const description = document.getElementById('issueDescription').value.trim();
     const isAnonymous = document.getElementById('postAnonymously') ? document.getElementById('postAnonymously').checked : false;
 
+    // Fallback: If selectedCoordinates is not set but district is selected, use district center
+    if (!selectedCoordinates && subLocation && districtCoords[subLocation]) {
+      selectedCoordinates = { ...districtCoords[subLocation] };
+    }
+
+    // Fallback: If district was not selected but coordinates were fetched, derive closest district
+    if (!subLocation && selectedCoordinates) {
+      subLocation = findNearestDistrict(selectedCoordinates.lat, selectedCoordinates.lng);
+      const subLocEl = document.getElementById('issueSubLocation');
+      if (subLocEl) subLocEl.value = subLocation;
+    }
+
     if (!selectedCoordinates) {
-      showToast('Please confirm location on the map first.');
+      showToast('Please wait for location detection or click on the map.');
       return;
     }
     if (!subLocation) {
